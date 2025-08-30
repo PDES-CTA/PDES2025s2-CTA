@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: cta-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-cta}
+      POSTGRES_USER: ${DB_USER:-usuario}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cta-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cta-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-cta}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-usuario}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+    networks:
+      - cta-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cta-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8080}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+    networks:
+      - cta-network
+
+volumes:
+  postgres_data:
+
+networks:
+  cta-network:
+    driver: bridge
