@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 
 @Entity
-@Table(name = "purchases")
+@Table(name = "purchase")
 class Purchase : BaseEntity() {
 
     //@ManyToOne(fetch = FetchType.LAZY)

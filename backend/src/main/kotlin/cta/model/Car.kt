@@ -10,7 +10,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "cars")
+@Table(name = "car")
 class Car : BaseEntity() {
 
     @NotBlank
@@ -57,7 +57,7 @@ class Car : BaseEntity() {
     var dealershipId: Long = 0 // TODO: Once we have the dealership entity we need to set the proper entity instead of the id
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "car_images", joinColumns = [JoinColumn(name = "car_id")])
+    @CollectionTable(name = "car_image", joinColumns = [JoinColumn(name = "car_id")])
     @Column(name = "image_url")
     var images: MutableList<String> = mutableListOf()
 

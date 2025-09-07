@@ -1,5 +1,6 @@
 package cta.web.controller
 
+import cta.web.dto.ErrorResponse
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -57,18 +58,13 @@ class GlobalExceptionHandler {
         logger.error("Unexpected error: ${e.message}", e)
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ErrorResponse(
-                status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                error = "Internal Server Error",
-                message = "An unexpected error occurred",
-                timestamp = LocalDateTime.now()
-            ))
+            .body(
+                ErrorResponse(
+                    status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    error = "Internal Server Error",
+                    message = "An unexpected error occurred",
+                    timestamp = LocalDateTime.now()
+                )
+            )
     }
 }
-
-data class ErrorResponse(
-    val status: Int,
-    val error: String,
-    val message: String,
-    val timestamp: LocalDateTime
-)
