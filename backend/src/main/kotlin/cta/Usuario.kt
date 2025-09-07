@@ -1,4 +1,4 @@
-package CTA
+package cta
 
 import jakarta.persistence.*
 import java.time.LocalDateTime

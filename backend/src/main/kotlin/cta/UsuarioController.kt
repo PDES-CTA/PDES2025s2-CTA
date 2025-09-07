@@ -1,4 +1,4 @@
-package CTA
+package cta
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
