@@ -23,12 +23,9 @@ class Purchase : BaseEntity() {
     @JoinColumn(name = "car_id", nullable = false)
     lateinit var car: Car
 
-    //@OneToOne(fetch = FetchType.LAZY)
-    //@JoinColumn("dealership_id", nullable = false)
-    //lateinit var dealership: Dealership
-    // TODO: Replace dealership ID with the right mapping of the Dealership entity
-    @Column(name = "dealership_id", nullable = false)
-    var dealershipId: Long = 0
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dealership_id", nullable = false)
+    lateinit var dealership: Dealership
 
     @DecimalMin("0.0")
     @Column(name = "final_price", nullable = false, precision = 15, scale = 2)
@@ -50,10 +47,12 @@ class Purchase : BaseEntity() {
 
     fun confirmPurchase() {
         this.purchaseStatus = PurchaseStatus.CONFIRMED
+        this.car.markAsSold()
     }
 
     fun cancelPurchase() {
         this.purchaseStatus = PurchaseStatus.CANCELLED
+        this.car.available = true
     }
 
     fun deliverPurchase() {
@@ -65,14 +64,16 @@ class Purchase : BaseEntity() {
     }
 
     // TODO: Once we have all the entities update details obtaining buyer's name, for instance
-    fun obtainDetails(): MutableMap<String?, Any?> {
-        val details: MutableMap<String?, Any?> = HashMap()
-        details["Purchase ID"] = this.id
-        details["Car"] = this.car.getFullName()
-        details["Final price"] = this.finalPrice
-        details["Purchase date"] = this.purchaseDate
-        details["Status"] = this.purchaseStatus
-        return details
+    fun obtainDetails(): Map<String, Any?> {
+        return mapOf(
+            "Purchase ID" to this.id,
+            "Car" to this.car.getFullName(),
+            "Dealership" to this.dealership.getDisplayName(),
+            "Final price" to this.finalPrice,
+            "Purchase date" to this.purchaseDate,
+            "Status" to this.purchaseStatus,
+            "Payment method" to this.paymentMethod,
+            "Observations" to this.observations
+        )
     }
-
 }
