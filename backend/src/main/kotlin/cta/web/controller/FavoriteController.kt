@@ -4,6 +4,8 @@ import cta.service.FavoriteService
 import cta.web.dto.FavoriteCarCreateRequest
 import cta.web.dto.FavoriteCarResponse
 import cta.web.dto.FavoriteCarUpdateReviewRequest
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -18,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/favorite")
 @CrossOrigin(origins = ["*"])
+@Tag(name = "Favorite Car", description = "Favorite car management operations")
 class FavoriteController(
     private val favoriteService: FavoriteService
 ) {
     @PostMapping
+    @Operation(summary = "Save a favorite car marked by a buyer")
     fun saveFavorite(
         @Valid @RequestBody request: FavoriteCarCreateRequest
     ): ResponseEntity<FavoriteCarResponse> {
@@ -30,6 +34,7 @@ class FavoriteController(
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an existing favorite car marked by a buyer")
     fun deleteFavorite(
         @PathVariable id: Long
     ): ResponseEntity<Unit> {
@@ -38,6 +43,7 @@ class FavoriteController(
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a favorite car review")
     fun updateReview(
         @PathVariable id: Long,
         @Valid @RequestBody request: FavoriteCarUpdateReviewRequest

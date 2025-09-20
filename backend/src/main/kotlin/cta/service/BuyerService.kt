@@ -27,8 +27,11 @@ class BuyerService(
         val buyer = buyerRepository.findByIdOrNull(id)
             ?: throw Exception("Favorite car with ID $id not found")
 
-        updateData["rating"]?.let { buyer.dni = (it.toString().toInt()) }
-        updateData["comment"]?.let { buyer.address = (it.toString()) }
+        updateData["dni"]?.let { buyer.dni = (it.toString().toInt()) }
+        updateData["address"]?.let { buyer.address = (it.toString()) }
+        updateData["email"]?.let { buyer.email = (it.toString()) }
+        updateData["phone"]?.let { buyer.phone = (it.toString()) }
+        updateData["active"]?.let { buyer.active = (it.toString().toBoolean()) }
 
         validateBuyer(buyer)
         return buyerRepository.save(buyer)
