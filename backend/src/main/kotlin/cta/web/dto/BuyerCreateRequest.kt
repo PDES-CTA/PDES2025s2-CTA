@@ -3,17 +3,12 @@ package cta.web.dto
 import cta.model.Buyer
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Pattern
 import org.hibernate.validator.constraints.Length
 
 data class BuyerCreateRequest(
     @field:NotNull(message = "The buyer DNI is mandatory")
-    @field:NotBlank(message = "The buyer DNI cannot be blank")
-    @field:Pattern(
-        regexp = "^\\d{2}\\.\\d{3}\\.\\d{3}$|^\\d{3}\\.\\d{3}\\.\\d{3}$",
-        message = "DNI must follow the format XX.XXX.XXX or XXX.XXX.XXX"
-    )
-    val dni: String,
+    @field:Length(min = 6, max = 9, message = "The buyer DNI must be at least 6 characters long")
+    val dni: Int,
 
     @field:NotNull(message = "The buyer address is mandatory")
     @field:NotBlank(message = "The buyer address cannot be blank")

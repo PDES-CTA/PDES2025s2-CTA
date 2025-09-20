@@ -12,12 +12,12 @@ import jakarta.validation.constraints.NotBlank
 @DiscriminatorValue("BUYER")
 class Buyer : User() {
 
-    @Column(name = "address")
+    @Column(name = "address", nullable = false)
+    @NotBlank(message = "Address cannot be blank")
     var address: String? = null
 
-    @NotBlank(message = "DNI is required")
     @Column(name = "dni", unique = true, nullable = false)
-    var dni: String? = null
+    var dni: Int? = null
 
     override val role: UserRole = UserRole.BUYER
 }

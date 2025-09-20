@@ -4,7 +4,7 @@ import cta.model.Buyer
 
 data class BuyerResponse(
     val id: Long?,
-    val dni: String?,
+    val dni: Int?,
     val address: String?
 ) {
     companion object {
