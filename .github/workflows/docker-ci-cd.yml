@@ -53,15 +53,15 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Update docker-compose.yml with new image tags
+    - name: Update docker-compose.yaml with new image tags
       run: |
-        sed -i "s|image: ${{ env.BACKEND_IMAGE_NAME }}:.*|image: ${{ env.BACKEND_IMAGE_NAME }}:${{ github.sha }}|g" docker-compose.yml
-        sed -i "s|image: ${{ env.FRONTEND_IMAGE_NAME }}:.*|image: ${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}|g" docker-compose.yml
+        sed -i "s|image: ${{ env.BACKEND_IMAGE_NAME }}:.*|image: ${{ env.BACKEND_IMAGE_NAME }}:${{ github.sha }}|g" docker-compose.yaml
+        sed -i "s|image: ${{ env.FRONTEND_IMAGE_NAME }}:.*|image: ${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}|g" docker-compose.yaml
 
-    - name: Commit and push updated docker-compose.yml
+    - name: Commit and push updated docker-compose.yaml
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add docker-compose.yml
-        git diff --staged --quiet || git commit -m "Update docker-compose.yml with new image tags"
+        git add docker-compose.yaml
+        git diff --staged --quiet || git commit -m "Update docker-compose.yaml with new image tags"
         git push
