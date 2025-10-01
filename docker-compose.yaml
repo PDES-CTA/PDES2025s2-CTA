@@ -1,52 +1,56 @@
+# docker-compose.yaml (for production/public use)
 services:
   postgres:
-    image: postgres:15
-    container_name: cta-postgres
+    image: postgres:15-alpine
+    container_name: postgres_prod
     environment:
-      POSTGRES_DB: ${DB_NAME:-cta}
-      POSTGRES_USER: ${DB_USER:-usuario}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: cta
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - cta-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: cta-backend
+    image: francomm/cta-backend:latest
+    container_name: backend_prod
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-cta}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER:-usuario}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cta
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
     ports:
-      - "${BACKEND_PORT:-8080}:8080"
+      - "8080:8080"
     depends_on:
-      - postgres
-    networks:
-      - cta-network
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: cta-frontend
+    image: francomm/cta-frontend:latest
+    container_name: frontend_prod
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8080}
+      NODE_ENV: production
+      BACKEND_URL: http://backend:8080
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "3000:3000"
     depends_on:
-      - backend
-    networks:
-      - cta-network
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
-
-networks:
-  cta-network:
-    driver: bridge
