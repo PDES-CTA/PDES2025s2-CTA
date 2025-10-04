@@ -9,11 +9,11 @@ import jakarta.validation.constraints.NotBlank
 class Dealership : User() {
 
     @NotBlank(message = "Business name is required")
-    @Column(name = "business_name", nullable = false)
+    @Column(name = "business_name", nullable = true)
     var businessName: String = ""
 
     @NotBlank(message = "CUIT is required")
-    @Column(name = "cuit", unique = true, nullable = false)
+    @Column(name = "cuit", unique = true, nullable = true)
     var cuit: String = ""
 
     @Column(name = "address")

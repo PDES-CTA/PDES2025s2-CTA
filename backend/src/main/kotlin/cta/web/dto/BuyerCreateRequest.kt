@@ -3,6 +3,8 @@ package cta.web.dto
 import cta.model.Buyer
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -30,11 +32,13 @@ data class BuyerCreateRequest(
     @field:Schema(description = "Buyer last name", example = "Example")
     val lastName: String,
 
+    @field:NotBlank(message = "Phone is required")
     @field:Schema(description = "Buyer phone number", example = "1112341234")
-    val phone: String? = null,
+    val phone: String,
 
     @field:NotNull(message = "The buyer DNI is mandatory")
-    @field:Length(min = 6, max = 9, message = "The buyer DNI must be at least 6 characters long")
+    @field:Min(value = 1000000, message = "DNI must be at least 7 digits")
+    @field:Max(value = 99999999, message = "DNI must be at most 8 digits")
     @field:Schema(description = "Buyer national identification number", example = "59252192")
     val dni: Int,
 

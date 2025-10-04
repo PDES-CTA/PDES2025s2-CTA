@@ -2,6 +2,8 @@ package cta.web.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.Length
@@ -16,7 +18,8 @@ data class BuyerUpdateRequest(
     @field:Schema(description = "New buyer phone number")
     val phone: String? = null,
 
-    @field:Length(min = 6, max = 9, message = "The buyer DNI must be at least 6 characters long")
+    @field:Min(value = 1000000, message = "DNI must be at least 7 digits")
+    @field:Max(value = 99999999, message = "DNI must be at most 8 digits")
     @field:Schema(description = "Buyer national identification number")
     val dni: Int? = null,
 

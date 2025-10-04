@@ -31,14 +31,14 @@ abstract class User : BaseEntity() {
     @Column(name = "last_name", nullable = false)
     var lastName: String = ""
 
-    @Column(name = "phone")
-    var phone: String? = null
+    @Column(name = "phone", nullable = false)
+    var phone: String = ""
 
     @Column(name = "registration_date", nullable = false)
     var registrationDate: LocalDateTime = LocalDateTime.now()
 
     @Column(nullable = false)
-    var active: Boolean = true
+    open var active: Boolean = true
 
     @get:Enumerated(EnumType.STRING)
     @get:Column(name = "role", nullable = false)
