@@ -15,5 +15,8 @@ data class ErrorResponse(
     val message: String,
 
     @field:Schema(description = "Error timestamp")
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+
+    @field:Schema(description = "Error details")
+    val details: List<String>?
 )
