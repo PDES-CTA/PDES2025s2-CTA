@@ -27,7 +27,7 @@ class BuyerService(
         val buyer = buyerRepository.findByIdOrNull(id)
             ?: throw Exception("Favorite car with ID $id not found")
 
-        updateData["dni"]?.let { buyer.dni = (it.toString().toInt()) }
+        updateData["dni"]?.let { buyer.dni = it.toString().toInt() }
         updateData["address"]?.let { buyer.address = (it.toString()) }
         updateData["email"]?.let { buyer.email = (it.toString()) }
         updateData["phone"]?.let { buyer.phone = (it.toString()) }
@@ -45,7 +45,8 @@ class BuyerService(
     }
 
     private fun validateBuyer(buyer: Buyer) {
-        require(buyer.address!!.isNotBlank()) { "Address cannot be empty" }
-        require(buyer.dni.toString().length in 6..9) { "Dni cannot be null" }
+        require(buyer.address.isNotBlank()) { "Address cannot be empty" }
+        require(buyer.dni > 0) { "DNI must be a positive number" }
+        require(buyer.dni.toString().length in 7..8) { "DNI must be 7 or 8 digits" }
     }
 }

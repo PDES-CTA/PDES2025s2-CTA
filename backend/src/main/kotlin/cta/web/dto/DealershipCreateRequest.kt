@@ -29,8 +29,8 @@ data class DealershipCreateRequest(
     @field:Schema(description = "Dealership owner last name", example = "Example")
     val lastName: String,
 
-    @field:Schema(description = "Dealership phone number", example = "1112341234")
-    val phone: String? = null,
+    @field:Schema(description = "Dealership phone number", example = "1112341234", nullable = false)
+    val phone: String = "",
 
     @field:NotBlank(message = "Business name is required")
     @field:Size(min = 2, max = 100, message = "Business name must be between 2 and 100 characters")
