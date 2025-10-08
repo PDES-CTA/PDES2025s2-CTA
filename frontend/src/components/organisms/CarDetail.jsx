@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import Button from './ui/Button';
-import Badge from './ui/Badge';
-import LoadingSpinner from './ui/LoadingSpinner';
-import { formatPrice, formatDate, getFuelTypeClass, getTransmissionClass } from './utils/carUtils';
-import styles from './styles/CarDetail.module.css';
+import { Button, Badge, LoadingSpinner } from '../atoms';
+import { formatPrice, formatDate, getFuelTypeClass, getTransmissionClass } from '../../utils/carUtils';
+import styles from './CarDetail.module.css';
 
 export default function CarDetail({ carId, onBack, getCarById }) {
   const [car, setCar] = useState(null);
@@ -22,7 +20,6 @@ export default function CarDetail({ carId, onBack, getCarById }) {
         setLoading(false);
       }
     };
-
     fetchCar();
   }, [carId, getCarById]);
 
@@ -32,9 +29,9 @@ export default function CarDetail({ carId, onBack, getCarById }) {
 
   return (
     <div className={styles.container}>
-      <Button 
-        onClick={onBack} 
-        variant="ghost" 
+      <Button
+        onClick={onBack}
+        variant="ghost"
         className={styles.backButton}
       >
         ← Volver al catálogo
@@ -63,7 +60,7 @@ export default function CarDetail({ carId, onBack, getCarById }) {
             </div>
             <div className={styles.priceSection}>
               <div className={styles.price}>{formatPrice(car.price)}</div>
-              <Badge 
+              <Badge
                 variant={car.available ? 'success' : 'danger'}
                 text={car.available ? 'Disponible' : 'Vendido'}
               />
@@ -97,9 +94,9 @@ export default function CarDetail({ carId, onBack, getCarById }) {
           )}
 
           <div className={styles.actions}>
-            <Button 
-              variant="primary" 
-              size="lg" 
+            <Button
+              variant="primary"
+              size="lg"
               disabled={!car.available}
               fullWidth
             >

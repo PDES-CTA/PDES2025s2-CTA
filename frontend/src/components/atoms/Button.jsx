@@ -1,14 +1,13 @@
-import styles from '../styles/Button.module.css';
-
-export default function Button({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
+import styles from './Button.module.css';
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
   fullWidth = false,
   disabled = false,
   onClick,
   className = '',
-  ...props 
+  ...props
 }) {
   const classes = [
     styles.button,

@@ -1,6 +1,5 @@
-import Button from './Button';
-import styles from '../styles/ErrorMessage.module.css';
-
+import Button from '../atoms/Button';
+import styles from './ErrorMessage.module.css';
 export default function ErrorMessage({ error, onRetry }) {
   return (
     <div className={styles.container}>

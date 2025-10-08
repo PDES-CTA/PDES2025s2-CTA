@@ -1,6 +1,6 @@
-import CarCard from './CarCard';
-import EmptyState from './ui/EmptyState';
-import styles from './styles/CarList.module.css';
+import CarCard from '../molecules/CarCard';
+import { EmptyState } from '../molecules';
+import styles from './CarList.module.css';
 
 export default function CarList({ cars, onViewDetails }) {
   if (cars.length === 0) {
@@ -12,7 +12,6 @@ export default function CarList({ cars, onViewDetails }) {
       <div className={styles.resultsCount}>
         {cars.length} auto{cars.length !== 1 ? 's' : ''} encontrado{cars.length !== 1 ? 's' : ''}
       </div>
-      
       <div className={styles.grid}>
         {cars.map((car) => (
           <CarCard

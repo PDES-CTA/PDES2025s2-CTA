@@ -1,12 +1,11 @@
-import styles from '../styles/Select.module.css';
-
-export default function Select({ 
-  label, 
-  value, 
-  onChange, 
-  options = [], 
+import styles from './Select.module.css';
+export default function Select({
+  label,
+  value,
+  onChange,
+  options = [],
   className = '',
-  ...props 
+  ...props
 }) {
   return (
     <div className={styles.selectGroup}>

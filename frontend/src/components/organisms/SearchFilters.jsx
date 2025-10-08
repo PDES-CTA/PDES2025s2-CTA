@@ -1,7 +1,5 @@
-import Button from './ui/Button';
-import Input from './ui//Input';
-import Select from './ui/Select';
-import styles from './styles/SearchFilters.module.css';
+import { Button, Input, Select } from '../atoms';
+import styles from './SearchFilters.module.css';
 
 const FUEL_TYPES = ['NAFTA', 'DIESEL', 'HIBRIDO', 'ELECTRICO', 'GNC'];
 const TRANSMISSION_TYPES = ['MANUAL', 'AUTOMATICA', 'SEMI_AUTOMATICA'];
@@ -33,7 +31,7 @@ export default function SearchFilters({
             Buscar
           </Button>
           <Button onClick={onToggleFilters} variant="secondary">
-            Filtros {showFilters}
+            Filtros {showFilters ? '▲' : '▼'}
           </Button>
         </div>
       </div>

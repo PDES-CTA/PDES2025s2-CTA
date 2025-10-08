@@ -1,13 +1,12 @@
-import styles from '../styles/Input.module.css';
-
-export default function Input({ 
-  label, 
-  type = 'text', 
-  placeholder, 
-  value, 
-  onChange, 
+import styles from './Input.module.css';
+export default function Input({
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
   className = '',
-  ...props 
+  ...props
 }) {
   return (
     <div className={styles.inputGroup}>
