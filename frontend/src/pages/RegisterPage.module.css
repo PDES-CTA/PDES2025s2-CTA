@@ -11,7 +11,7 @@
 /* Card */
 .card {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   padding: var(--spacing-xl);
   background-color: white;
   border-radius: var(--radius-lg);
@@ -54,6 +54,12 @@
 .form {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
 }
 
@@ -143,6 +149,10 @@
 @media (max-width: 640px) {
   .card {
     padding: var(--spacing-lg);
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
   }
 
   .title {

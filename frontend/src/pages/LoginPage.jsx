@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { LogIn, Loader } from 'lucide-react';
 import { authService } from '../services/api';
 import { ROUTES } from '../constants';
+import styles from './LoginPage.module.css';
 
 export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
@@ -30,40 +32,60 @@ export default function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <h1>Iniciar Sesión</h1>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <div className={styles.iconContainer}>
+          <LogIn className={styles.icon} size={48} />
+        </div>
         
-        {error && <div className="error-message">{error}</div>}
+        <h1 className={styles.title}>Iniciar Sesión</h1>
         
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Email</label>
             <input
               name="email"
               type="email"
               placeholder="tu@email.com"
+              className={styles.input}
               required
             />
           </div>
 
-          <div className="form-group">
-            <label>Contraseña</label>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Contraseña</label>
             <input
               name="password"
               type="password"
               placeholder="••••••••"
+              className={styles.input}
               required
             />
           </div>
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Ingresando...' : 'Ingresar'}
+          <button type="submit" disabled={loading} className={styles.submitButton}>
+            {loading ? (
+              <>
+                <Loader className={styles.buttonSpinner} size={20} />
+                Ingresando...
+              </>
+            ) : (
+              'Ingresar'
+            )}
           </button>
         </form>
 
-        <p>
-          ¿No tenés cuenta? <Link to={ROUTES.REGISTER}>Registrate</Link>
+        <p className={styles.footer}>
+          ¿No tenés cuenta?{' '}
+          <Link to={ROUTES.REGISTER} className={styles.link}>
+            Registrate
+          </Link>
         </p>
       </div>
     </div>

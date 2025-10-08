@@ -1,0 +1,63 @@
+.layout {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.header {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.headerContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.spinner {
+  color: #2563eb;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .headerContainer {
+    padding: 0 1rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+}
