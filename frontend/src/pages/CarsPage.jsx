@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import { carService, authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
 import { ErrorMessage } from '../components/molecules';
 import { LoadingSpinner } from '../components/atoms';
