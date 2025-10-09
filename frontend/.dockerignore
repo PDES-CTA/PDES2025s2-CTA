@@ -1,17 +1,3 @@
-# backend/.dockerignore
-.git
-.gitignore
-README.md
-Dockerfile
-.dockerignore
-build/
-.gradle/
-gradle/wrapper/gradle-wrapper.jar
-.idea/
-*.iml
-*.log
-target/
-
 # frontend/.dockerignore
 .git
 .gitignore
@@ -35,6 +21,6 @@ coverage/
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
-# Don't ignore config files - they're needed for the build
+
 !next.config.mjs
 !eslint.config.mjs

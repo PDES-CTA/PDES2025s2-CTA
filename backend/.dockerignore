@@ -8,30 +8,3 @@ Dockerfile
 *.iml
 *.log
 target/
-
-# frontend/.dockerignore
-.git
-.gitignore
-README.md
-Dockerfile
-.dockerignore
-node_modules/
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.next/
-out/
-coverage/
-.nyc_output/
-.vercel
-.DS_Store
-*.tsbuildinfo
-next-env.d.ts
-# Don't ignore config files - they're needed for the build
-!next.config.mjs
-!eslint.config.mjs
