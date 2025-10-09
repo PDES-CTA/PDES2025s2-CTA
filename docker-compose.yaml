@@ -1,56 +1,52 @@
-# docker-compose.yaml (for production/public use)
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: postgres_prod
+    image: postgres:15
+    container_name: cta-postgres
     environment:
-      POSTGRES_DB: cta
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ${DB_NAME:-cta}
+      POSTGRES_USER: ${DB_USER:-usuario}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d cta"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - cta-network
 
   backend:
-    image: francomm/cta-backend:latest
-    container_name: backend_prod
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cta-backend
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cta
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-cta}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-usuario}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
+      - postgres
+    networks:
+      - cta-network
 
   frontend:
-    image: francomm/cta-frontend:latest
-    container_name: frontend_prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cta-frontend
     environment:
-      NODE_ENV: production
-      BACKEND_URL: http://backend:8080
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8080}
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
-      backend:
-        condition: service_healthy
-    restart: unless-stopped
+      - backend
+    networks:
+      - cta-network
 
 volumes:
   postgres_data:
+
+networks:
+  cta-network:
+    driver: bridge
