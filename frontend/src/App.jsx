@@ -37,6 +37,7 @@ const Layout = ({ children }) => {
 };
 
 function App() {
+  const [_user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
