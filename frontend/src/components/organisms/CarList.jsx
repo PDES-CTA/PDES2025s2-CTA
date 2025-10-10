@@ -10,7 +10,7 @@ export default function CarList({ cars, onViewDetails }) {
   return (
     <div className={styles.container}>
       <div className={styles.resultsCount}>
-        {cars.length} auto{cars.length !== 1 ? 's' : ''} encontrado{cars.length !== 1 ? 's' : ''}
+        {cars.length} car{cars.length !== 1 ? 's' : ''} found{cars.length !== 1 ? 's' : ''}
       </div>
       <div className={styles.grid}>
         {cars.map((car) => (

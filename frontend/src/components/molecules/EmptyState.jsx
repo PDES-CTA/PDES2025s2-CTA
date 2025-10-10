@@ -8,13 +8,11 @@ export default function EmptyState({ onClearFilters }) {
       <div className={styles.icon}>
         <FileText size={64} strokeWidth={1.5} />
       </div>
-      
-      <h3 className={styles.title}>No se encontraron autos</h3>
-      <p className={styles.message}>Intentá ajustar tus filtros de búsqueda.</p>
-      
+      <h3 className={styles.title}>No cars found</h3>
+      <p className={styles.message}>Try adjusting your search filters.</p>
       {onClearFilters && (
         <Button onClick={onClearFilters} variant="primary">
-          Ver todos los autos
+          View all cars
         </Button>
       )}
     </div>

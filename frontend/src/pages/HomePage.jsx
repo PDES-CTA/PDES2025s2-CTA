@@ -8,24 +8,23 @@ export default function HomePage() {
     <div className={styles.container}>
       <div className={styles.content}>
         <h1 className={styles.title}>
-          Comprá tu auto 0km
+          Buy your brand new car
         </h1>
-        
         <p className={styles.subtitle}>
-          Encontrá tu auto nuevo en las mejores concesionarias de Argentina. Precios transparentes y stock actualizado.
+          Find your new car at the best dealerships in Argentina. Transparent prices and updated inventory.
         </p>
-        
+
         <div className={styles.actions}>
           <Link to={ROUTES.CARS}>
             <button className={styles.primaryButton}>
               <Search size={20} />
-              Ver autos disponibles
+              View available cars
             </button>
           </Link>
           <Link to={ROUTES.LOGIN}>
             <button className={styles.secondaryButton}>
               <LogIn size={18} />
-              Ingresar
+              Log In
             </button>
           </Link>
         </div>
@@ -33,15 +32,15 @@ export default function HomePage() {
         <div className={styles.stats}>
           <div className={styles.stat}>
             <div className={styles.statNumber}>0km</div>
-            <div className={styles.statLabel}>Autos nuevos</div>
+            <div className={styles.statLabel}>Brand new cars</div>
           </div>
           <div className={styles.stat}>
             <div className={styles.statNumber}>100%</div>
-            <div className={styles.statLabel}>Verificados</div>
+            <div className={styles.statLabel}>Verified</div>
           </div>
           <div className={styles.stat}>
-            <div className={styles.statNumber}>Patentados</div>
-            <div className={styles.statLabel}>Entrega incluida</div>
+            <div className={styles.statNumber}>Registered</div>
+            <div className={styles.statLabel}>Delivery included</div>
           </div>
         </div>
       </div>

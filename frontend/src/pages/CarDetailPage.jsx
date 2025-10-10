@@ -22,7 +22,7 @@ export default function CarDetailPage() {
       const data = await carService.getCarById(id);
       setCar(data);
     } catch (err) {
-      setError(err.message || 'Error al cargar el auto');
+      setError(err.message || 'Error loading car');
       console.error(err);
     } finally {
       setLoading(false);
@@ -31,7 +31,7 @@ export default function CarDetailPage() {
 
   const handleImageError = (e) => {
     e.target.onerror = null;
-    e.target.src = 'https://via.placeholder.com/600x400?text=Sin+Imagen';
+    e.target.src = 'https://via.placeholder.com/600x400?text=No+Image';
   };
 
   if (loading) {
@@ -46,12 +46,12 @@ export default function CarDetailPage() {
     return (
       <div className={styles.errorContainer}>
         <AlertCircle className={styles.errorIcon} size={64} />
-        <h3 className={styles.errorTitle}>Auto no encontrado</h3>
+        <h3 className={styles.errorTitle}>Car not found</h3>
         <p className={styles.errorMessage}>
-          {error || 'El auto que buscas no existe o fue eliminado'}
+          {error || 'The car you are looking for does not exist or has been removed'}
         </p>
         <button onClick={() => navigate('/cars')} className={styles.errorButton}>
-          Ver todos los autos
+          View all cars
         </button>
       </div>
     );
@@ -62,7 +62,7 @@ export default function CarDetailPage() {
       <div className={styles.container}>
         <button onClick={() => navigate(-1)} className={styles.backButton}>
           <ArrowLeft size={20} />
-          Volver
+          Back
         </button>
 
         <div className={styles.card}>
@@ -92,11 +92,11 @@ export default function CarDetailPage() {
 
               <div className={styles.details}>
                 <div className={styles.detailRow}>
-                  <span className={styles.label}>Año:</span>
+                  <span className={styles.label}>Year:</span>
                   <span className={styles.value}>{car.year}</span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.label}>Kilometraje:</span>
+                  <span className={styles.label}>Mileage:</span>
                   <span className={styles.value}>{formatKilometers(car.mileage)}</span>
                 </div>
                 <div className={styles.detailRow}>
@@ -104,24 +104,24 @@ export default function CarDetailPage() {
                   <span className={styles.value}>{car.color}</span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.label}>Combustible:</span>
+                  <span className={styles.label}>Fuel:</span>
                   <span className={styles.value}>{car.fuelType}</span>
                 </div>
                 <div className={styles.detailRow}>
-                  <span className={styles.label}>Transmisión:</span>
+                  <span className={styles.label}>Transmission:</span>
                   <span className={styles.value}>{car.transmission}</span>
                 </div>
               </div>
 
               {car.description && (
                 <div className={styles.descriptionSection}>
-                  <h3 className={styles.descriptionTitle}>Descripción:</h3>
+                  <h3 className={styles.descriptionTitle}>Description:</h3>
                   <p className={styles.description}>{car.description}</p>
                 </div>
               )}
 
               <button className={styles.buyButton}>
-                Comprar
+                Buy
               </button>
             </div>
           </div>

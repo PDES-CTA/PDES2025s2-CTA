@@ -25,7 +25,7 @@ export default function LoginPage({ onLogin }) {
       if (onLogin) await onLogin();
       navigate(ROUTES.CARS);
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
+      setError(err.message || 'Error logging in');
     } finally {
       setLoading(false);
     }
@@ -37,9 +37,9 @@ export default function LoginPage({ onLogin }) {
         <div className={styles.iconContainer}>
           <LogIn className={styles.icon} size={48} />
         </div>
-        
-        <h1 className={styles.title}>Iniciar Sesión</h1>
-        
+
+        <h1 className={styles.title}>Log In</h1>
+
         {error && (
           <div className={styles.errorMessage}>
             {error}
@@ -52,14 +52,14 @@ export default function LoginPage({ onLogin }) {
             <input
               name="email"
               type="email"
-              placeholder="tu@email.com"
+              placeholder="you@email.com"
               className={styles.input}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Contraseña</label>
+            <label className={styles.label}>Password</label>
             <input
               name="password"
               type="password"
@@ -73,18 +73,18 @@ export default function LoginPage({ onLogin }) {
             {loading ? (
               <>
                 <Loader className={styles.buttonSpinner} size={20} />
-                Ingresando...
+                Logging in...
               </>
             ) : (
-              'Ingresar'
+              'Log In'
             )}
           </button>
         </form>
 
         <p className={styles.footer}>
-          ¿No tenés cuenta?{' '}
+          Don't have an account?{' '}
           <Link to={ROUTES.REGISTER} className={styles.link}>
-            Registrate
+            Sign up
           </Link>
         </p>
       </div>

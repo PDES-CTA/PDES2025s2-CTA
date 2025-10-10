@@ -18,7 +18,7 @@ export default function RegisterPage() {
     const confirmPassword = formData.get('confirmPassword');
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError('Passwords do not match');
       return;
     }
 
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       await authService.register(userData);
       navigate(ROUTES.LOGIN);
     } catch (err) {
-      setError(err.message || 'Error al registrarse');
+      setError(err.message || 'Error registering');
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function RegisterPage() {
           <UserPlus className={styles.icon} size={48} />
         </div>
 
-        <h1 className={styles.title}>Crear Cuenta</h1>
+        <h1 className={styles.title}>Create Account</h1>
 
         {error && (
           <div className={styles.errorMessage}>
@@ -63,7 +63,7 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Nombre</label>
+              <label className={styles.label}>First Name</label>
               <input
                 name="firstName"
                 type="text"
@@ -72,7 +72,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Apellido</label>
+              <label className={styles.label}>Last Name</label>
               <input
                 name="lastName"
                 type="text"
@@ -87,7 +87,7 @@ export default function RegisterPage() {
             <input
               name="email"
               type="email"
-              placeholder="tu@email.com"
+              placeholder="you@email.com"
               className={styles.input}
               required
             />
@@ -95,7 +95,7 @@ export default function RegisterPage() {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>DNI</label>
+              <label className={styles.label}>ID Number</label>
               <input
                 name="dni"
                 type="text"
@@ -106,7 +106,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Teléfono</label>
+              <label className={styles.label}>Phone</label>
               <input
                 name="phone"
                 type="tel"
@@ -118,11 +118,11 @@ export default function RegisterPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Dirección</label>
+            <label className={styles.label}>Address</label>
             <input
               name="address"
               type="text"
-              placeholder="Calle 123"
+              placeholder="Street 123"
               className={styles.input}
               required
             />
@@ -130,7 +130,7 @@ export default function RegisterPage() {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Contraseña</label>
+              <label className={styles.label}>Password</label>
               <input
                 name="password"
                 type="password"
@@ -141,7 +141,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Confirmar Contraseña</label>
+              <label className={styles.label}>Confirm Password</label>
               <input
                 name="confirmPassword"
                 type="password"
@@ -157,18 +157,18 @@ export default function RegisterPage() {
             {loading ? (
               <>
                 <Loader className={styles.buttonSpinner} size={20} />
-                Creando cuenta...
+                Creating account...
               </>
             ) : (
-              'Registrarse'
+              'Sign Up'
             )}
           </button>
         </form>
 
         <p className={styles.footer}>
-          ¿Ya tenés cuenta?{' '}
+          Already have an account?{' '}
           <Link to={ROUTES.LOGIN} className={styles.link}>
-            Iniciá sesión
+            Log in
           </Link>
         </p>
       </div>

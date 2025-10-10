@@ -34,7 +34,7 @@ export default function CarDetail({ carId, onBack, getCarById }) {
         variant="ghost"
         className={styles.backButton}
       >
-        ← Volver al catálogo
+        ← Back to catalog
       </Button>
 
       <article className={styles.carDetail}>
@@ -47,7 +47,7 @@ export default function CarDetail({ carId, onBack, getCarById }) {
             />
           ) : (
             <div className={styles.imagePlaceholder}>
-              <span>Sin imagen disponible</span>
+              <span>No image available</span>
             </div>
           )}
         </div>
@@ -56,28 +56,28 @@ export default function CarDetail({ carId, onBack, getCarById }) {
           <header className={styles.header}>
             <div>
               <h1 className={styles.title}>{car.brand} {car.model}</h1>
-              <p className={styles.year}>Año {car.year}</p>
+              <p className={styles.year}>Year {car.year}</p>
             </div>
             <div className={styles.priceSection}>
               <div className={styles.price}>{formatPrice(car.price)}</div>
               <Badge
                 variant={car.available ? 'success' : 'danger'}
-                text={car.available ? 'Disponible' : 'Vendido'}
+                text={car.available ? 'Available' : 'Sold'}
               />
             </div>
           </header>
 
           <div className={styles.specs}>
             <div className={styles.specItem}>
-              <h3>Kilometraje</h3>
+              <h3>Mileage</h3>
               <p>{car.mileage.toLocaleString()} km</p>
             </div>
             <div className={styles.specItem}>
-              <h3>Combustible</h3>
+              <h3>Fuel</h3>
               <Badge variant="fuel" className={getFuelTypeClass(car.fuelType)} text={car.fuelType} />
             </div>
             <div className={styles.specItem}>
-              <h3>Transmisión</h3>
+              <h3>Transmission</h3>
               <Badge variant="transmission" className={getTransmissionClass(car.transmission)} text={car.transmission} />
             </div>
             <div className={styles.specItem}>
@@ -88,7 +88,7 @@ export default function CarDetail({ carId, onBack, getCarById }) {
 
           {car.description && (
             <div className={styles.description}>
-              <h3>Descripción</h3>
+              <h3>Description</h3>
               <p>{car.description}</p>
             </div>
           )}
@@ -100,15 +100,15 @@ export default function CarDetail({ carId, onBack, getCarById }) {
               disabled={!car.available}
               fullWidth
             >
-              {car.available ? 'Contactar Concesionaria' : 'No disponible'}
+              {car.available ? 'Contact Dealer' : 'Not available'}
             </Button>
             <Button variant="secondary" size="lg" fullWidth>
-              Agregar a Favoritos
+              Add to Favorites
             </Button>
           </div>
 
           <footer className={styles.metadata}>
-            <p>Publicado: {formatDate(car.publicationDate)}</p>
+            <p>Published: {formatDate(car.publicationDate)}</p>
             <p>ID: #{car.id}</p>
           </footer>
         </div>
