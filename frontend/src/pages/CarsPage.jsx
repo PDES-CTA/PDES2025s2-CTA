@@ -63,12 +63,12 @@ export default function CarsPage() {
       <div className={styles.container}>
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <h1 className={styles.title}>Autos Disponibles</h1>
-            <p className={styles.subtitle}>Encontrá el auto perfecto para vos</p>
+            <h1 className={styles.title}>Available Cars</h1>
+            <p className={styles.subtitle}>Find the perfect car for you</p>
           </div>
           <button onClick={handleLogout} className={styles.logoutButton}>
             <LogOut size={20} />
-            Cerrar Sesión
+            Log Out
           </button>
         </div>
 
