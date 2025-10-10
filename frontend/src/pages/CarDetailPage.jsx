@@ -14,7 +14,7 @@ export default function CarDetailPage() {
 
   useEffect(() => {
     loadCar();
-  }, [id]);
+  }, [id, loadCar]);
 
   const loadCar = async () => {
     try {
