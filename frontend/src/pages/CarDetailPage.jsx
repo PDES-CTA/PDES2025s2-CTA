@@ -13,21 +13,21 @@ export default function CarDetailPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadCar();
-  }, [id, loadCar]);
+    const loadCar = async () => {
+      try {
+        setLoading(true);
+        const data = await carService.getCarById(id);
+        setCar(data);
+      } catch (err) {
+        setError(err.message || 'Error loading car');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadCar = async () => {
-    try {
-      setLoading(true);
-      const data = await carService.getCarById(id);
-      setCar(data);
-    } catch (err) {
-      setError(err.message || 'Error loading car');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadCar();
+  }, [id]);
 
   const handleImageError = (e) => {
     e.target.onerror = null;
