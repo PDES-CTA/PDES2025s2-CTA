@@ -5,7 +5,7 @@ import styles from './CarCard.module.css';
 
 export default function CarCard({ car, onViewDetails }) {
   const hasImages = car.images?.length > 0;
-
+  
   const handleImageError = (e) => {
     e.target.style.display = 'none';
     e.target.nextSibling.style.display = 'flex';
@@ -34,14 +34,14 @@ export default function CarCard({ car, onViewDetails }) {
           </h3>
           <Badge
             variant={car.available ? 'success' : 'danger'}
-            text={car.available ? 'Disponible' : 'Vendido'}
+            text={car.available ? 'Available' : 'Sold'}
           />
         </header>
 
         <div className={styles.priceSection}>
           <div className={styles.price}>{formatPrice(car.price)}</div>
           <div className={styles.details}>
-            Año {car.year} • {car.mileage.toLocaleString()} km
+            Year {car.year} • {car.mileage.toLocaleString()} km
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default function CarCard({ car, onViewDetails }) {
 
         <footer className={styles.footer}>
           <span className={styles.publishDate}>
-            Publicado: {formatDate(car.publicationDate)}
+            Published: {formatDate(car.publicationDate)}
           </span>
           <Button
             onClick={onViewDetails}
@@ -65,7 +65,7 @@ export default function CarCard({ car, onViewDetails }) {
             variant="primary"
             size="sm"
           >
-            {car.available ? 'Ver Detalles' : 'No disponible'}
+            {car.available ? 'View Details' : 'Not available'}
           </Button>
         </footer>
       </div>

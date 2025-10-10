@@ -1,56 +1,84 @@
-// Roles de usuario
+// User roles
 export const ROLES = {
   BUYER: 'BUYER',
   DEALERSHIP: 'DEALERSHIP',
-  ADMIN: 'ADMIN'
+  ADMINISTRATOR: 'ADMINISTRATOR'
 };
 
-// Tipos de combustible
+// Fuel types
 export const FUEL_TYPES = {
-  NAFTA: 'NAFTA',
+  GASOLINE: 'GASOLINE',
   DIESEL: 'DIESEL',
-  HIBRIDO: 'HIBRIDO',
-  ELECTRICO: 'ELECTRICO',
+  HYBRID: 'HYBRID',
+  ELECTRIC: 'ELECTRIC',
   GNC: 'GNC'
 };
 
 export const FUEL_TYPE_LABELS = {
-  NAFTA: 'Nafta',
-  DIESEL: 'Diésel',
-  HIBRIDO: 'Híbrido',
-  ELECTRICO: 'Eléctrico',
-  GNC: 'GNC'
+  GASOLINE: 'Gasoline',
+  DIESEL: 'Diesel',
+  HYBRID: 'Hybrid',
+  ELECTRIC: 'Electric',
+  GNC: 'CNG'
 };
 
-// Tipos de transmisión
+// Transmission types
 export const TRANSMISSION_TYPES = {
   MANUAL: 'MANUAL',
-  AUTOMATICA: 'AUTOMATICA',
-  SEMI_AUTOMATICA: 'SEMI_AUTOMATICA'
+  AUTOMATIC: 'AUTOMATIC',
+  SEMI_AUTOMATIC: 'SEMI_AUTOMATIC'
 };
 
 export const TRANSMISSION_TYPE_LABELS = {
   MANUAL: 'Manual',
-  AUTOMATICA: 'Automática',
-  SEMI_AUTOMATICA: 'Semi-automática'
+  AUTOMATIC: 'Automatic',
+  SEMI_AUTOMATIC: 'Semi-automatic'
 };
 
-// Estados de compra
+// Purchase statuses
 export const PURCHASE_STATUS = {
-  PENDIENTE: 'PENDIENTE',
-  CONFIRMADA: 'CONFIRMADA',
-  ENTREGADA: 'ENTREGADA',
-  CANCELADA: 'CANCELADA'
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
 };
 
 export const PURCHASE_STATUS_LABELS = {
-  PENDIENTE: 'Pendiente',
-  CONFIRMADA: 'Confirmada',
-  ENTREGADA: 'Entregada',
-  CANCELADA: 'Cancelada'
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled'
 };
 
-// Rutas de la aplicación
+// Payment methods
+export const PAYMENT_METHODS = {
+  CASH: 'CASH',
+  CHECK: 'CHECK',
+  CREDIT_CARD: 'CREDIT_CARD'
+};
+
+export const PAYMENT_METHOD_LABELS = {
+  CASH: 'Cash',
+  CHECK: 'Check',
+  CREDIT_CARD: 'Credit Card'
+};
+
+// Report types
+export const REPORT_TYPES = {
+  MOST_SOLD_CARS: 'MOST_SOLD_CARS',
+  TOP_BUYERS: 'TOP_BUYERS',
+  FAVORITE_CARS: 'FAVORITE_CARS',
+  TOP_AGENCIES: 'TOP_AGENCIES'
+};
+
+export const REPORT_TYPE_LABELS = {
+  MOST_SOLD_CARS: 'Most Sold Cars',
+  TOP_BUYERS: 'Top Buyers',
+  FAVORITE_CARS: 'Favorite Cars',
+  TOP_AGENCIES: 'Top Agencies'
+};
+
+// Application routes
 export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
@@ -64,7 +92,7 @@ export const ROUTES = {
   PROFILE: '/profile'
 };
 
-// Helper para generar rutas dinámicas
+// Helper for dynamic routes
 export const generateRoute = {
   carDetail: (id) => `/cars/${id}`,
   userProfile: (id) => `/profile/${id}`
