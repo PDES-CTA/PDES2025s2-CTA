@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=5",
     "preview": "vite preview"
   },
   "dependencies": {
