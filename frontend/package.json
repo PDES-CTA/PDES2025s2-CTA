@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=5",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=5 --fix",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage"
