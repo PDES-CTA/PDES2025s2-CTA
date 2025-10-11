@@ -249,7 +249,7 @@ class DealershipService(
             require(dealership.firstName.isNotBlank()) { "First name cannot be empty" }
             require(dealership.lastName.isNotBlank()) { "Last name cannot be empty" }
 
-            dealership.phone?.let { phone ->
+            dealership.phone.let { phone ->
                 require(phone.isNotBlank()) { "Phone cannot be empty if provided" }
                 require(phone.length >= 10) { "Phone must be at least 10 characters" }
             }
