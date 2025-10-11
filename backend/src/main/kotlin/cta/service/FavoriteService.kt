@@ -3,7 +3,7 @@ package cta.service
 import cta.model.FavoriteCar
 import cta.repository.FavoriteCarRepository
 import cta.web.dto.FavoriteCarCreateRequest
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

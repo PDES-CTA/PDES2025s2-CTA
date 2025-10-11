@@ -2,7 +2,7 @@ package cta.service
 
 import cta.model.Buyer
 import cta.repository.BuyerRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 

@@ -48,6 +48,13 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
+    testImplementation("com.h2database:h2")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 

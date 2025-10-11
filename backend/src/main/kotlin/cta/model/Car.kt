@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 
 @Entity
@@ -72,8 +73,10 @@ class Car : BaseEntity() {
     fun isAvailable(): Boolean = available
 
     fun calculateDiscountedPrice(percentage: Double): BigDecimal {
-        val discount = price.multiply(BigDecimal(percentage / 100))
-        return price.subtract(discount)
+        val multiplier = BigDecimal.ONE.subtract(
+            BigDecimal.valueOf(percentage).divide(BigDecimal("100"))
+        )
+        return price.multiply(multiplier).setScale(2, RoundingMode.HALF_UP)
     }
 
     fun getFullName(): String = "$brand $model $year"

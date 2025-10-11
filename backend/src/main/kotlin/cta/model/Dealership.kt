@@ -30,19 +30,6 @@ class Dealership : User() {
 
     override val role: UserRole = UserRole.DEALERSHIP
 
-    fun updateDealershipProfile(data: Map<String, Any>) {
-        // Call parent's updateProfile for common fields
-        updateProfile(data)
-
-        // Update dealership-specific fields
-        data["businessName"]?.let { businessName = it.toString() }
-        data["cuit"]?.let { cuit = it.toString() }
-        data["address"]?.let { address = it.toString() }
-        data["city"]?.let { city = it.toString() }
-        data["province"]?.let { province = it.toString() }
-        data["description"]?.let { description = it.toString() }
-    }
-
     fun getFullAddress(): String {
         val addressParts = listOfNotNull(address, city, province)
         return if (addressParts.isNotEmpty()) {
