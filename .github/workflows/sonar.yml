@@ -27,23 +27,12 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: ${{ runner.os }}-gradle
-
       - name: Build and test backend with coverage
         working-directory: ./backend
         run: ./gradlew build jacocoTestReport --info
+
+      - name: Verify backend coverage report
+        run: ls -la backend/coverage/jacoco.xml
 
       # ==== FRONTEND ====
       - name: Set up Node.js
@@ -61,10 +50,12 @@ jobs:
         working-directory: ./frontend
         run: npm run test:coverage
 
+      - name: Verify frontend coverage report
+        run: ls -la frontend/coverage/lcov.info
+
       # ==== SONARCLOUD ANALYSIS ====
       - name: SonarCloud Scan
-        working-directory: ./backend
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew sonar -Dsonar.projectBaseDir=$GITHUB_WORKSPACE --info
