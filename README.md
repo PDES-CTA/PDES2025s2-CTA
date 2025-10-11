@@ -1,5 +1,5 @@
 # PDES2025s2-CTA
-
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PDES-CTA_PDES2025s2-CTA&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PDES-CTA_PDES2025s2-CTA)
 ```mermaid
 classDiagram
     %% Entidades principales del dominio

@@ -12,6 +12,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.jpa") version "1.9.22"
     jacoco
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 group = "CTA"
@@ -59,6 +60,18 @@ dependencies {
     testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
     testImplementation("com.h2database:h2")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "PDES-CTA_PDES2025s2-CTA")
+        property("sonar.organization", "PDES-CTA")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
+        property("sonar.kotlin.source.version", "1.9")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${projectDir}/coverage/jacoco.xml")
+    }
 }
 
 tasks.test {
