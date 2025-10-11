@@ -67,4 +67,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew sonar -Dsonar.projectBaseDir=.. --info
+        run: ./gradlew sonar -Dsonar.projectBaseDir=$GITHUB_WORKSPACE --info
