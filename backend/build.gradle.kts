@@ -67,10 +67,6 @@ sonar {
         property("sonar.projectKey", "PDES-CTA_PDES2025s2-CTA")
         property("sonar.organization", "PDES-CTA")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.sources", "src/main/kotlin")
-        property("sonar.tests", "src/test/kotlin")
-        property("sonar.kotlin.source.version", "1.9")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${projectDir}/coverage/jacoco.xml")
     }
 }
 
