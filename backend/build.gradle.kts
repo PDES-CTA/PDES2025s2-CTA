@@ -65,7 +65,7 @@ dependencies {
 sonar {
     properties {
         property("sonar.projectKey", "PDES-CTA_PDES2025s2-CTA")
-        property("sonar.organization", "PDES-CTA")
+        property("sonar.organization", "pdes-cta")
         property("sonar.host.url", "https://sonarcloud.io")
     }
 }
