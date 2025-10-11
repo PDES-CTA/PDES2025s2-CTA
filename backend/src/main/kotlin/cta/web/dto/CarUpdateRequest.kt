@@ -4,7 +4,10 @@ import cta.enum.FuelType
 import cta.enum.TransmissionType
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.DecimalMin
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.PositiveOrZero
 import java.math.BigDecimal
 
 @Schema(description = "Car update data transfer object")

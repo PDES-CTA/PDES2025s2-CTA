@@ -1,7 +1,9 @@
 package cta.model
 
 import cta.enum.UserRole
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorValue
+import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotBlank
 
 @Entity

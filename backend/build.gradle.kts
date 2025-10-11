@@ -70,9 +70,9 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
-        xml.outputLocation.set(file("${projectDir}/coverage/jacoco.xml"))
+        xml.outputLocation.set(file("$projectDir/coverage/jacoco.xml"))
         html.required.set(true)
-        html.outputLocation.set(file("${projectDir}/coverage/html"))
+        html.outputLocation.set(file("$projectDir/coverage/html"))
     }
 }
 

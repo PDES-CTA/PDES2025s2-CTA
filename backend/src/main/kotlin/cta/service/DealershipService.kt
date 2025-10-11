@@ -6,7 +6,6 @@ import cta.web.dto.DealershipCreateRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.NoSuchElementException
 
 @Service
 class DealershipService(
