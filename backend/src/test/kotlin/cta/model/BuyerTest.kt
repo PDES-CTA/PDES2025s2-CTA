@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("Buyer Entity Tests")
-class BuyerTest { 
+class BuyerTest {
     private lateinit var buyer: Buyer
 
     @BeforeEach
