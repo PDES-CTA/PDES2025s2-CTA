@@ -1,7 +1,15 @@
 package cta.model
 
 import cta.enum.UserRole
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorColumn
+import jakarta.persistence.DiscriminatorType
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.Inheritance
+import jakarta.persistence.InheritanceType
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -12,7 +20,6 @@ import java.time.LocalDateTime
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 abstract class User : BaseEntity() {
-
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
     @Column(unique = true, nullable = false)
@@ -44,7 +51,10 @@ abstract class User : BaseEntity() {
     @get:Column(name = "role", nullable = false)
     abstract val role: UserRole
 
-    fun login(email: String, password: String): Boolean {
+    fun login(
+        email: String,
+        password: String,
+    ): Boolean {
         return this.email == email && this.password == password && active
     }
 

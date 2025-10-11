@@ -1,18 +1,21 @@
 package cta.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import cta.enum.FuelType
+import cta.enum.PaymentMethod
+import cta.enum.PurchaseStatus
+import cta.enum.TransmissionType
 import cta.model.Car
 import cta.model.Dealership
 import cta.model.Purchase
-import cta.enum.FuelType
-import cta.enum.PurchaseStatus
-import cta.enum.TransmissionType
 import cta.service.PurchaseService
 import cta.web.dto.PurchaseCreateRequest
 import cta.web.dto.PurchaseUpdateRequest
-import com.fasterxml.jackson.databind.ObjectMapper
-import cta.enum.PaymentMethod
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,18 +23,24 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@SpringBootTest(properties = [
-    "spring.main.allow-bean-definition-overriding=true"
-])
+@SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+    ],
+)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class PurchaseControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -78,7 +87,7 @@ class PurchaseControllerTest {
         dealership: Dealership = createMockDealership(),
         observations: String = "No observations",
         purchaseStatus: PurchaseStatus = PurchaseStatus.PENDING,
-        finalPrice: BigDecimal = BigDecimal("20000")
+        finalPrice: BigDecimal = BigDecimal("20000"),
     ): Purchase {
         return Purchase().apply {
             this.id = id
@@ -96,10 +105,11 @@ class PurchaseControllerTest {
     @Test
     fun `should get all purchases and return 200 OK`() {
         // Given
-        val purchases = listOf(
-            createMockPurchase(id = 1L),
-            createMockPurchase(id = 2L)
-        )
+        val purchases =
+            listOf(
+                createMockPurchase(id = 1L),
+                createMockPurchase(id = 2L),
+            )
         whenever(purchaseService.findAll()).thenReturn(purchases)
 
         // When & Then
@@ -158,10 +168,11 @@ class PurchaseControllerTest {
     fun `should get purchases by buyer id and return 200 OK`() {
         // Given
         val buyerId = 1L
-        val purchases = listOf(
-            createMockPurchase(id = 1L),
-            createMockPurchase(id = 2L)
-        )
+        val purchases =
+            listOf(
+                createMockPurchase(id = 1L),
+                createMockPurchase(id = 2L),
+            )
         whenever(purchaseService.findByBuyerId(buyerId)).thenReturn(purchases)
 
         // When & Then
@@ -222,10 +233,11 @@ class PurchaseControllerTest {
     fun `should get purchases by dealership id and return 200 OK`() {
         // Given
         val dealershipId = 1L
-        val purchases = listOf(
-            createMockPurchase(id = 1L),
-            createMockPurchase(id = 2L)
-        )
+        val purchases =
+            listOf(
+                createMockPurchase(id = 1L),
+                createMockPurchase(id = 2L),
+            )
         whenever(purchaseService.findByDealershipId(dealershipId)).thenReturn(purchases)
 
         // When & Then
@@ -257,16 +269,17 @@ class PurchaseControllerTest {
     @Test
     fun `should create purchase and return 201 CREATED`() {
         // Given
-        val request = PurchaseCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            dealershipId = 1L,
-            finalPrice = BigDecimal("20000"),
-            purchaseDate = LocalDateTime.now(),
-            purchaseStatus = PurchaseStatus.PENDING,
-            paymentMethod = PaymentMethod.CREDIT_CARD,
-            observations = "No observations"
-        )
+        val request =
+            PurchaseCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                dealershipId = 1L,
+                finalPrice = BigDecimal("20000"),
+                purchaseDate = LocalDateTime.now(),
+                purchaseStatus = PurchaseStatus.PENDING,
+                paymentMethod = PaymentMethod.CREDIT_CARD,
+                observations = "No observations",
+            )
 
         val savedPurchase = createMockPurchase(id = 1L)
         whenever(purchaseService.createPurchase(any())).thenReturn(savedPurchase)
@@ -275,7 +288,7 @@ class PurchaseControllerTest {
         mockMvc.perform(
             post("/api/purchases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1))
@@ -291,19 +304,20 @@ class PurchaseControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when creating purchase with missing buyerId`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "carId": 1,
                 "dealershipId": 1,
                 "totalAmount": 20000
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/purchases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -311,19 +325,20 @@ class PurchaseControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when creating purchase with missing carId`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "buyerId": 1,
                 "dealershipId": 1,
                 "totalAmount": 20000
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/purchases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -331,20 +346,21 @@ class PurchaseControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when creating purchase with invalid totalAmount`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "buyerId": 1,
                 "carId": 1,
                 "dealershipId": 1,
                 "totalAmount": -1000
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/purchases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -352,16 +368,17 @@ class PurchaseControllerTest {
     @Test
     fun `should return 404 NOT FOUND when creating purchase with non-existent buyer`() {
         // Given
-        val request = PurchaseCreateRequest(
-            buyerId = 999L,
-            carId = 1L,
-            dealershipId = 1L,
-            finalPrice = BigDecimal("20000"),
-            purchaseDate = LocalDateTime.now(),
-            purchaseStatus = PurchaseStatus.PENDING,
-            paymentMethod = PaymentMethod.CREDIT_CARD,
-            observations = "No observations"
-        )
+        val request =
+            PurchaseCreateRequest(
+                buyerId = 999L,
+                carId = 1L,
+                dealershipId = 1L,
+                finalPrice = BigDecimal("20000"),
+                purchaseDate = LocalDateTime.now(),
+                purchaseStatus = PurchaseStatus.PENDING,
+                paymentMethod = PaymentMethod.CREDIT_CARD,
+                observations = "No observations",
+            )
 
         whenever(purchaseService.createPurchase(any()))
             .thenThrow(NoSuchElementException("Buyer not found"))
@@ -370,7 +387,7 @@ class PurchaseControllerTest {
         mockMvc.perform(
             post("/api/purchases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
     }
@@ -379,22 +396,24 @@ class PurchaseControllerTest {
     fun `should update purchase and return 200 OK`() {
         // Given
         val purchaseId = 1L
-        val request = PurchaseUpdateRequest(
-            finalPrice = BigDecimal("22000"),
-            purchaseDate = LocalDateTime.now().minusDays(1)
-        )
+        val request =
+            PurchaseUpdateRequest(
+                finalPrice = BigDecimal("22000"),
+                purchaseDate = LocalDateTime.now().minusDays(1),
+            )
 
-        val updatedPurchase = createMockPurchase(
-            id = purchaseId,
-            finalPrice = BigDecimal("22000")
-        )
+        val updatedPurchase =
+            createMockPurchase(
+                id = purchaseId,
+                finalPrice = BigDecimal("22000"),
+            )
         whenever(purchaseService.updatePurchase(eq(purchaseId), any())).thenReturn(updatedPurchase)
 
         // When & Then
         mockMvc.perform(
             put("/api/purchases/{id}", purchaseId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(purchaseId))
@@ -407,9 +426,10 @@ class PurchaseControllerTest {
     fun `should return 404 NOT FOUND when updating non-existent purchase`() {
         // Given
         val purchaseId = 999L
-        val request = PurchaseUpdateRequest(
-            finalPrice = BigDecimal("22000")
-        )
+        val request =
+            PurchaseUpdateRequest(
+                finalPrice = BigDecimal("22000"),
+            )
 
         whenever(purchaseService.updatePurchase(eq(purchaseId), any()))
             .thenThrow(NoSuchElementException("Purchase not found"))
@@ -418,7 +438,7 @@ class PurchaseControllerTest {
         mockMvc.perform(
             put("/api/purchases/{id}", purchaseId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
     }
@@ -451,10 +471,11 @@ class PurchaseControllerTest {
     fun `should mark purchase as canceled and return 200 OK`() {
         // Given
         val purchaseId = 1L
-        val canceledPurchase = createMockPurchase(
-            id = purchaseId,
-            purchaseStatus = PurchaseStatus.CANCELLED,
-        )
+        val canceledPurchase =
+            createMockPurchase(
+                id = purchaseId,
+                purchaseStatus = PurchaseStatus.CANCELLED,
+            )
         whenever(purchaseService.markAsCanceled(purchaseId)).thenReturn(canceledPurchase)
 
         // When & Then
@@ -470,10 +491,11 @@ class PurchaseControllerTest {
     fun `should mark purchase as delivered and return 200 OK`() {
         // Given
         val purchaseId = 1L
-        val deliveredPurchase = createMockPurchase(
-            id = purchaseId,
-            purchaseStatus = PurchaseStatus.DELIVERED,
-        )
+        val deliveredPurchase =
+            createMockPurchase(
+                id = purchaseId,
+                purchaseStatus = PurchaseStatus.DELIVERED,
+            )
         whenever(purchaseService.markAsDelivered(purchaseId)).thenReturn(deliveredPurchase)
 
         // When & Then
@@ -489,10 +511,11 @@ class PurchaseControllerTest {
     fun `should mark purchase as confirmed and return 200 OK`() {
         // Given
         val purchaseId = 1L
-        val confirmedPurchase = createMockPurchase(
-            id = purchaseId,
-            purchaseStatus = PurchaseStatus.CONFIRMED,
-        )
+        val confirmedPurchase =
+            createMockPurchase(
+                id = purchaseId,
+                purchaseStatus = PurchaseStatus.CONFIRMED,
+            )
         whenever(purchaseService.markAsConfirmed(purchaseId)).thenReturn(confirmedPurchase)
 
         // When & Then
@@ -508,10 +531,11 @@ class PurchaseControllerTest {
     fun `should mark purchase as pending and return 200 OK`() {
         // Given
         val purchaseId = 1L
-        val pendingPurchase = createMockPurchase(
-            id = purchaseId,
-            purchaseStatus = PurchaseStatus.PENDING,
-        )
+        val pendingPurchase =
+            createMockPurchase(
+                id = purchaseId,
+                purchaseStatus = PurchaseStatus.PENDING,
+            )
         whenever(purchaseService.markAsPending(purchaseId)).thenReturn(pendingPurchase)
 
         // When & Then

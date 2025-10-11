@@ -1,7 +1,16 @@
 package cta.model
 
-import cta.enum.*
-import jakarta.persistence.*
+import cta.enum.FuelType
+import cta.enum.TransmissionType
+import jakarta.persistence.CollectionTable
+import jakarta.persistence.Column
+import jakarta.persistence.ElementCollection
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.Table
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -13,7 +22,6 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "car")
 class Car : BaseEntity() {
-
     @NotBlank
     @Column(nullable = false)
     var brand: String = ""
@@ -73,9 +81,10 @@ class Car : BaseEntity() {
     fun isAvailable(): Boolean = available
 
     fun calculateDiscountedPrice(percentage: Double): BigDecimal {
-        val multiplier = BigDecimal.ONE.subtract(
-            BigDecimal.valueOf(percentage).divide(BigDecimal("100"))
-        )
+        val multiplier =
+            BigDecimal.ONE.subtract(
+                BigDecimal.valueOf(percentage).divide(BigDecimal("100")),
+            )
         return price.multiply(multiplier).setScale(2, RoundingMode.HALF_UP)
     }
 

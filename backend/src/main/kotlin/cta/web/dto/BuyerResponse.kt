@@ -8,22 +8,16 @@ import java.time.LocalDateTime
 data class BuyerResponse(
     @field:Schema(description = "Unique identifier for the buyer")
     val id: Long?,
-
     @field:Schema(description = "Buyer national identification number")
     val dni: Int?,
-
     @field:Schema(description = "Address of the buyer")
     val address: String?,
-
     @field:Schema(description = "Buyer email")
     val email: String,
-
     @field:Schema(description = "Buyer phone")
     val phone: String?,
-
     @field:Schema(description = "Buyer registration date")
     val registrationDate: LocalDateTime,
-
     @field:Schema(description = "Buyer is active indicator")
     val active: Boolean,
 ) {
@@ -36,7 +30,7 @@ data class BuyerResponse(
                 email = buyer.email,
                 phone = buyer.phone,
                 registrationDate = buyer.registrationDate,
-                active = buyer.active
+                active = buyer.active,
             )
         }
     }

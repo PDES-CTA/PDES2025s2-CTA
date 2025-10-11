@@ -1,28 +1,31 @@
 package cta.model
 
 import cta.enum.UserRole
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 @DisplayName("Buyer Entity Tests")
 class BuyerTest {
-
     private lateinit var buyer: Buyer
 
     @BeforeEach
     fun setup() {
-        buyer = Buyer().apply {
-            email = "john.doe@example.com"
-            password = "securePassword123"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "+54 11 1234-5678"
-            address = "Av. Corrientes 1234, Buenos Aires"
-            dni = 12345678
-            active = true
-        }
+        buyer =
+            Buyer().apply {
+                email = "john.doe@example.com"
+                password = "securePassword123"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "+54 11 1234-5678"
+                address = "Av. Corrientes 1234, Buenos Aires"
+                dni = 12345678
+                active = true
+            }
     }
 
     @Test
@@ -44,15 +47,16 @@ class BuyerTest {
     @Test
     @DisplayName("Should create buyer using factory method")
     fun shouldCreateBuyerUsingFactoryMethod() {
-        val newBuyer = Buyer.create(
-            email = "jane.smith@example.com",
-            password = "password456",
-            firstName = "Jane",
-            lastName = "Smith",
-            phone = "+54 11 8765-4321",
-            address = "Calle Florida 500, CABA",
-            dni = 87654321
-        )
+        val newBuyer =
+            Buyer.create(
+                email = "jane.smith@example.com",
+                password = "password456",
+                firstName = "Jane",
+                lastName = "Smith",
+                phone = "+54 11 8765-4321",
+                address = "Calle Florida 500, CABA",
+                dni = 87654321,
+            )
 
         assertEquals("jane.smith@example.com", newBuyer.email)
         assertEquals("password456", newBuyer.password)
@@ -124,25 +128,27 @@ class BuyerTest {
     @Test
     @DisplayName("Should create multiple buyers with different data")
     fun shouldCreateMultipleBuyers() {
-        val buyer1 = Buyer.create(
-            email = "buyer1@example.com",
-            password = "pass1",
-            firstName = "Buyer",
-            lastName = "One",
-            phone = "123456789",
-            address = "Address 1",
-            dni = 11111111
-        )
+        val buyer1 =
+            Buyer.create(
+                email = "buyer1@example.com",
+                password = "pass1",
+                firstName = "Buyer",
+                lastName = "One",
+                phone = "123456789",
+                address = "Address 1",
+                dni = 11111111,
+            )
 
-        val buyer2 = Buyer.create(
-            email = "buyer2@example.com",
-            password = "pass2",
-            firstName = "Buyer",
-            lastName = "Two",
-            phone = "987654321",
-            address = "Address 2",
-            dni = 22222222
-        )
+        val buyer2 =
+            Buyer.create(
+                email = "buyer2@example.com",
+                password = "pass2",
+                firstName = "Buyer",
+                lastName = "Two",
+                phone = "987654321",
+                address = "Address 2",
+                dni = 22222222,
+            )
 
         assertNotEquals(buyer1.email, buyer2.email)
         assertNotEquals(buyer1.dni, buyer2.dni)
@@ -169,15 +175,16 @@ class BuyerTest {
     @Test
     @DisplayName("Factory method should set active to true by default")
     fun factoryMethodShouldSetActiveToTrue() {
-        val newBuyer = Buyer.create(
-            email = "test@example.com",
-            password = "test123",
-            firstName = "Test",
-            lastName = "User",
-            phone = "123456",
-            address = "Test Address",
-            dni = 12345678
-        )
+        val newBuyer =
+            Buyer.create(
+                email = "test@example.com",
+                password = "test123",
+                firstName = "Test",
+                lastName = "User",
+                phone = "123456",
+                address = "Test Address",
+                dni = 12345678,
+            )
 
         assertTrue(newBuyer.active)
     }

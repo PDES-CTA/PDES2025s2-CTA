@@ -12,5 +12,5 @@ data class CarSearchFilters(
     val maxYear: Int? = null,
     val brand: String? = null,
     val fuelType: FuelType? = null,
-    val transmission: TransmissionType? = null
+    val transmission: TransmissionType? = null,
 )

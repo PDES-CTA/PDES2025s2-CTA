@@ -11,24 +11,24 @@ import java.time.LocalDateTime
 
 @DisplayName("Car Entity Tests")
 class CarTest {
-
     private lateinit var car: Car
 
     @BeforeEach
     fun setup() {
-        car = Car().apply {
-            brand = "Toyota"
-            model = "Corolla"
-            year = 2023
-            price = BigDecimal("20000.00")
-            mileage = 15000
-            color = "Blue"
-            fuelType = FuelType.GASOLINE
-            transmission = TransmissionType.AUTOMATIC
-            description = "Well maintained car"
-            dealershipId = 1L
-            available = true
-        }
+        car =
+            Car().apply {
+                brand = "Toyota"
+                model = "Corolla"
+                year = 2023
+                price = BigDecimal("20000.00")
+                mileage = 15000
+                color = "Blue"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                description = "Well maintained car"
+                dealershipId = 1L
+                available = true
+            }
     }
 
     @Test

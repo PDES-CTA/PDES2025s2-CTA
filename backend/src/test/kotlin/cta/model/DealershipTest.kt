@@ -1,32 +1,33 @@
 package cta.model
 
 import cta.enum.UserRole
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 @DisplayName("Dealership Entity Tests")
 class DealershipTest {
-
     private lateinit var dealership: Dealership
 
     @BeforeEach
     fun setup() {
-        dealership = Dealership().apply {
-            email = "contact@dealership.com"
-            password = "securePassword123"
-            firstName = "John"
-            lastName = "Dealer"
-            phone = "+54 11 1234-5678"
-            businessName = "Premium Auto Sales"
-            cuit = "20-12345678-9"
-            address = "Av. Libertador 1000"
-            city = "Buenos Aires"
-            province = "CABA"
-            description = "Leading car dealership in Argentina"
-            active = true
-        }
+        dealership =
+            Dealership().apply {
+                email = "contact@dealership.com"
+                password = "securePassword123"
+                firstName = "John"
+                lastName = "Dealer"
+                phone = "+54 11 1234-5678"
+                businessName = "Premium Auto Sales"
+                cuit = "20-12345678-9"
+                address = "Av. Libertador 1000"
+                city = "Buenos Aires"
+                province = "CABA"
+                description = "Leading car dealership in Argentina"
+                active = true
+            }
     }
 
     @Test
@@ -158,5 +159,4 @@ class DealershipTest {
 
         assertEquals("Mendoza", fullAddress)
     }
-
 }

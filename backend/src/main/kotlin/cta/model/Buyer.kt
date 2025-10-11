@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotBlank
 @Table(name = "buyer")
 @DiscriminatorValue("BUYER")
 class Buyer : User() {
-
     @Column(name = "address", nullable = true)
     @NotBlank(message = "Address cannot be blank")
     var address: String = ""
@@ -29,7 +28,7 @@ class Buyer : User() {
             lastName: String,
             phone: String,
             address: String,
-            dni: Int
+            dni: Int,
         ): Buyer {
             return Buyer().apply {
                 this.email = email

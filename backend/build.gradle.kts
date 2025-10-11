@@ -12,6 +12,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.jpa") version "1.9.22"
     jacoco
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
     id("org.sonarqube") version "5.1.0.4882"
 }
 
@@ -78,9 +79,9 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
-        xml.outputLocation.set(file("${projectDir}/coverage/jacoco.xml"))
+        xml.outputLocation.set(file("$projectDir/coverage/jacoco.xml"))
         html.required.set(true)
-        html.outputLocation.set(file("${projectDir}/coverage/html"))
+        html.outputLocation.set(file("$projectDir/coverage/html"))
     }
 }
 

@@ -1,13 +1,14 @@
 package cta.model
 
 import cta.enum.UserRole
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorValue
+import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotBlank
 
 @Entity
 @DiscriminatorValue("DEALERSHIP")
 class Dealership : User() {
-
     @NotBlank(message = "Business name is required")
     @Column(name = "business_name", nullable = true)
     var businessName: String = ""

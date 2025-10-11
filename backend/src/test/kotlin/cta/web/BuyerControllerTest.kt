@@ -1,10 +1,10 @@
 package cta.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import cta.model.Buyer
 import cta.service.BuyerService
 import cta.web.dto.BuyerCreateRequest
 import cta.web.dto.BuyerUpdateRequest
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -17,14 +17,16 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(properties = ["spring.main.allow-bean-definition-overriding=true"])
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class BuyerControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -37,25 +39,27 @@ class BuyerControllerTest {
     @Test
     fun `should create buyer and return 201 CREATED`() {
         // Given
-        val request = BuyerCreateRequest(
-            email = "buyer-user@gmail.com",
-            password = "password123",
-            firstName = "John",
-            lastName = "Example",
-            phone = "1112341234",
-            dni = 59252192,
-            address = "24 Main Street, BA"
-        )
+        val request =
+            BuyerCreateRequest(
+                email = "buyer-user@gmail.com",
+                password = "password123",
+                firstName = "John",
+                lastName = "Example",
+                phone = "1112341234",
+                dni = 59252192,
+                address = "24 Main Street, BA",
+            )
 
-        val savedBuyer = Buyer().apply {
-            id = 1L
-            email = "buyer-user@gmail.com"
-            password = "password123"
-            phone = "1112341234"
-            dni = 59252192
-            address = "24 Main Street, BA"
-            active = true
-        }
+        val savedBuyer =
+            Buyer().apply {
+                id = 1L
+                email = "buyer-user@gmail.com"
+                password = "password123"
+                phone = "1112341234"
+                dni = 59252192
+                address = "24 Main Street, BA"
+                active = true
+            }
 
         whenever(buyerService.createBuyer(any())).thenReturn(savedBuyer)
 
@@ -63,7 +67,7 @@ class BuyerControllerTest {
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1))
@@ -79,7 +83,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when email is missing`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "password": "password123",
                 "firstName": "John",
@@ -88,13 +93,13 @@ class BuyerControllerTest {
                 "dni": 59252192,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -102,7 +107,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when email format is invalid`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "invalid-email",
                 "password": "password123",
@@ -112,13 +118,13 @@ class BuyerControllerTest {
                 "dni": 59252192,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -126,7 +132,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when password is too short`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "buyer@gmail.com",
                 "password": "pass",
@@ -136,13 +143,13 @@ class BuyerControllerTest {
                 "dni": 59252192,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -150,7 +157,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when firstName is too short`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "buyer@gmail.com",
                 "password": "password123",
@@ -160,13 +168,13 @@ class BuyerControllerTest {
                 "dni": 59252192,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -174,7 +182,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when DNI is below minimum`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "buyer@gmail.com",
                 "password": "password123",
@@ -184,13 +193,13 @@ class BuyerControllerTest {
                 "dni": 999999,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -198,7 +207,8 @@ class BuyerControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when DNI exceeds maximum`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "buyer@gmail.com",
                 "password": "password123",
@@ -208,13 +218,13 @@ class BuyerControllerTest {
                 "dni": 100000000,
                 "address": "24 Main Street, BA"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -223,7 +233,8 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when address exceeds max length`() {
         // Given
         val longAddress = "a".repeat(41)
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "buyer@gmail.com",
                 "password": "password123",
@@ -233,13 +244,13 @@ class BuyerControllerTest {
                 "dni": 59252192,
                 "address": "$longAddress"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/buyer")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -248,24 +259,26 @@ class BuyerControllerTest {
     fun `should update buyer and return 200 OK`() {
         // Given
         val buyerId = 1L
-        val request = BuyerUpdateRequest(
-            email = "updated@gmail.com",
-            phone = "1234567890",
-            dni = 12345678,
-            address = "Updated Street 123",
-            active = true
-        )
+        val request =
+            BuyerUpdateRequest(
+                email = "updated@gmail.com",
+                phone = "1234567890",
+                dni = 12345678,
+                address = "Updated Street 123",
+                active = true,
+            )
 
-        val updatedBuyer = Buyer().apply {
-            id = buyerId
-            email = "updated@gmail.com"
-            firstName = "John"
-            lastName = "Example"
-            phone = "1234567890"
-            dni = 12345678
-            address = "Updated Street 123"
-            active = true
-        }
+        val updatedBuyer =
+            Buyer().apply {
+                id = buyerId
+                email = "updated@gmail.com"
+                firstName = "John"
+                lastName = "Example"
+                phone = "1234567890"
+                dni = 12345678
+                address = "Updated Street 123"
+                active = true
+            }
 
         whenever(buyerService.updateBuyer(eq(buyerId), any())).thenReturn(updatedBuyer)
 
@@ -273,7 +286,7 @@ class BuyerControllerTest {
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(buyerId))
@@ -290,22 +303,24 @@ class BuyerControllerTest {
     fun `should update buyer with partial data and return 200 OK`() {
         // Given
         val buyerId = 1L
-        val request = BuyerUpdateRequest(
-            email = "partial@gmail.com",
-            address = "Updated Address",
-            active = false
-        )
+        val request =
+            BuyerUpdateRequest(
+                email = "partial@gmail.com",
+                address = "Updated Address",
+                active = false,
+            )
 
-        val updatedBuyer = Buyer().apply {
-            id = buyerId
-            email = "partial@gmail.com"
-            firstName = "John"
-            lastName = "Example"
-            phone = "1112341234"
-            dni = 59252192
-            address = "Updated Address"
-            active = false
-        }
+        val updatedBuyer =
+            Buyer().apply {
+                id = buyerId
+                email = "partial@gmail.com"
+                firstName = "John"
+                lastName = "Example"
+                phone = "1112341234"
+                dni = 59252192
+                address = "Updated Address"
+                active = false
+            }
 
         whenever(buyerService.updateBuyer(eq(buyerId), any())).thenReturn(updatedBuyer)
 
@@ -313,7 +328,7 @@ class BuyerControllerTest {
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(buyerId))
@@ -328,17 +343,18 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when update buyer with invalid email`() {
         // Given
         val buyerId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "invalid-email"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -347,17 +363,18 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when phone is too short`() {
         // Given
         val buyerId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "phone": "123456789"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -366,17 +383,18 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when phone is too long`() {
         // Given
         val buyerId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "phone": "1234567890123456"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -385,17 +403,18 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when update DNI is below minimum`() {
         // Given
         val buyerId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "dni": 999999
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -404,17 +423,18 @@ class BuyerControllerTest {
     fun `should return 400 BAD REQUEST when update DNI exceeds maximum`() {
         // Given
         val buyerId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "dni": 100000000
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -424,17 +444,18 @@ class BuyerControllerTest {
         // Given
         val buyerId = 1L
         val longAddress = "a".repeat(41)
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "address": "$longAddress"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -446,7 +467,7 @@ class BuyerControllerTest {
 
         // When & Then
         mockMvc.perform(
-            delete("/api/buyer/{id}", buyerId)
+            delete("/api/buyer/{id}", buyerId),
         )
             .andExpect(status().isNoContent)
 
@@ -462,7 +483,7 @@ class BuyerControllerTest {
 
         // When & Then
         mockMvc.perform(
-            delete("/api/buyer/{id}", buyerId)
+            delete("/api/buyer/{id}", buyerId),
         )
             .andExpect(status().isNotFound)
     }
@@ -471,11 +492,12 @@ class BuyerControllerTest {
     fun `should return 404 NOT FOUND when updating non-existent buyer`() {
         // Given
         val buyerId = 999L
-        val request = BuyerUpdateRequest(
-            email = "updated@gmail.com",
-            address = "updated address",
-            phone = "1234567890"
-        )
+        val request =
+            BuyerUpdateRequest(
+                email = "updated@gmail.com",
+                address = "updated address",
+                phone = "1234567890",
+            )
 
         whenever(buyerService.updateBuyer(eq(buyerId), any()))
             .thenThrow(NoSuchElementException("Buyer not found"))
@@ -484,7 +506,7 @@ class BuyerControllerTest {
         mockMvc.perform(
             put("/api/buyer/{id}", buyerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
     }

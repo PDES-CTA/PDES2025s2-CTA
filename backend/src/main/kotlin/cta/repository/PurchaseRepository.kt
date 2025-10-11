@@ -8,12 +8,14 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PurchaseRepository : JpaRepository<Purchase, Long> {
-
     fun findByBuyerId(buyerId: Long): List<Purchase>
+
     fun findByCarId(carId: Long): Purchase
+
     fun findByDealershipId(dealershipId: Long): List<Purchase>
 
-    @Query(value = """
+    @Query(
+        value = """
         SELECT c.brand,
            c.model,
            c.year,
@@ -24,6 +26,10 @@ interface PurchaseRepository : JpaRepository<Purchase, Long> {
         GROUP BY c.brand, c.model, c.year
         ORDER BY sales_count DESC
         LIMIT :limit
-    """, nativeQuery = true)
-    fun findMostSoldCars(@Param("limit") limit: Int = 10): List<Array<Any>>
+    """,
+        nativeQuery = true,
+    )
+    fun findMostSoldCars(
+        @Param("limit") limit: Int = 10,
+    ): List<Array<Any>>
 }

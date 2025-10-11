@@ -1,19 +1,19 @@
 package cta.web
 
-import cta.model.Buyer
-import cta.service.BuyerService
-import cta.repository.UserRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import cta.config.JwtTokenProvider
+import cta.model.Buyer
+import cta.repository.UserRepository
+import cta.service.BuyerService
+import cta.web.controller.AuthController
 import cta.web.dto.BuyerCreateRequest
 import cta.web.dto.LoginRequest
-import com.fasterxml.jackson.databind.ObjectMapper
-import cta.web.controller.AuthController
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -35,7 +35,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @WebMvcTest(AuthController::class)
 @AutoConfigureMockMvc(addFilters = false) // Disable security for testing
 class AuthControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -66,36 +65,40 @@ class AuthControllerTest {
     @DisplayName("Should login successfully with valid credentials")
     fun shouldLoginSuccessfully() {
         // Given
-        val loginRequest = LoginRequest(
-            email = "buyer@example.com",
-            password = "password123"
-        )
+        val loginRequest =
+            LoginRequest(
+                email = "buyer@example.com",
+                password = "password123",
+            )
 
-        val authentication = UsernamePasswordAuthenticationToken(
-            "buyer@example.com",
-            "password123"
-        )
+        val authentication =
+            UsernamePasswordAuthenticationToken(
+                "buyer@example.com",
+                "password123",
+            )
 
-        val userDetails = User(
-            "buyer@example.com",
-            "encodedPassword",
-            true,
-            true,
-            true,
-            true,
-            listOf(SimpleGrantedAuthority("ROLE_BUYER"))
-        )
+        val userDetails =
+            User(
+                "buyer@example.com",
+                "encodedPassword",
+                true,
+                true,
+                true,
+                true,
+                listOf(SimpleGrantedAuthority("ROLE_BUYER")),
+            )
 
-        val buyer = Buyer().apply {
-            id = 1L
-            email = "buyer@example.com"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "1234567890"
-            address = "Address"
-            dni = 12345678
-            active = true
-        }
+        val buyer =
+            Buyer().apply {
+                id = 1L
+                email = "buyer@example.com"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "1234567890"
+                address = "Address"
+                dni = 12345678
+                active = true
+            }
 
         `when`(authenticationManager.authenticate(any())).thenReturn(authentication)
         `when`(userDetailsService.loadUserByUsername("buyer@example.com")).thenReturn(userDetails)
@@ -106,7 +109,7 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest))
+                .content(objectMapper.writeValueAsString(loginRequest)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.token").value("fake-jwt-token"))
@@ -125,18 +128,19 @@ class AuthControllerTest {
     @DisplayName("Should return 400 when email is blank")
     fun shouldReturn400WhenEmailIsBlank() {
         // Given
-        val loginRequest = """
+        val loginRequest =
+            """
             {
                 "email": "",
                 "password": "password123"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(loginRequest)
+                .content(loginRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -147,26 +151,28 @@ class AuthControllerTest {
     @DisplayName("Should register new buyer successfully")
     fun shouldRegisterNewBuyerSuccessfully() {
         // Given
-        val registerRequest = BuyerCreateRequest(
-            email = "newbuyer@example.com",
-            password = "password123",
-            firstName = "Jane",
-            lastName = "Smith",
-            phone = "9876543210",
-            address = "New Address",
-            dni = 87654321
-        )
+        val registerRequest =
+            BuyerCreateRequest(
+                email = "newbuyer@example.com",
+                password = "password123",
+                firstName = "Jane",
+                lastName = "Smith",
+                phone = "9876543210",
+                address = "New Address",
+                dni = 87654321,
+            )
 
-        val savedBuyer = Buyer().apply {
-            id = 2L
-            email = "newbuyer@example.com"
-            firstName = "Jane"
-            lastName = "Smith"
-            phone = "9876543210"
-            address = "New Address"
-            dni = 87654321
-            active = true
-        }
+        val savedBuyer =
+            Buyer().apply {
+                id = 2L
+                email = "newbuyer@example.com"
+                firstName = "Jane"
+                lastName = "Smith"
+                phone = "9876543210"
+                address = "New Address"
+                dni = 87654321
+                active = true
+            }
 
         `when`(userRepository.existsByEmail("newbuyer@example.com")).thenReturn(false)
         `when`(passwordEncoder.encode("password123")).thenReturn("encodedPassword")
@@ -176,7 +182,7 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest))
+                .content(objectMapper.writeValueAsString(registerRequest)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(2))
@@ -193,15 +199,16 @@ class AuthControllerTest {
     @DisplayName("Should return 409 when email already exists")
     fun shouldReturn409WhenEmailExists() {
         // Given
-        val registerRequest = BuyerCreateRequest(
-            email = "existing@example.com",
-            password = "password123",
-            firstName = "Jane",
-            lastName = "Smith",
-            phone = "9876543210",
-            address = "Address",
-            dni = 87654321
-        )
+        val registerRequest =
+            BuyerCreateRequest(
+                email = "existing@example.com",
+                password = "password123",
+                firstName = "Jane",
+                lastName = "Smith",
+                phone = "9876543210",
+                address = "Address",
+                dni = 87654321,
+            )
 
         `when`(userRepository.existsByEmail("existing@example.com")).thenReturn(true)
 
@@ -209,7 +216,7 @@ class AuthControllerTest {
         mockMvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest))
+                .content(objectMapper.writeValueAsString(registerRequest)),
         )
             .andExpect(status().isConflict)
 
@@ -220,18 +227,19 @@ class AuthControllerTest {
     @DisplayName("Should return 400 when registration data is invalid")
     fun shouldReturn400WhenRegistrationDataInvalid() {
         // Given - Missing required fields
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "test@example.com",
                 "password": ""
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -243,16 +251,17 @@ class AuthControllerTest {
     @WithMockUser(username = "buyer@example.com", roles = ["BUYER"])
     fun shouldGetCurrentUserSuccessfully() {
         // Given
-        val buyer = Buyer().apply {
-            id = 1L
-            email = "buyer@example.com"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "1234567890"
-            address = "Address"
-            dni = 12345678
-            active = true
-        }
+        val buyer =
+            Buyer().apply {
+                id = 1L
+                email = "buyer@example.com"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "1234567890"
+                address = "Address"
+                dni = 12345678
+                active = true
+            }
 
         `when`(userRepository.findByEmail("buyer@example.com")).thenReturn(buyer)
 
@@ -265,5 +274,4 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.lastName").value("Doe"))
             .andExpect(jsonPath("$.role").value("BUYER"))
     }
-
 }

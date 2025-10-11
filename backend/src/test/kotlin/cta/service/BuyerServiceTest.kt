@@ -2,25 +2,27 @@ package cta.service
 
 import cta.model.Buyer
 import cta.repository.BuyerRepository
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.never
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.any
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 @DisplayName("BuyerService Tests")
 class BuyerServiceTest {
-
     @Mock
     private lateinit var buyerRepository: BuyerRepository
 
@@ -31,17 +33,18 @@ class BuyerServiceTest {
 
     @BeforeEach
     fun setup() {
-        validBuyer = Buyer().apply {
-            id = 1L
-            email = "buyer@example.com"
-            password = "password123"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "+54 11 1234-5678"
-            address = "Av. Corrientes 1234"
-            dni = 12345678
-            active = true
-        }
+        validBuyer =
+            Buyer().apply {
+                id = 1L
+                email = "buyer@example.com"
+                password = "password123"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "+54 11 1234-5678"
+                address = "Av. Corrientes 1234"
+                dni = 12345678
+                active = true
+            }
     }
 
     // ========== findById Tests ==========
@@ -70,9 +73,10 @@ class BuyerServiceTest {
         `when`(buyerRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception = assertThrows(NoSuchElementException::class.java) {
-            buyerService.findById(999L)
-        }
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                buyerService.findById(999L)
+            }
         assertEquals("Buyer with ID 999 not found", exception.message)
         verify(buyerRepository).findById(999L)
     }
@@ -83,16 +87,17 @@ class BuyerServiceTest {
     @DisplayName("Should create buyer successfully")
     fun shouldCreateBuyer() {
         // Given
-        val newBuyer = Buyer().apply {
-            email = "newbuyer@example.com"
-            password = "password123"
-            firstName = "Jane"
-            lastName = "Smith"
-            phone = "+54 11 9999-9999"
-            address = "Calle Florida 500"
-            dni = 87654321
-            active = true
-        }
+        val newBuyer =
+            Buyer().apply {
+                email = "newbuyer@example.com"
+                password = "password123"
+                firstName = "Jane"
+                lastName = "Smith"
+                phone = "+54 11 9999-9999"
+                address = "Calle Florida 500"
+                dni = 87654321
+                active = true
+            }
         val savedBuyer = newBuyer.apply { id = 2L }
 
         `when`(buyerRepository.save(any(Buyer::class.java))).thenReturn(savedBuyer)
@@ -112,15 +117,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when creating buyer with blank address")
     fun shouldThrowExceptionWhenAddressIsBlank() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = ""
-            dni = 12345678
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = ""
+                dni = 12345678
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("Address cannot be empty", exception.message)
         verify(buyerRepository, never()).save(any(Buyer::class.java))
     }
@@ -129,15 +136,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when creating buyer with whitespace-only address")
     fun shouldThrowExceptionWhenAddressIsWhitespace() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = "   "
-            dni = 12345678
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = "   "
+                dni = 12345678
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("Address cannot be empty", exception.message)
     }
 
@@ -145,15 +154,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when creating buyer with zero DNI")
     fun shouldThrowExceptionWhenDniIsZero() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = "Valid Address"
-            dni = 0
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = 0
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("DNI must be a positive number", exception.message)
     }
 
@@ -161,15 +172,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when creating buyer with negative DNI")
     fun shouldThrowExceptionWhenDniIsNegative() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = "Valid Address"
-            dni = -12345678
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = -12345678
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("DNI must be a positive number", exception.message)
     }
 
@@ -177,15 +190,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when DNI has less than 7 digits")
     fun shouldThrowExceptionWhenDniHasLessThan7Digits() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = "Valid Address"
-            dni = 123456  // 6 digits
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = 123456 // 6 digits
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("DNI must be 7 or 8 digits", exception.message)
     }
 
@@ -193,15 +208,17 @@ class BuyerServiceTest {
     @DisplayName("Should throw exception when DNI has more than 8 digits")
     fun shouldThrowExceptionWhenDniHasMoreThan8Digits() {
         // Given
-        val invalidBuyer = Buyer().apply {
-            address = "Valid Address"
-            dni = 123456789  // 9 digits
-        }
+        val invalidBuyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = 123456789 // 9 digits
+            }
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            buyerService.createBuyer(invalidBuyer)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                buyerService.createBuyer(invalidBuyer)
+            }
         assertEquals("DNI must be 7 or 8 digits", exception.message)
     }
 
@@ -209,10 +226,11 @@ class BuyerServiceTest {
     @DisplayName("Should accept DNI with 7 digits")
     fun shouldAcceptDniWith7Digits() {
         // Given
-        val buyer = Buyer().apply {
-            address = "Valid Address"
-            dni = 1234567  // 7 digits - valid
-        }
+        val buyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = 1234567 // 7 digits - valid
+            }
         `when`(buyerRepository.save(any(Buyer::class.java))).thenReturn(buyer)
 
         // When
@@ -227,10 +245,11 @@ class BuyerServiceTest {
     @DisplayName("Should accept DNI with 8 digits")
     fun shouldAcceptDniWith8Digits() {
         // Given
-        val buyer = Buyer().apply {
-            address = "Valid Address"
-            dni = 12345678  // 8 digits - valid
-        }
+        val buyer =
+            Buyer().apply {
+                address = "Valid Address"
+                dni = 12345678 // 8 digits - valid
+            }
         `when`(buyerRepository.save(any(Buyer::class.java))).thenReturn(buyer)
 
         // When
@@ -250,13 +269,14 @@ class BuyerServiceTest {
         `when`(buyerRepository.findById(1L)).thenReturn(Optional.of(validBuyer))
         `when`(buyerRepository.save(any(Buyer::class.java))).thenReturn(validBuyer)
 
-        val updates = mapOf(
-            "dni" to 87654321,
-            "address" to "New Address 123",
-            "email" to "newemail@example.com",
-            "phone" to "+54 11 8888-8888",
-            "active" to false
-        )
+        val updates =
+            mapOf(
+                "dni" to 87654321,
+                "address" to "New Address 123",
+                "email" to "newemail@example.com",
+                "phone" to "+54 11 8888-8888",
+                "active" to false,
+            )
 
         // When
         val result = buyerService.updateBuyer(1L, updates)
@@ -280,9 +300,10 @@ class BuyerServiceTest {
         val originalEmail = validBuyer.email
         val originalPhone = validBuyer.phone
 
-        val updates = mapOf(
-            "address" to "Updated Address Only"
-        )
+        val updates =
+            mapOf(
+                "address" to "Updated Address Only",
+            )
 
         // When
         val result = buyerService.updateBuyer(1L, updates)
@@ -302,9 +323,10 @@ class BuyerServiceTest {
         val updates = mapOf("address" to "New Address")
 
         // When & Then
-        val exception = assertThrows(Exception::class.java) {
-            buyerService.updateBuyer(999L, updates)
-        }
+        val exception =
+            assertThrows(Exception::class.java) {
+                buyerService.updateBuyer(999L, updates)
+            }
         assertEquals("Favorite car with ID 999 not found", exception.message)
         verify(buyerRepository, never()).save(any(Buyer::class.java))
     }
@@ -315,9 +337,10 @@ class BuyerServiceTest {
         // Given
         `when`(buyerRepository.findById(1L)).thenReturn(Optional.of(validBuyer))
 
-        val updates = mapOf(
-            "dni" to 123  // Invalid - less than 7 digits
-        )
+        val updates =
+            mapOf(
+                "dni" to 123,
+            )
 
         // When & Then
         assertThrows(IllegalArgumentException::class.java) {
@@ -366,9 +389,10 @@ class BuyerServiceTest {
         `when`(buyerRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception = assertThrows(Exception::class.java) {
-            buyerService.deleteBuyer(999L)
-        }
+        val exception =
+            assertThrows(Exception::class.java) {
+                buyerService.deleteBuyer(999L)
+            }
         assertEquals("Favorite car with ID 999 not found", exception.message)
         verify(buyerRepository, never()).delete(any(Buyer::class.java))
     }

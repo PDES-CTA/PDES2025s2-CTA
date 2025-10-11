@@ -3,11 +3,10 @@ package cta.config
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.Date
 import javax.crypto.SecretKey
 
 @Component
@@ -27,7 +26,10 @@ class JwtTokenProvider {
         return createToken(claims, userDetails.username)
     }
 
-    private fun createToken(claims: Map<String, Any>, subject: String): String {
+    private fun createToken(
+        claims: Map<String, Any>,
+        subject: String,
+    ): String {
         val now = Date()
         val expiryDate = Date(now.time + expiration)
 
@@ -48,7 +50,10 @@ class JwtTokenProvider {
         return extractClaim(token, Claims::getExpiration)
     }
 
-    fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T {
+    fun <T> extractClaim(
+        token: String,
+        claimsResolver: (Claims) -> T,
+    ): T {
         val claims = extractAllClaims(token)
         return claimsResolver(claims)
     }
@@ -65,7 +70,10 @@ class JwtTokenProvider {
         return extractExpiration(token).before(Date())
     }
 
-    fun validateToken(token: String, userDetails: UserDetails): Boolean {
+    fun validateToken(
+        token: String,
+        userDetails: UserDetails,
+    ): Boolean {
         val username = extractUsername(token)
         return (username == userDetails.username && !isTokenExpired(token))
     }

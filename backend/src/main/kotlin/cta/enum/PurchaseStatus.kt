@@ -4,5 +4,5 @@ enum class PurchaseStatus {
     PENDING,
     CONFIRMED,
     DELIVERED,
-    CANCELLED
+    CANCELLED,
 }

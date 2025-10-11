@@ -3,18 +3,23 @@ package cta.service
 import cta.model.Dealership
 import cta.repository.DealershipRepository
 import cta.web.dto.DealershipCreateRequest
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.never
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.any
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDateTime
 import java.util.Optional
@@ -22,7 +27,6 @@ import java.util.Optional
 @ExtendWith(MockitoExtension::class)
 @DisplayName("DealershipService Tests")
 class DealershipServiceTest {
-
     @Mock
     private lateinit var dealershipRepository: DealershipRepository
 
@@ -33,21 +37,22 @@ class DealershipServiceTest {
 
     @BeforeEach
     fun setup() {
-        validDealership = Dealership().apply {
-            id = 1L
-            businessName = "AutoMax S.A."
-            cuit = "20123456789"
-            email = "contact@automax.com"
-            phone = "1234567890"
-            address = "Av. Corrientes 1234"
-            city = "Buenos Aires"
-            province = "Buenos Aires"
-            description = "Premium car dealership"
-            firstName = "Juan"
-            lastName = "Pérez"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        validDealership =
+            Dealership().apply {
+                id = 1L
+                businessName = "AutoMax S.A."
+                cuit = "20123456789"
+                email = "contact@automax.com"
+                phone = "1234567890"
+                address = "Av. Corrientes 1234"
+                city = "Buenos Aires"
+                province = "Buenos Aires"
+                description = "Premium car dealership"
+                firstName = "Juan"
+                lastName = "Pérez"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
     }
 
     // ========== findById Tests ==========
@@ -76,9 +81,10 @@ class DealershipServiceTest {
         `when`(dealershipRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception = assertThrows(NoSuchElementException::class.java) {
-            dealershipService.findById(999L)
-        }
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                dealershipService.findById(999L)
+            }
         assertEquals("Dealership with ID 999 not found", exception.message)
         verify(dealershipRepository).findById(999L)
     }
@@ -89,17 +95,18 @@ class DealershipServiceTest {
     @DisplayName("Should find all dealerships")
     fun shouldFindAllDealerships() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findAll()).thenReturn(dealerships)
 
@@ -131,17 +138,18 @@ class DealershipServiceTest {
     @DisplayName("Should find only active dealerships")
     fun shouldFindOnlyActiveDealerships() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val activeDealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(activeDealerships)
 
@@ -220,9 +228,10 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when email is blank")
     fun shouldThrowExceptionWhenEmailIsBlank() {
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.findByEmail("")
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.findByEmail("")
+            }
         assertEquals("Email cannot be empty", exception.message)
         verify(dealershipRepository, never()).findByEmail("")
     }
@@ -233,17 +242,18 @@ class DealershipServiceTest {
     @DisplayName("Should search dealerships by business name")
     fun shouldSearchDealershipsByBusinessName() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(dealerships)
 
@@ -261,19 +271,20 @@ class DealershipServiceTest {
     @DisplayName("Should search dealerships by city")
     fun shouldSearchDealershipsByCity() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            city = "Rosario"
-            province = "Santa Fe"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                city = "Rosario"
+                province = "Santa Fe"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(dealerships)
 
@@ -291,19 +302,20 @@ class DealershipServiceTest {
     @DisplayName("Should search dealerships by province")
     fun shouldSearchDealershipsByProvince() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            city = "Rosario"
-            province = "Santa Fe"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                city = "Rosario"
+                province = "Santa Fe"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(dealerships)
 
@@ -321,17 +333,18 @@ class DealershipServiceTest {
     @DisplayName("Should search dealerships by CUIT")
     fun shouldSearchDealershipsByCuit() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(dealerships)
 
@@ -349,17 +362,18 @@ class DealershipServiceTest {
     @DisplayName("Should return all active dealerships when no filters applied")
     fun shouldReturnAllDealershipsWhenNoFilters() {
         // Given
-        val dealership2 = Dealership().apply {
-            id = 2L
-            businessName = "CarWorld S.R.L."
-            cuit = "20987654321"
-            email = "info@carworld.com"
-            phone = "9876543210"
-            firstName = "María"
-            lastName = "González"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val dealership2 =
+            Dealership().apply {
+                id = 2L
+                businessName = "CarWorld S.R.L."
+                cuit = "20987654321"
+                email = "info@carworld.com"
+                phone = "9876543210"
+                firstName = "María"
+                lastName = "González"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
         val dealerships = listOf(validDealership, dealership2)
         `when`(dealershipRepository.findByActiveTrue()).thenReturn(dealerships)
 
@@ -392,35 +406,37 @@ class DealershipServiceTest {
     @DisplayName("Should create dealership successfully")
     fun shouldCreateDealership() {
         // Given
-        val request = DealershipCreateRequest(
-            businessName = "NewAuto S.A.",
-            cuit = "20111222333",
-            email = "contact@newauto.com",
-            password = "example",
-            phone = "1122334455",
-            address = "Calle Falsa 123",
-            city = "Córdoba",
-            province = "Córdoba",
-            description = "New dealership",
-            firstName = "Carlos",
-            lastName = "López"
-        )
+        val request =
+            DealershipCreateRequest(
+                businessName = "NewAuto S.A.",
+                cuit = "20111222333",
+                email = "contact@newauto.com",
+                password = "example",
+                phone = "1122334455",
+                address = "Calle Falsa 123",
+                city = "Córdoba",
+                province = "Córdoba",
+                description = "New dealership",
+                firstName = "Carlos",
+                lastName = "López",
+            )
 
-        val savedDealership = Dealership().apply {
-            id = 3L
-            businessName = "NewAuto S.A."
-            cuit = "20111222333"
-            email = "contact@newauto.com"
-            phone = "1122334455"
-            address = "Calle Falsa 123"
-            city = "Córdoba"
-            province = "Córdoba"
-            description = "New dealership"
-            firstName = "Carlos"
-            lastName = "López"
-            active = true
-            registrationDate = LocalDateTime.now()
-        }
+        val savedDealership =
+            Dealership().apply {
+                id = 3L
+                businessName = "NewAuto S.A."
+                cuit = "20111222333"
+                email = "contact@newauto.com"
+                phone = "1122334455"
+                address = "Calle Falsa 123"
+                city = "Córdoba"
+                province = "Córdoba"
+                description = "New dealership"
+                firstName = "Carlos"
+                lastName = "López"
+                active = true
+                registrationDate = LocalDateTime.now()
+            }
 
         `when`(dealershipRepository.findByCuit("20111222333")).thenReturn(null)
         `when`(dealershipRepository.findByEmail("contact@newauto.com")).thenReturn(null)
@@ -440,22 +456,24 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when creating dealership with existing CUIT")
     fun shouldThrowExceptionWhenCuitAlreadyExists() {
         // Given
-        val request = DealershipCreateRequest(
-            businessName = "NewAuto S.A.",
-            cuit = "20123456789",
-            email = "contact@newauto.com",
-            password = "example",
-            phone = "1122334455",
-            firstName = "Carlos",
-            lastName = "López"
-        )
+        val request =
+            DealershipCreateRequest(
+                businessName = "NewAuto S.A.",
+                cuit = "20123456789",
+                email = "contact@newauto.com",
+                password = "example",
+                phone = "1122334455",
+                firstName = "Carlos",
+                lastName = "López",
+            )
 
         `when`(dealershipRepository.findByCuit("20123456789")).thenReturn(validDealership)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.createDealership(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.createDealership(request)
+            }
         assertEquals("Dealership with CUIT 20123456789 already exists", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -464,23 +482,25 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when creating dealership with existing email")
     fun shouldThrowExceptionWhenEmailAlreadyExists() {
         // Given
-        val request = DealershipCreateRequest(
-            businessName = "NewAuto S.A.",
-            cuit = "20111222333",
-            email = "contact@automax.com",
-            password = "example",
-            phone = "1122334455",
-            firstName = "Carlos",
-            lastName = "López"
-        )
+        val request =
+            DealershipCreateRequest(
+                businessName = "NewAuto S.A.",
+                cuit = "20111222333",
+                email = "contact@automax.com",
+                password = "example",
+                phone = "1122334455",
+                firstName = "Carlos",
+                lastName = "López",
+            )
 
         `when`(dealershipRepository.findByCuit("20111222333")).thenReturn(null)
         `when`(dealershipRepository.findByEmail("contact@automax.com")).thenReturn(validDealership)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.createDealership(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.createDealership(request)
+            }
         assertEquals("Dealership with email contact@automax.com already exists", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -494,16 +514,17 @@ class DealershipServiceTest {
         `when`(dealershipRepository.findById(1L)).thenReturn(Optional.of(validDealership))
         `when`(dealershipRepository.save(any(Dealership::class.java))).thenReturn(validDealership)
 
-        val updates = mapOf(
-            "businessName" to "AutoMax Premium S.A.",
-            "email" to "premium@automax.com",
-            "phone" to "1199887766",
-            "address" to "Av. Libertador 5000",
-            "city" to "CABA",
-            "province" to "Buenos Aires",
-            "description" to "Premium dealership updated",
-            "active" to "false"
-        )
+        val updates =
+            mapOf(
+                "businessName" to "AutoMax Premium S.A.",
+                "email" to "premium@automax.com",
+                "phone" to "1199887766",
+                "address" to "Av. Libertador 5000",
+                "city" to "CABA",
+                "province" to "Buenos Aires",
+                "description" to "Premium dealership updated",
+                "active" to "false",
+            )
 
         // When
         val result = dealershipService.updateDealership(1L, updates)
@@ -550,9 +571,10 @@ class DealershipServiceTest {
         val updates = mapOf("phone" to "1234567890")
 
         // When & Then
-        val exception = assertThrows(NoSuchElementException::class.java) {
-            dealershipService.updateDealership(999L, updates)
-        }
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                dealershipService.updateDealership(999L, updates)
+            }
         assertEquals("Dealership with ID 999 not found", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -561,9 +583,10 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when update data is empty")
     fun shouldThrowExceptionWhenUpdateDataIsEmpty() {
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.updateDealership(1L, emptyMap())
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.updateDealership(1L, emptyMap())
+            }
         assertEquals("Update data cannot be empty", exception.message)
     }
 
@@ -571,9 +594,10 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when dealership ID is not positive")
     fun shouldThrowExceptionWhenIdIsNotPositive() {
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.updateDealership(0L, mapOf("phone" to "1234567890"))
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.updateDealership(0L, mapOf("phone" to "1234567890"))
+            }
         assertEquals("Dealership ID must be positive", exception.message)
     }
 
@@ -586,9 +610,10 @@ class DealershipServiceTest {
         val updates = mapOf("businessName" to "")
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.updateDealership(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.updateDealership(1L, updates)
+            }
         assertEquals("Business name cannot be empty", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -602,9 +627,10 @@ class DealershipServiceTest {
         val updates = mapOf("email" to "")
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.updateDealership(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.updateDealership(1L, updates)
+            }
         assertEquals("Email cannot be empty", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -618,9 +644,10 @@ class DealershipServiceTest {
         val updates = mapOf("active" to "invalid")
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.updateDealership(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.updateDealership(1L, updates)
+            }
         assertEquals("Invalid boolean value for active field", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -650,9 +677,10 @@ class DealershipServiceTest {
         `when`(dealershipRepository.findById(1L)).thenReturn(Optional.of(validDealership))
 
         // When & Then
-        val exception = assertThrows(IllegalStateException::class.java) {
-            dealershipService.deactivate(1L)
-        }
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                dealershipService.deactivate(1L)
+            }
         assertEquals("Dealership is already deactivated", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -682,9 +710,10 @@ class DealershipServiceTest {
         `when`(dealershipRepository.findById(1L)).thenReturn(Optional.of(validDealership))
 
         // When & Then
-        val exception = assertThrows(IllegalStateException::class.java) {
-            dealershipService.activate(1L)
-        }
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                dealershipService.activate(1L)
+            }
         assertEquals("Dealership is already active", exception.message)
         verify(dealershipRepository, never()).save(any(Dealership::class.java))
     }
@@ -713,9 +742,10 @@ class DealershipServiceTest {
         `when`(dealershipRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception = assertThrows(NoSuchElementException::class.java) {
-            dealershipService.deleteDealership(999L)
-        }
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                dealershipService.deleteDealership(999L)
+            }
         assertEquals("Dealership with ID 999 not found", exception.message)
         verify(dealershipRepository, never()).delete(any(Dealership::class.java))
     }
@@ -724,9 +754,10 @@ class DealershipServiceTest {
     @DisplayName("Should throw exception when deleting with invalid ID")
     fun shouldThrowExceptionWhenDeletingWithInvalidId() {
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            dealershipService.deleteDealership(0L)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                dealershipService.deleteDealership(0L)
+            }
         assertEquals("Dealership ID must be positive", exception.message)
         verify(dealershipRepository, never()).findById(0L)
     }

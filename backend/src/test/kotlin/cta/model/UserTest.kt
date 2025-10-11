@@ -1,28 +1,31 @@
 package cta.model
 
 import cta.enum.UserRole
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 @DisplayName("User (via Buyer) Tests")
 class UserTest {
-
     private lateinit var user: Buyer
 
     @BeforeEach
     fun setup() {
-        user = Buyer().apply {
-            email = "user@example.com"
-            password = "password123"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "+54 11 1234-5678"
-            address = "Av. Corrientes 1234"
-            dni = 12345678
-            active = true
-        }
+        user =
+            Buyer().apply {
+                email = "user@example.com"
+                password = "password123"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "+54 11 1234-5678"
+                address = "Av. Corrientes 1234"
+                dni = 12345678
+                active = true
+            }
     }
 
     @Test
@@ -62,11 +65,12 @@ class UserTest {
     @Test
     @DisplayName("Should update profile with provided data")
     fun shouldUpdateProfile() {
-        val updates = mapOf(
-            "firstName" to "Jane",
-            "lastName" to "Smith",
-            "phone" to "+54 11 9999-9999"
-        )
+        val updates =
+            mapOf(
+                "firstName" to "Jane",
+                "lastName" to "Smith",
+                "phone" to "+54 11 9999-9999",
+            )
 
         user.updateProfile(updates)
 
@@ -81,9 +85,10 @@ class UserTest {
         val originalFirstName = user.firstName
         val originalPhone = user.phone
 
-        val updates = mapOf(
-            "lastName" to "UpdatedLastName"
-        )
+        val updates =
+            mapOf(
+                "lastName" to "UpdatedLastName",
+            )
 
         user.updateProfile(updates)
 
@@ -203,11 +208,12 @@ class UserTest {
     @Test
     @DisplayName("Should update profile with same values")
     fun shouldUpdateProfileWithSameValues() {
-        val updates = mapOf(
-            "firstName" to "John",
-            "lastName" to "Doe",
-            "phone" to "+54 11 1234-5678"
-        )
+        val updates =
+            mapOf(
+                "firstName" to "John",
+                "lastName" to "Doe",
+                "phone" to "+54 11 1234-5678",
+            )
 
         user.updateProfile(updates)
 
