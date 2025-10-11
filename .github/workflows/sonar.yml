@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Build and test backend
+      - name: Build and test backend with coverage
         working-directory: ./backend
         run: ./gradlew build jacocoTestReport --info
 
@@ -59,8 +59,7 @@ jobs:
 
       - name: Run frontend tests with coverage
         working-directory: ./frontend
-        run: npm test -- --run --coverage
-        continue-on-error: true
+        run: npm run test:coverage
 
       # ==== SONARCLOUD ANALYSIS ====
       - name: SonarCloud Scan
