@@ -2,16 +2,15 @@ package cta.service
 
 import cta.model.Buyer
 import cta.repository.BuyerRepository
-import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BuyerService(
-    private val buyerRepository: BuyerRepository
+    private val buyerRepository: BuyerRepository,
 ) {
-
-    fun findById(id : Long) : Buyer {
+    fun findById(id: Long): Buyer {
         return buyerRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("Buyer with ID $id not found")
     }
@@ -23,9 +22,13 @@ class BuyerService(
     }
 
     @Transactional
-    fun updateBuyer(id: Long, updateData: Map<String, Any>): Buyer {
-        val buyer = buyerRepository.findByIdOrNull(id)
-            ?: throw Exception("Favorite car with ID $id not found")
+    fun updateBuyer(
+        id: Long,
+        updateData: Map<String, Any>,
+    ): Buyer {
+        val buyer =
+            buyerRepository.findByIdOrNull(id)
+                ?: throw Exception("Favorite car with ID $id not found")
 
         updateData["dni"]?.let { buyer.dni = it.toString().toInt() }
         updateData["address"]?.let { buyer.address = (it.toString()) }
@@ -39,8 +42,9 @@ class BuyerService(
 
     @Transactional
     fun deleteBuyer(id: Long) {
-        val favoriteCar = buyerRepository.findByIdOrNull(id)
-            ?: throw Exception("Favorite car with ID $id not found")
+        val favoriteCar =
+            buyerRepository.findByIdOrNull(id)
+                ?: throw Exception("Favorite car with ID $id not found")
         buyerRepository.delete(favoriteCar)
     }
 

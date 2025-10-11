@@ -23,12 +23,13 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @Tag(name = "Buyer", description = "Buyer management operations")
 class BuyerController(
-    private val buyerService: BuyerService
+    private val buyerService: BuyerService,
 ) {
-
     @PostMapping
     @Operation(summary = "Create a new buyer")
-    fun createBuyer(@Valid @RequestBody request: BuyerCreateRequest): ResponseEntity<BuyerResponse?> {
+    fun createBuyer(
+        @Valid @RequestBody request: BuyerCreateRequest,
+    ): ResponseEntity<BuyerResponse?> {
         val savedBuyer = buyerService.createBuyer(request.toEntity())
         return ResponseEntity.status(HttpStatus.CREATED).body(BuyerResponse.fromEntity(savedBuyer))
     }
@@ -37,7 +38,7 @@ class BuyerController(
     @Operation(summary = "Update an existing Buyer")
     fun updateBuyer(
         @PathVariable id: Long,
-        @Valid @RequestBody request: BuyerUpdateRequest
+        @Valid @RequestBody request: BuyerUpdateRequest,
     ): ResponseEntity<BuyerResponse> {
         val updatedPurchase = buyerService.updateBuyer(id, request.toMap())
         return ResponseEntity.ok(BuyerResponse.fromEntity(updatedPurchase))
@@ -45,9 +46,10 @@ class BuyerController(
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an existing Buyer")
-    fun deleteBuyer(@PathVariable id: Long): ResponseEntity<Unit> {
+    fun deleteBuyer(
+        @PathVariable id: Long,
+    ): ResponseEntity<Unit> {
         buyerService.deleteBuyer(id)
         return ResponseEntity.noContent().build()
     }
-
 }

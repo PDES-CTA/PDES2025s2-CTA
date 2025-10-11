@@ -12,12 +12,17 @@ plugins {
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.jpa") version "1.9.22"
     jacoco
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 group = "CTA"
 version = "0.0.1-SNAPSHOT"
 
 java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
@@ -48,7 +53,22 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
+    testImplementation("com.h2database:h2")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "PDES-CTA_PDES2025s2-CTA")
+        property("sonar.organization", "pdes-cta")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
 
 tasks.test {
@@ -59,7 +79,9 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
+        xml.outputLocation.set(file("$projectDir/coverage/jacoco.xml"))
         html.required.set(true)
+        html.outputLocation.set(file("$projectDir/coverage/html"))
     }
 }
 

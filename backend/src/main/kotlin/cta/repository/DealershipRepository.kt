@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface DealershipRepository : JpaRepository<Dealership, Long> {
-
     fun findByActiveTrue(): List<Dealership>
 
     fun findByCuit(cuit: String): Dealership?
@@ -24,10 +23,12 @@ interface DealershipRepository : JpaRepository<Dealership, Long> {
 
     fun findByProvinceAndActiveTrue(province: String): List<Dealership>
 
-    @Query("""
+    @Query(
+        """
         SELECT d FROM Dealership d 
         WHERE d.active = true 
         ORDER BY d.registrationDate DESC
-    """)
+    """,
+    )
     fun findActiveOrderedByRegistrationDate(): List<Dealership>
 }

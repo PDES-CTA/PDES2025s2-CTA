@@ -12,16 +12,14 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.NoSuchElementException
 
 @Service
 class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
     private val carRepository: CarRepository,
-    //private val buyerRepository: BuyerRepository,
-    private val dealershipRepository: DealershipRepository
+    // private val buyerRepository: BuyerRepository,
+    private val dealershipRepository: DealershipRepository,
 ) {
-
     fun findById(id: Long): Purchase {
         return purchaseRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("Purchase with id $id not found")
@@ -51,7 +49,10 @@ class PurchaseService(
     }
 
     @Transactional
-    fun updatePurchase(id: Long, updateData: Map<String, Any>): Purchase {
+    fun updatePurchase(
+        id: Long,
+        updateData: Map<String, Any>,
+    ): Purchase {
         val purchase = findById(id)
 
         updateData["finalPrice"]?.let { purchase.finalPrice = BigDecimal(it.toString()) }
@@ -119,12 +120,14 @@ class PurchaseService(
     }
 
     private fun validateAndTransformPurchaseCreateRequest(request: PurchaseCreateRequest): Purchase {
-        val car = carRepository.findByIdOrNull(request.carId)
-            ?: throw NoSuchElementException("Car with ID ${request.carId} not found")
-            //val buyer = buyerRepository.findById(request.buyerId)
-    //    .orElseThrow { NoSuchElementException("Buyer with ID ${request.buyerId} not found") }
-        val dealership = dealershipRepository.findByIdOrNull(request.dealershipId)
-            ?: throw NoSuchElementException("Dealership with ID ${request.dealershipId} not found")
+        val car =
+            carRepository.findByIdOrNull(request.carId)
+                ?: throw NoSuchElementException("Car with ID ${request.carId} not found")
+        // val buyer = buyerRepository.findById(request.buyerId)
+        //    .orElseThrow { NoSuchElementException("Buyer with ID ${request.buyerId} not found") }
+        val dealership =
+            dealershipRepository.findByIdOrNull(request.dealershipId)
+                ?: throw NoSuchElementException("Dealership with ID ${request.dealershipId} not found")
 
         require(car.available) { "Car ${car.id} is not available for purchase" }
 
@@ -132,28 +135,29 @@ class PurchaseService(
         //     "Car ${car.id} doesn't belong to dealership ${request.dealershipId}"
         // }
 
-        //require(buyerRepository.findById(request.buyerId)) {
+        // require(buyerRepository.findById(request.buyerId)) {
         //    "Buyer with ID ${request.buyerId} not found"
-        //}
+        // }
 
-        //require(dealershipRepository.existsById(request.dealershipId)) {
+        // require(dealershipRepository.existsById(request.dealershipId)) {
         //    "Dealership with ID ${request.dealershipId} not found"
-        //}
+        // }
 
         require(car.dealershipId == request.dealershipId) {
             "Car ${car.id} doesn't belong to dealership ${request.dealershipId}"
         }
 
-        val purchase = Purchase().apply {
-            this.buyerId = request.buyerId
-            this.car = car
-            this.dealership = dealership
-            this.finalPrice = request.finalPrice
-            this.paymentMethod = request.paymentMethod
-            this.observations = request.observations
-            this.purchaseDate = request.purchaseDate
-            this.purchaseStatus = request.purchaseStatus
-        }
+        val purchase =
+            Purchase().apply {
+                this.buyerId = request.buyerId
+                this.car = car
+                this.dealership = dealership
+                this.finalPrice = request.finalPrice
+                this.paymentMethod = request.paymentMethod
+                this.observations = request.observations
+                this.purchaseDate = request.purchaseDate
+                this.purchaseStatus = request.purchaseStatus
+            }
         return purchase
     }
 }

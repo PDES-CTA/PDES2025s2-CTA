@@ -5,5 +5,5 @@ enum class FuelType {
     DIESEL,
     HYBRID,
     ELECTRIC,
-    GNC
+    GNC,
 }

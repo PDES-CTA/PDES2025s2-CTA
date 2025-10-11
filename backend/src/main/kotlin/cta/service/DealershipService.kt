@@ -6,13 +6,11 @@ import cta.web.dto.DealershipCreateRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.NoSuchElementException
 
 @Service
 class DealershipService(
-    private val dealershipRepository: DealershipRepository
+    private val dealershipRepository: DealershipRepository,
 ) {
-
     fun findById(id: Long): Dealership {
         return try {
             dealershipRepository.findByIdOrNull(id)
@@ -69,30 +67,34 @@ class DealershipService(
 
             filters.businessName?.let { name ->
                 require(name.isNotBlank()) { "Business name filter cannot be empty" }
-                dealerships = dealerships.filter {
-                    it.businessName.contains(name, ignoreCase = true)
-                }
+                dealerships =
+                    dealerships.filter {
+                        it.businessName.contains(name, ignoreCase = true)
+                    }
             }
 
             filters.city?.let { city ->
                 require(city.isNotBlank()) { "City filter cannot be empty" }
-                dealerships = dealerships.filter {
-                    it.city?.equals(city, ignoreCase = true) == true
-                }
+                dealerships =
+                    dealerships.filter {
+                        it.city?.equals(city, ignoreCase = true) == true
+                    }
             }
 
             filters.province?.let { province ->
                 require(province.isNotBlank()) { "Province filter cannot be empty" }
-                dealerships = dealerships.filter {
-                    it.province?.equals(province, ignoreCase = true) == true
-                }
+                dealerships =
+                    dealerships.filter {
+                        it.province?.equals(province, ignoreCase = true) == true
+                    }
             }
 
             filters.cuit?.let { cuit ->
                 require(cuit.isNotBlank()) { "CUIT filter cannot be empty" }
-                dealerships = dealerships.filter {
-                    it.cuit.contains(cuit, ignoreCase = true)
-                }
+                dealerships =
+                    dealerships.filter {
+                        it.cuit.contains(cuit, ignoreCase = true)
+                    }
             }
 
             dealerships.sortedByDescending { it.registrationDate }
@@ -118,7 +120,10 @@ class DealershipService(
     }
 
     @Transactional
-    fun updateDealership(id: Long, updateData: Map<String, Any>): Dealership {
+    fun updateDealership(
+        id: Long,
+        updateData: Map<String, Any>,
+    ): Dealership {
         return try {
             require(id > 0) { "Dealership ID must be positive" }
             require(updateData.isNotEmpty()) { "Update data cannot be empty" }
@@ -244,7 +249,7 @@ class DealershipService(
             require(dealership.firstName.isNotBlank()) { "First name cannot be empty" }
             require(dealership.lastName.isNotBlank()) { "Last name cannot be empty" }
 
-            dealership.phone?.let { phone ->
+            dealership.phone.let { phone ->
                 require(phone.isNotBlank()) { "Phone cannot be empty if provided" }
                 require(phone.length >= 10) { "Phone must be at least 10 characters" }
             }
@@ -257,7 +262,6 @@ class DealershipService(
             // CUIT format validation
             require(dealership.cuit.length == 11) { "CUIT must be exactly 11 characters" }
             require(dealership.cuit.all { it.isDigit() }) { "CUIT must contain only digits" }
-
         } catch (e: IllegalArgumentException) {
             throw e
         } catch (e: Exception) {
@@ -265,4 +269,3 @@ class DealershipService(
         }
     }
 }
-

@@ -14,19 +14,15 @@ data class PurchaseUpdateRequest(
     @field:DecimalMax(value = "99999999999999.99", inclusive = false, message = "Price exceeds maximum acceptable price")
     @field:Schema(description = "New price for the car sold")
     val finalPrice: BigDecimal? = null,
-
     @field:DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @field:Schema(description = "New purchase date")
     val purchaseDate: LocalDateTime? = null,
-
     @field:Schema(description = "New purchase status")
     val purchaseStatus: PurchaseStatus? = null,
-
     @field:Schema(description = "New payment method of the purchase")
     val paymentMethod: String? = null,
-
     @field:Schema(description = "New observations of the purchase")
-    val observations: String? = null
+    val observations: String? = null,
 ) {
     fun toMap(): Map<String, Any> {
         return listOf(
@@ -34,7 +30,7 @@ data class PurchaseUpdateRequest(
             "purchaseDate" to purchaseDate,
             "purchaseStatus" to purchaseStatus,
             "paymentMethod" to paymentMethod,
-            "observations" to observations
+            "observations" to observations,
         ).mapNotNull { (key, value) ->
             value?.let { key to it }
         }.toMap()

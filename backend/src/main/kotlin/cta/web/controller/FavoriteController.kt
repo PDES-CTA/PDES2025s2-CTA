@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 @Tag(name = "Favorite Car", description = "Favorite car management operations")
 class FavoriteController(
-    private val favoriteService: FavoriteService
+    private val favoriteService: FavoriteService,
 ) {
     @PostMapping
     @Operation(summary = "Save a favorite car marked by a buyer")
     fun saveFavorite(
-        @Valid @RequestBody request: FavoriteCarCreateRequest
+        @Valid @RequestBody request: FavoriteCarCreateRequest,
     ): ResponseEntity<FavoriteCarResponse> {
         val favorite = favoriteService.saveFavorite(request)
         return ResponseEntity.ok(FavoriteCarResponse.fromEntity(favorite))
@@ -36,7 +36,7 @@ class FavoriteController(
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an existing favorite car marked by a buyer")
     fun deleteFavorite(
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         favoriteService.deleteFavoriteCar(id)
         return ResponseEntity.noContent().build()
@@ -46,7 +46,7 @@ class FavoriteController(
     @Operation(summary = "Update a favorite car review")
     fun updateReview(
         @PathVariable id: Long,
-        @Valid @RequestBody request: FavoriteCarUpdateReviewRequest
+        @Valid @RequestBody request: FavoriteCarUpdateReviewRequest,
     ): ResponseEntity<FavoriteCarResponse?> {
         val updatedFavoriteCarReview = favoriteService.updateReview(id, request.toMap())
         return ResponseEntity.ok(FavoriteCarResponse.fromEntity(updatedFavoriteCarReview))
