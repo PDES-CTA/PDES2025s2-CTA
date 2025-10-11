@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -21,12 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
     "spring.main.allow-bean-definition-overriding=true"
 ])
 @AutoConfigureMockMvc(addFilters = false)
-@TestPropertySource(properties = [
-    "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.datasource.driver-class-name=org.h2.Driver",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration"
-])
+@ActiveProfiles("test")
 class DealershipControllerTest {
 
     @Autowired
