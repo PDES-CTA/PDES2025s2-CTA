@@ -128,7 +128,7 @@ jobs:
     - name: Run frontend tests
       if: matrix.component == 'frontend'
       working-directory: ./frontend
-      run: npm test -- --coverage --watchAll=false
+      run: npm test -- --run --coverage
       continue-on-error: ${{ github.base_ref == 'develop' }}
 
     - name: Upload test coverage
