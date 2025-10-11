@@ -32,9 +32,9 @@ class UserDetailsServiceImpl(
             usuario.email,
             usuario.password,
             usuario.active,
-            true, // accountNonExpired
-            true, // credentialsNonExpired
-            true, // accountNonLocked
+            true,
+            true,
+            true,
             authorities,
         )
     }
