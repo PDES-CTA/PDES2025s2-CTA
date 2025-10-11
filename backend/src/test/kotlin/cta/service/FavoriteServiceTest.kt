@@ -1,24 +1,24 @@
 package cta.service
 
+import cta.enum.FuelType
+import cta.enum.TransmissionType
 import cta.model.Buyer
 import cta.model.Car
 import cta.model.FavoriteCar
-import cta.enum.FuelType
-import cta.enum.TransmissionType
 import cta.repository.FavoriteCarRepository
 import cta.web.dto.FavoriteCarCreateRequest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.never
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.any
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -27,7 +27,6 @@ import java.util.Optional
 @ExtendWith(MockitoExtension::class)
 @DisplayName("FavoriteService Tests")
 class FavoriteServiceTest {
-
     @Mock
     private lateinit var favoriteCarRepository: FavoriteCarRepository
 
@@ -46,43 +45,46 @@ class FavoriteServiceTest {
 
     @BeforeEach
     fun setup() {
-        validCar = Car().apply {
-            id = 1L
-            brand = "Toyota"
-            model = "Corolla"
-            year = 2022
-            price = BigDecimal("25000.00")
-            mileage = 15000
-            color = "White"
-            description = "Excellent condition"
-            fuelType = FuelType.GASOLINE
-            transmission = TransmissionType.AUTOMATIC
-            available = true
-            dealershipId = 1L
-            publicationDate = LocalDateTime.now()
-        }
+        validCar =
+            Car().apply {
+                id = 1L
+                brand = "Toyota"
+                model = "Corolla"
+                year = 2022
+                price = BigDecimal("25000.00")
+                mileage = 15000
+                color = "White"
+                description = "Excellent condition"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                available = true
+                dealershipId = 1L
+                publicationDate = LocalDateTime.now()
+            }
 
-        validBuyer = Buyer().apply {
-            id = 1L
-            email = "buyer@example.com"
-            password = "password123"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "+54 11 1234-5678"
-            address = "Av. Corrientes 1234"
-            dni = 12345678
-            active = true
-        }
+        validBuyer =
+            Buyer().apply {
+                id = 1L
+                email = "buyer@example.com"
+                password = "password123"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "+54 11 1234-5678"
+                address = "Av. Corrientes 1234"
+                dni = 12345678
+                active = true
+            }
 
-        validFavoriteCar = FavoriteCar().apply {
-            id = 1L
-            buyer = validBuyer
-            car = validCar
-            rating = 8
-            comment = "Great car!"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = true
-        }
+        validFavoriteCar =
+            FavoriteCar().apply {
+                id = 1L
+                buyer = validBuyer
+                car = validCar
+                rating = 8
+                comment = "Great car!"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = true
+            }
     }
 
     // ========== saveFavorite Tests ==========
@@ -91,14 +93,15 @@ class FavoriteServiceTest {
     @DisplayName("Should save favorite car successfully")
     fun shouldSaveFavoriteCarSuccessfully() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = "Great car!",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = "Great car!",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -121,14 +124,15 @@ class FavoriteServiceTest {
     @DisplayName("Should throw exception when car is already in favorites")
     fun shouldThrowExceptionWhenCarAlreadyInFavorites() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = "Great car!",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = "Great car!",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
         val existingFavorites = listOf(validFavoriteCar)
 
@@ -137,9 +141,10 @@ class FavoriteServiceTest {
         `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(existingFavorites)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.saveFavorite(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(request)
+            }
         assertEquals("Car with id 1 is already in favorites", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -148,23 +153,25 @@ class FavoriteServiceTest {
     @DisplayName("Should throw exception when rating is less than 0")
     fun shouldThrowExceptionWhenRatingIsLessThanZero() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = -1,
-            comment = "Test",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = -1,
+                comment = "Test",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
         `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.saveFavorite(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(request)
+            }
         assertEquals("Rating must be greater or equal 0", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -173,23 +180,25 @@ class FavoriteServiceTest {
     @DisplayName("Should throw exception when rating is greater than 10")
     fun shouldThrowExceptionWhenRatingIsGreaterThan10() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 11,
-            comment = "Test",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 11,
+                comment = "Test",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
         `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.saveFavorite(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(request)
+            }
         assertEquals("Rating must be less or equal 10", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -198,24 +207,26 @@ class FavoriteServiceTest {
     @DisplayName("Should accept rating of 0")
     fun shouldAcceptRatingOfZero() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 0,
-            comment = "Not impressed",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 0,
+                comment = "Not impressed",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
-        val favoriteWithZeroRating = FavoriteCar().apply {
-            id = 4L
-            buyer = validBuyer
-            car = validCar
-            rating = 0
-            comment = "Not impressed"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = true
-        }
+        val favoriteWithZeroRating =
+            FavoriteCar().apply {
+                id = 4L
+                buyer = validBuyer
+                car = validCar
+                rating = 0
+                comment = "Not impressed"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = true
+            }
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -235,24 +246,26 @@ class FavoriteServiceTest {
     @DisplayName("Should accept rating of 10")
     fun shouldAcceptRatingOf10() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 10,
-            comment = "Perfect!",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 10,
+                comment = "Perfect!",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
-        val favoriteWithMaxRating = FavoriteCar().apply {
-            id = 5L
-            buyer = validBuyer
-            car = validCar
-            rating = 10
-            comment = "Perfect!"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = true
-        }
+        val favoriteWithMaxRating =
+            FavoriteCar().apply {
+                id = 5L
+                buyer = validBuyer
+                car = validCar
+                rating = 10
+                comment = "Perfect!"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = true
+            }
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -273,23 +286,25 @@ class FavoriteServiceTest {
     fun shouldThrowExceptionWhenCommentExceeds1000Characters() {
         // Given
         val longComment = "a".repeat(1001)
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = longComment,
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = longComment,
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
         `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.saveFavorite(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(request)
+            }
         assertEquals("Observations cannot exceed 1000 characters", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -299,24 +314,26 @@ class FavoriteServiceTest {
     fun shouldAcceptCommentWith1000Characters() {
         // Given
         val maxComment = "a".repeat(1000)
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = maxComment,
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = maxComment,
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = true,
+            )
 
-        val favoriteWithMaxComment = FavoriteCar().apply {
-            id = 6L
-            buyer = validBuyer
-            car = validCar
-            rating = 8
-            comment = maxComment
-            dateAdded = LocalDateTime.now()
-            priceNotifications = true
-        }
+        val favoriteWithMaxComment =
+            FavoriteCar().apply {
+                id = 6L
+                buyer = validBuyer
+                car = validCar
+                rating = 8
+                comment = maxComment
+                dateAdded = LocalDateTime.now()
+                priceNotifications = true
+            }
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -336,23 +353,25 @@ class FavoriteServiceTest {
     @DisplayName("Should throw exception when date is before year 2000")
     fun shouldThrowExceptionWhenDateIsBeforeYear2000() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = "Test",
-            dateAdded = LocalDateTime.of(1999, 12, 31, 23, 59),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = "Test",
+                dateAdded = LocalDateTime.of(1999, 12, 31, 23, 59),
+                priceNotifications = true,
+            )
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
         `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.saveFavorite(request)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(request)
+            }
         assertEquals("Car must be added as favorite after January 1, 2000", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -361,24 +380,26 @@ class FavoriteServiceTest {
     @DisplayName("Should accept date exactly on January 1, 2000 00:00:01")
     fun shouldAcceptDateOnJanuary1_2000() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 8,
-            comment = "Test",
-            dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1),
-            priceNotifications = true
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 8,
+                comment = "Test",
+                dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1),
+                priceNotifications = true,
+            )
 
-        val favoriteWithMinDate = FavoriteCar().apply {
-            id = 7L
-            buyer = validBuyer
-            car = validCar
-            rating = 8
-            comment = "Test"
-            dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1)
-            priceNotifications = true
-        }
+        val favoriteWithMinDate =
+            FavoriteCar().apply {
+                id = 7L
+                buyer = validBuyer
+                car = validCar
+                rating = 8
+                comment = "Test"
+                dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1)
+                priceNotifications = true
+            }
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -417,9 +438,10 @@ class FavoriteServiceTest {
         `when`(favoriteCarRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception = assertThrows(Exception::class.java) {
-            favoriteService.deleteFavoriteCar(999L)
-        }
+        val exception =
+            assertThrows(Exception::class.java) {
+                favoriteService.deleteFavoriteCar(999L)
+            }
         assertEquals("Favorite car with ID 999 not found", exception.message)
         verify(favoriteCarRepository, never()).delete(any(FavoriteCar::class.java))
     }
@@ -433,10 +455,11 @@ class FavoriteServiceTest {
         `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
         `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
 
-        val updates = mapOf(
-            "rating" to 9,
-            "comment" to "Updated comment - even better!"
-        )
+        val updates =
+            mapOf(
+                "rating" to 9,
+                "comment" to "Updated comment - even better!",
+            )
 
         // When
         val result = favoriteService.updateReview(1L, updates)
@@ -496,9 +519,10 @@ class FavoriteServiceTest {
         val updates = mapOf("rating" to 9)
 
         // When & Then
-        val exception = assertThrows(Exception::class.java) {
-            favoriteService.updateReview(999L, updates)
-        }
+        val exception =
+            assertThrows(Exception::class.java) {
+                favoriteService.updateReview(999L, updates)
+            }
         assertEquals("Favorite car with ID 999 not found", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -512,9 +536,10 @@ class FavoriteServiceTest {
         val updates = mapOf("rating" to -1)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.updateReview(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.updateReview(1L, updates)
+            }
         assertEquals("Rating must be greater or equal 0", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -528,9 +553,10 @@ class FavoriteServiceTest {
         val updates = mapOf("rating" to 11)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.updateReview(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.updateReview(1L, updates)
+            }
         assertEquals("Rating must be less or equal 10", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -545,9 +571,10 @@ class FavoriteServiceTest {
         val updates = mapOf("comment" to longComment)
 
         // When & Then
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            favoriteService.updateReview(1L, updates)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.updateReview(1L, updates)
+            }
         assertEquals("Observations cannot exceed 1000 characters", exception.message)
         verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
     }
@@ -594,49 +621,53 @@ class FavoriteServiceTest {
     @DisplayName("Should allow multiple favorites from same buyer for different cars")
     fun shouldAllowMultipleFavoritesFromSameBuyerForDifferentCars() {
         // Given
-        val car2 = Car().apply {
-            id = 2L
-            brand = "Honda"
-            model = "Civic"
-            year = 2023
-            price = BigDecimal("28000.00")
-            mileage = 10000
-            color = "Blue"
-            fuelType = FuelType.GASOLINE
-            transmission = TransmissionType.AUTOMATIC
-            available = true
-            dealershipId = 1L
-            publicationDate = LocalDateTime.now()
-        }
+        val car2 =
+            Car().apply {
+                id = 2L
+                brand = "Honda"
+                model = "Civic"
+                year = 2023
+                price = BigDecimal("28000.00")
+                mileage = 10000
+                color = "Blue"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                available = true
+                dealershipId = 1L
+                publicationDate = LocalDateTime.now()
+            }
 
-        val existingFavorite = FavoriteCar().apply {
-            id = 2L
-            buyer = validBuyer
-            car = validCar
-            rating = 7
-            comment = "First favorite"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = true
-        }
+        val existingFavorite =
+            FavoriteCar().apply {
+                id = 2L
+                buyer = validBuyer
+                car = validCar
+                rating = 7
+                comment = "First favorite"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = true
+            }
 
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 2L,
-            rating = 9,
-            comment = "Second favorite",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = false
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 2L,
+                rating = 9,
+                comment = "Second favorite",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = false,
+            )
 
-        val newFavorite = FavoriteCar().apply {
-            id = 3L
-            buyer = validBuyer
-            car = car2
-            rating = 9
-            comment = "Second favorite"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = false
-        }
+        val newFavorite =
+            FavoriteCar().apply {
+                id = 3L
+                buyer = validBuyer
+                car = car2
+                rating = 9
+                comment = "Second favorite"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = false
+            }
 
         `when`(carService.findById(2L)).thenReturn(car2)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
@@ -656,24 +687,26 @@ class FavoriteServiceTest {
     @DisplayName("Should handle priceNotifications false")
     fun shouldHandlePriceNotificationsFalse() {
         // Given
-        val request = FavoriteCarCreateRequest(
-            buyerId = 1L,
-            carId = 1L,
-            rating = 5,
-            comment = "Monitoring price",
-            dateAdded = LocalDateTime.now(),
-            priceNotifications = false
-        )
+        val request =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                rating = 5,
+                comment = "Monitoring price",
+                dateAdded = LocalDateTime.now(),
+                priceNotifications = false,
+            )
 
-        val favoriteWithoutNotifications = FavoriteCar().apply {
-            id = 8L
-            buyer = validBuyer
-            car = validCar
-            rating = 5
-            comment = "Monitoring price"
-            dateAdded = LocalDateTime.now()
-            priceNotifications = false
-        }
+        val favoriteWithoutNotifications =
+            FavoriteCar().apply {
+                id = 8L
+                buyer = validBuyer
+                car = validCar
+                rating = 5
+                comment = "Monitoring price"
+                dateAdded = LocalDateTime.now()
+                priceNotifications = false
+            }
 
         `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)

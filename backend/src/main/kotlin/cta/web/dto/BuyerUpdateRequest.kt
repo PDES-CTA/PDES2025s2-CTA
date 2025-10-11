@@ -13,23 +13,19 @@ data class BuyerUpdateRequest(
     @field:Email(message = "Invalid email format")
     @field:Schema(description = "New buyer email")
     val email: String? = null,
-
     @field:Size(min = 10, max = 15, message = "Phone must be between 10 and 15 characters")
     @field:Schema(description = "New buyer phone number")
     val phone: String? = null,
-
     @field:Min(value = 1000000, message = "DNI must be at least 7 digits")
     @field:Max(value = 99999999, message = "DNI must be at most 8 digits")
     @field:Schema(description = "Buyer national identification number")
     val dni: Int? = null,
-
     @field:NotBlank(message = "The buyer address cannot be blank")
     @field:Length(max = 40, message = "The buyer address max length is 40 characters")
     @field:Schema(description = "New address of the buyer")
     val address: String? = null,
-
     @field:Schema(description = "New buyer is active indicator")
-    val active: Boolean? = null
+    val active: Boolean? = null,
 ) {
     fun toMap(): Map<String, Any> {
         return listOf(
@@ -37,7 +33,7 @@ data class BuyerUpdateRequest(
             "address" to address,
             "phone" to phone,
             "email" to email,
-            "active" to active
+            "active" to active,
         ).mapNotNull { (key, value) ->
             value?.let { key to it }
         }.toMap()

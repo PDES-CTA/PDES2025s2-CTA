@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "favorite_car")
 class FavoriteCar : BaseEntity() {
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
     lateinit var buyer: Buyer

@@ -1,10 +1,10 @@
 package cta.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import cta.model.Dealership
 import cta.service.DealershipService
 import cta.web.dto.DealershipCreateRequest
 import cta.web.dto.DealershipUpdateRequest
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,13 +17,14 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@SpringBootTest(properties = [
-    "spring.main.allow-bean-definition-overriding=true"
-])
+@SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+    ],
+)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class DealershipControllerTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -43,7 +44,7 @@ class DealershipControllerTest {
         active: Boolean = true,
         password: String = "password",
         firstName: String = "John",
-        lastName: String = "Smith"
+        lastName: String = "Smith",
     ): Dealership {
         return Dealership().apply {
             this.id = id
@@ -64,10 +65,11 @@ class DealershipControllerTest {
     @Test
     fun `should get all active dealerships and return 200 OK`() {
         // Given
-        val dealerships = listOf(
-            createMockDealership(id = 1L, businessName = "Auto Motors SA"),
-            createMockDealership(id = 2L, businessName = "Car Sales SRL")
-        )
+        val dealerships =
+            listOf(
+                createMockDealership(id = 1L, businessName = "Auto Motors SA"),
+                createMockDealership(id = 2L, businessName = "Car Sales SRL"),
+            )
         whenever(dealershipService.findActive()).thenReturn(dealerships)
 
         // When & Then
@@ -136,7 +138,7 @@ class DealershipControllerTest {
         // When & Then
         mockMvc.perform(
             get("/api/dealerships/search")
-                .param("businessName", "Auto Motors")
+                .param("businessName", "Auto Motors"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -155,7 +157,7 @@ class DealershipControllerTest {
         // When & Then
         mockMvc.perform(
             get("/api/dealerships/search")
-                .param("city", "Buenos Aires")
+                .param("city", "Buenos Aires"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -174,7 +176,7 @@ class DealershipControllerTest {
         // When & Then
         mockMvc.perform(
             get("/api/dealerships/search")
-                .param("province", "Buenos Aires")
+                .param("province", "Buenos Aires"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -193,7 +195,7 @@ class DealershipControllerTest {
         // When & Then
         mockMvc.perform(
             get("/api/dealerships/search")
-                .param("cuit", "20-12345678-9")
+                .param("cuit", "20-12345678-9"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -214,7 +216,7 @@ class DealershipControllerTest {
             get("/api/dealerships/search")
                 .param("businessName", "Auto Motors")
                 .param("city", "Buenos Aires")
-                .param("province", "Buenos Aires")
+                .param("province", "Buenos Aires"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -231,7 +233,7 @@ class DealershipControllerTest {
         // When & Then
         mockMvc.perform(
             get("/api/dealerships/search")
-                .param("businessName", "NonExistent")
+                .param("businessName", "NonExistent"),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$").isArray)
@@ -297,18 +299,19 @@ class DealershipControllerTest {
     @Test
     fun `should create dealership and return 201 CREATED`() {
         // Given
-        val request = DealershipCreateRequest(
-            businessName = "Auto Motors SA",
-            cuit = "20123456789",
-            email = "contact@automotors.com",
-            phone = "011-1234-5678",
-            address = "Av. Example 123",
-            city = "Buenos Aires",
-            province = "Buenos Aires",
-            password = "password",
-            firstName = "John",
-            lastName = "Smith"
-        )
+        val request =
+            DealershipCreateRequest(
+                businessName = "Auto Motors SA",
+                cuit = "20123456789",
+                email = "contact@automotors.com",
+                phone = "011-1234-5678",
+                address = "Av. Example 123",
+                city = "Buenos Aires",
+                province = "Buenos Aires",
+                password = "password",
+                firstName = "John",
+                lastName = "Smith",
+            )
 
         val savedDealership = createMockDealership(id = 1L)
         whenever(dealershipService.createDealership(any())).thenReturn(savedDealership)
@@ -317,7 +320,7 @@ class DealershipControllerTest {
         mockMvc.perform(
             post("/api/dealerships")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
             .andExpect(jsonPath("$.id").value(1))
@@ -331,19 +334,20 @@ class DealershipControllerTest {
     @Test
     fun `should return 400 BAD REQUEST when creating dealership with invalid data`() {
         // Given
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "businessName": "",
                 "cuit": "invalid",
                 "email": "invalid-email"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             post("/api/dealerships")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }
@@ -352,29 +356,31 @@ class DealershipControllerTest {
     fun `should update dealership and return 200 OK`() {
         // Given
         val dealershipId = 1L
-        val request = DealershipUpdateRequest(
-            businessName = "Updated Motors SA",
-            email = "updated@automotors.com",
-            phone = "011-9999-9999",
-            address = "New Address 456",
-            city = "Cordoba",
-            province = "Cordoba"
-        )
+        val request =
+            DealershipUpdateRequest(
+                businessName = "Updated Motors SA",
+                email = "updated@automotors.com",
+                phone = "011-9999-9999",
+                address = "New Address 456",
+                city = "Cordoba",
+                province = "Cordoba",
+            )
 
-        val updatedDealership = createMockDealership(
-            id = dealershipId,
-            businessName = "Updated Motors SA",
-            email = "updated@automotors.com",
-            city = "Cordoba",
-            province = "Cordoba"
-        )
+        val updatedDealership =
+            createMockDealership(
+                id = dealershipId,
+                businessName = "Updated Motors SA",
+                email = "updated@automotors.com",
+                city = "Cordoba",
+                province = "Cordoba",
+            )
         whenever(dealershipService.updateDealership(eq(dealershipId), any())).thenReturn(updatedDealership)
 
         // When & Then
         mockMvc.perform(
             put("/api/dealerships/{id}", dealershipId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(dealershipId))
@@ -390,9 +396,10 @@ class DealershipControllerTest {
     fun `should return 404 NOT FOUND when updating non-existent dealership`() {
         // Given
         val dealershipId = 999L
-        val request = DealershipUpdateRequest(
-            businessName = "Updated Motors SA"
-        )
+        val request =
+            DealershipUpdateRequest(
+                businessName = "Updated Motors SA",
+            )
 
         whenever(dealershipService.updateDealership(eq(dealershipId), any()))
             .thenThrow(NoSuchElementException("Dealership not found"))
@@ -401,7 +408,7 @@ class DealershipControllerTest {
         mockMvc.perform(
             put("/api/dealerships/{id}", dealershipId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
     }
@@ -410,17 +417,18 @@ class DealershipControllerTest {
     fun `should return 400 BAD REQUEST when updating dealership with invalid data`() {
         // Given
         val dealershipId = 1L
-        val invalidRequest = """
+        val invalidRequest =
+            """
             {
                 "email": "invalid-email"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // When & Then
         mockMvc.perform(
             put("/api/dealerships/{id}", dealershipId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest)
+                .content(invalidRequest),
         )
             .andExpect(status().isBadRequest)
     }

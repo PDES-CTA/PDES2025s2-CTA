@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 abstract class User : BaseEntity() {
-
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
     @Column(unique = true, nullable = false)
@@ -44,7 +43,10 @@ abstract class User : BaseEntity() {
     @get:Column(name = "role", nullable = false)
     abstract val role: UserRole
 
-    fun login(email: String, password: String): Boolean {
+    fun login(
+        email: String,
+        password: String,
+    ): Boolean {
         return this.email == email && this.password == password && active
     }
 

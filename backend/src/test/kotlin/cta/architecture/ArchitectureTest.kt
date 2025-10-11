@@ -6,25 +6,25 @@ import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*
 import com.tngtech.archunit.library.Architectures.layeredArchitecture
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
+import jakarta.persistence.Entity
+import jakarta.validation.constraints.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RestController
-import jakarta.persistence.Entity
-import jakarta.validation.constraints.*
 
 class ArchitectureTest {
-
     companion object {
         private lateinit var importedClasses: JavaClasses
 
         @JvmStatic
         @BeforeAll
         fun setup() {
-            importedClasses = ClassFileImporter()
-                .withImportOption(ImportOption.DoNotIncludeTests())
-                .importPackages("cta")
+            importedClasses =
+                ClassFileImporter()
+                    .withImportOption(ImportOption.DoNotIncludeTests())
+                    .importPackages("cta")
         }
     }
 
@@ -34,27 +34,23 @@ class ArchitectureTest {
     fun `should respect layered architecture`() {
         layeredArchitecture()
             .consideringAllDependencies()
-
             .layer("Controllers").definedBy("..web.controller..")
             .layer("Services").definedBy("..service..")
             .layer("Repositories").definedBy("..repository..")
             .layer("Models").definedBy("..model..")
             .layer("DTOs").definedBy("..web.dto..")
             .layer("Config").definedBy("..config..")
-
             .whereLayer("Controllers").mayNotBeAccessedByAnyLayer()
             .whereLayer("Services").mayOnlyBeAccessedByLayers("Controllers", "Config")
             .whereLayer("Repositories").mayOnlyBeAccessedByLayers("Services")
             .whereLayer("Models").mayOnlyBeAccessedByLayers("Services", "Repositories", "DTOs", "Controllers")
             .whereLayer("DTOs").mayOnlyBeAccessedByLayers("Controllers", "Services")
-
             .ignoreDependency(
                 com.tngtech.archunit.base.DescribedPredicate.describe("AuthController") {
                     it.name.contains("AuthController")
                 },
-                com.tngtech.archunit.base.DescribedPredicate.alwaysTrue()
+                com.tngtech.archunit.base.DescribedPredicate.alwaysTrue(),
             )
-
             .check(importedClasses)
     }
 
@@ -235,7 +231,6 @@ class ArchitectureTest {
     }
 
     // ========== CYCLIC DEPENDENCY TESTS ==========
-
 
     @Test
     fun `should be free of cycles in service layer`() {
@@ -469,7 +464,7 @@ class ArchitectureTest {
                 "cta.web.dto..",
                 "cta.config..",
                 "cta.exception..",
-                "cta.util.."
+                "cta.util..",
             )
             .check(importedClasses)
     }

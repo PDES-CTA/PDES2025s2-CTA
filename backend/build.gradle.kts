@@ -12,6 +12,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.jpa") version "1.9.22"
     jacoco
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 group = "CTA"

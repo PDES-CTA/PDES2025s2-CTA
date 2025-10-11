@@ -6,14 +6,13 @@ import cta.enum.PurchaseStatus
 import cta.enum.TransmissionType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @DisplayName("Purchase Entity Tests")
 class PurchaseTest {
-
     private lateinit var purchase: Purchase
     private lateinit var carT: Car
     private lateinit var dealershipT: Dealership
@@ -21,45 +20,48 @@ class PurchaseTest {
     @BeforeEach
     fun setup() {
         // Create a car
-        carT = Car().apply {
-            brand = "Toyota"
-            model = "Corolla"
-            year = 2023
-            price = BigDecimal("25000.00")
-            mileage = 15000
-            color = "Blue"
-            fuelType = FuelType.GASOLINE
-            transmission = TransmissionType.AUTOMATIC
-            description = "Well maintained car"
-            dealershipId = 1L
-            available = true
-        }
+        carT =
+            Car().apply {
+                brand = "Toyota"
+                model = "Corolla"
+                year = 2023
+                price = BigDecimal("25000.00")
+                mileage = 15000
+                color = "Blue"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                description = "Well maintained car"
+                dealershipId = 1L
+                available = true
+            }
 
         // Create a dealership
-        dealershipT = Dealership().apply {
-            email = "contact@dealership.com"
-            password = "password123"
-            firstName = "John"
-            lastName = "Dealer"
-            phone = "+54 11 1234-5678"
-            businessName = "Premium Auto Sales"
-            cuit = "20-12345678-9"
-            address = "Av. Libertador 1000"
-            city = "Buenos Aires"
-            province = "CABA"
-            active = true
-        }
+        dealershipT =
+            Dealership().apply {
+                email = "contact@dealership.com"
+                password = "password123"
+                firstName = "John"
+                lastName = "Dealer"
+                phone = "+54 11 1234-5678"
+                businessName = "Premium Auto Sales"
+                cuit = "20-12345678-9"
+                address = "Av. Libertador 1000"
+                city = "Buenos Aires"
+                province = "CABA"
+                active = true
+            }
 
         // Create purchase
-        purchase = Purchase().apply {
-            this.buyerId = 123L
-            this.car = carT
-            this.dealership = dealershipT
-            this.finalPrice = BigDecimal("24000.00")
-            this.purchaseDate = LocalDateTime.now()
-            this.purchaseStatus = PurchaseStatus.PENDING
-            this.paymentMethod = PaymentMethod.CASH
-        }
+        purchase =
+            Purchase().apply {
+                this.buyerId = 123L
+                this.car = carT
+                this.dealership = dealershipT
+                this.finalPrice = BigDecimal("24000.00")
+                this.purchaseDate = LocalDateTime.now()
+                this.purchaseStatus = PurchaseStatus.PENDING
+                this.paymentMethod = PaymentMethod.CASH
+            }
     }
 
     @Test
@@ -283,16 +285,17 @@ class PurchaseTest {
     @Test
     @DisplayName("Should create purchase with all fields set")
     fun shouldCreatePurchaseWithAllFieldsSet() {
-        val completePurchase = Purchase().apply {
-            this.buyerId = 456L
-            this.car = carT
-            this.dealership = dealershipT
-            this.finalPrice = BigDecimal("22000.00")
-            this.purchaseDate = LocalDateTime.of(2024, 1, 1, 10, 0)
-            this.purchaseStatus = PurchaseStatus.CONFIRMED
-            this.paymentMethod = PaymentMethod.CREDIT_CARD
-            this.observations = "VIP customer"
-        }
+        val completePurchase =
+            Purchase().apply {
+                this.buyerId = 456L
+                this.car = carT
+                this.dealership = dealershipT
+                this.finalPrice = BigDecimal("22000.00")
+                this.purchaseDate = LocalDateTime.of(2024, 1, 1, 10, 0)
+                this.purchaseStatus = PurchaseStatus.CONFIRMED
+                this.paymentMethod = PaymentMethod.CREDIT_CARD
+                this.observations = "VIP customer"
+            }
 
         assertEquals(456L, completePurchase.buyerId)
         assertEquals(BigDecimal("22000.00"), completePurchase.finalPrice)

@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "car")
 class Car : BaseEntity() {
-
     @NotBlank
     @Column(nullable = false)
     var brand: String = ""
@@ -73,9 +72,10 @@ class Car : BaseEntity() {
     fun isAvailable(): Boolean = available
 
     fun calculateDiscountedPrice(percentage: Double): BigDecimal {
-        val multiplier = BigDecimal.ONE.subtract(
-            BigDecimal.valueOf(percentage).divide(BigDecimal("100"))
-        )
+        val multiplier =
+            BigDecimal.ONE.subtract(
+                BigDecimal.valueOf(percentage).divide(BigDecimal("100")),
+            )
         return price.multiply(multiplier).setScale(2, RoundingMode.HALF_UP)
     }
 

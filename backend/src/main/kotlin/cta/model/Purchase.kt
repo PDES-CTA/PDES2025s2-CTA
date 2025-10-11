@@ -7,14 +7,12 @@ import jakarta.validation.constraints.DecimalMin
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-
 @Entity
 @Table(name = "purchase")
 class Purchase : BaseEntity() {
-
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "buyer_id", nullable = false)
-    //lateinit var buyer: Buyer
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "buyer_id", nullable = false)
+    // lateinit var buyer: Buyer
     // TODO: Replace buyer ID with the right mapping of the Buyer entity
     @Column(name = "buyer_id", nullable = false)
     var buyerId: Long = 0
@@ -73,7 +71,7 @@ class Purchase : BaseEntity() {
             "Purchase date" to this.purchaseDate,
             "Status" to this.purchaseStatus,
             "Payment method" to this.paymentMethod,
-            "Observations" to this.observations
+            "Observations" to this.observations,
         )
     }
 }

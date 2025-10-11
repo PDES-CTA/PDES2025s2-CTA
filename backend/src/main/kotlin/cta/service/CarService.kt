@@ -1,7 +1,7 @@
 package cta.service
-import cta.model.Car
 import cta.enum.FuelType
 import cta.enum.TransmissionType
+import cta.model.Car
 import cta.repository.CarRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -10,9 +10,8 @@ import java.math.BigDecimal
 
 @Service
 class CarService(
-    private val carRepository: CarRepository
+    private val carRepository: CarRepository,
 ) {
-
     fun findById(id: Long): Car {
         return carRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("Car with ID $id not found")
@@ -34,11 +33,12 @@ class CarService(
         var cars = carRepository.findByAvailableTrue()
 
         filters.keyword?.let { keyword ->
-            cars = cars.filter { car ->
-                car.brand.contains(keyword, ignoreCase = true) ||
+            cars =
+                cars.filter { car ->
+                    car.brand.contains(keyword, ignoreCase = true) ||
                         car.model.contains(keyword, ignoreCase = true) ||
                         car.description?.contains(keyword, ignoreCase = true) == true
-            }
+                }
         }
 
         filters.minPrice?.let { min ->
@@ -79,7 +79,10 @@ class CarService(
     }
 
     @Transactional
-    fun updateCar(id: Long, updateData: Map<String, Any>): Car {
+    fun updateCar(
+        id: Long,
+        updateData: Map<String, Any>,
+    ): Car {
         val car = findById(id)
 
         updateData["brand"]?.let { car.brand = it.toString() }
@@ -102,7 +105,10 @@ class CarService(
     }
 
     @Transactional
-    fun updatePrice(id: Long, newPrice: BigDecimal): Car {
+    fun updatePrice(
+        id: Long,
+        newPrice: BigDecimal,
+    ): Car {
         val car = findById(id)
         car.updatePrice(newPrice)
         return carRepository.save(car)

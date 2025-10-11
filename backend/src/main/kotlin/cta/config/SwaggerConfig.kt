@@ -12,10 +12,9 @@ import org.springframework.context.annotation.Configuration
 @ConditionalOnProperty(
     name = ["swagger.enabled"],
     havingValue = "true",
-    matchIfMissing = true
+    matchIfMissing = true,
 )
 class SwaggerConfig {
-
     @Value("\${app.environment:development}")
     private lateinit var environment: String
 
@@ -26,19 +25,21 @@ class SwaggerConfig {
                 Info()
                     .title("CTA API")
                     .version("0.0.1")
-                    .description("Car Trading Application API")
+                    .description("Car Trading Application API"),
             )
             .servers(getEnvironmentServers())
     }
 
     private fun getEnvironmentServers(): List<Server> {
         return when (environment) {
-            "production" -> listOf(
-                Server().url("https://api.cta.com").description("Production")
-            )
-            else -> listOf(
-                Server().url("http://localhost:8080").description("Local/Development")
-            )
+            "production" ->
+                listOf(
+                    Server().url("https://api.cta.com").description("Production"),
+                )
+            else ->
+                listOf(
+                    Server().url("http://localhost:8080").description("Local/Development"),
+                )
         }
     }
 }

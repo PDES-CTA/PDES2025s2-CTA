@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank
 @Entity
 @DiscriminatorValue("DEALERSHIP")
 class Dealership : User() {
-
     @NotBlank(message = "Business name is required")
     @Column(name = "business_name", nullable = true)
     var businessName: String = ""

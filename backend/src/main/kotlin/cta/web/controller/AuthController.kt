@@ -4,9 +4,9 @@ import cta.config.JwtTokenProvider
 import cta.model.Buyer
 import cta.repository.UserRepository
 import cta.service.BuyerService
+import cta.web.dto.BuyerCreateRequest
 import cta.web.dto.LoginRequest
 import cta.web.dto.LoginResponse
-import cta.web.dto.BuyerCreateRequest
 import cta.web.dto.UserResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -28,18 +28,20 @@ class AuthController(
     private val userDetailsService: UserDetailsService,
     private val buyerService: BuyerService,
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
 ) {
-
     @PostMapping("/login")
-    fun login(@Valid @RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
+    fun login(
+        @Valid @RequestBody loginRequest: LoginRequest,
+    ): ResponseEntity<LoginResponse> {
         // Auth user
-        val authentication: Authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(
-                loginRequest.email,
-                loginRequest.password
+        val authentication: Authentication =
+            authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken(
+                    loginRequest.email,
+                    loginRequest.password,
+                ),
             )
-        )
 
         SecurityContextHolder.getContext().authentication = authentication
 
@@ -48,50 +50,56 @@ class AuthController(
         val token = jwtTokenProvider.generateToken(userDetails)
 
         // Get full user
-        val usuario = userRepository.findByEmail(loginRequest.email)
-            ?: throw RuntimeException("User not found")
+        val usuario =
+            userRepository.findByEmail(loginRequest.email)
+                ?: throw RuntimeException("User not found")
 
-        val response = LoginResponse(
-            token = token,
-            type = "Bearer",
-            id = usuario.id!!,
-            email = usuario.email,
-            nombre = usuario.firstName,
-            apellido = usuario.lastName,
-            role = userDetails.authorities.first().authority.removePrefix("ROLE_")
-        )
+        val response =
+            LoginResponse(
+                token = token,
+                type = "Bearer",
+                id = usuario.id!!,
+                email = usuario.email,
+                nombre = usuario.firstName,
+                apellido = usuario.lastName,
+                role = userDetails.authorities.first().authority.removePrefix("ROLE_"),
+            )
 
         return ResponseEntity.ok(response)
     }
 
     @PostMapping("/register")
-    fun register(@Valid @RequestBody request: BuyerCreateRequest): ResponseEntity<UserResponse> {
+    fun register(
+        @Valid @RequestBody request: BuyerCreateRequest,
+    ): ResponseEntity<UserResponse> {
         // Verify if email already exists
         if (userRepository.existsByEmail(request.email)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build()
         }
 
         // Create a new Buyer using factory method
-        val buyer = Buyer.create(
-            email = request.email,
-            password = passwordEncoder.encode(request.password),
-            firstName = request.firstName,
-            lastName = request.lastName,
-            phone = request.phone,
-            address = request.address,
-            dni = request.dni
-        )
+        val buyer =
+            Buyer.create(
+                email = request.email,
+                password = passwordEncoder.encode(request.password),
+                firstName = request.firstName,
+                lastName = request.lastName,
+                phone = request.phone,
+                address = request.address,
+                dni = request.dni,
+            )
 
         val savedBuyer = buyerService.createBuyer(buyer)
 
-        val response = UserResponse(
-            id = savedBuyer.id!!,
-            email = savedBuyer.email,
-            firstName = savedBuyer.firstName,
-            lastName = savedBuyer.lastName,
-            phone = savedBuyer.phone,
-            role = "BUYER"
-        )
+        val response =
+            UserResponse(
+                id = savedBuyer.id!!,
+                email = savedBuyer.email,
+                firstName = savedBuyer.firstName,
+                lastName = savedBuyer.lastName,
+                phone = savedBuyer.phone,
+                role = "BUYER",
+            )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
@@ -101,24 +109,27 @@ class AuthController(
         val authentication = SecurityContextHolder.getContext().authentication
         val email = authentication.name
 
-        val usuario = userRepository.findByEmail(email)
-            ?: throw RuntimeException("User not found")
+        val usuario =
+            userRepository.findByEmail(email)
+                ?: throw RuntimeException("User not found")
 
-        val role = when {
-            usuario.javaClass.simpleName == "Administrator" -> "ADMIN"
-            usuario.javaClass.simpleName == "Dealership" -> "DEALERSHIP"
-            usuario.javaClass.simpleName == "Buyer" -> "BUYER"
-            else -> "USER"
-        }
+        val role =
+            when {
+                usuario.javaClass.simpleName == "Administrator" -> "ADMIN"
+                usuario.javaClass.simpleName == "Dealership" -> "DEALERSHIP"
+                usuario.javaClass.simpleName == "Buyer" -> "BUYER"
+                else -> "USER"
+            }
 
-        val response = UserResponse(
-            id = usuario.id!!,
-            email = usuario.email,
-            firstName = usuario.firstName,
-            lastName = usuario.lastName,
-            phone = usuario.phone,
-            role = role
-        )
+        val response =
+            UserResponse(
+                id = usuario.id!!,
+                email = usuario.email,
+                firstName = usuario.firstName,
+                lastName = usuario.lastName,
+                phone = usuario.phone,
+                role = role,
+            )
 
         return ResponseEntity.ok(response)
     }

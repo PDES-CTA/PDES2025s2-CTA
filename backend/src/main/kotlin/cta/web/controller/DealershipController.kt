@@ -1,7 +1,7 @@
 package cta.web.controller
 
-import cta.service.DealershipService
 import cta.service.DealershipSearchFilters
+import cta.service.DealershipService
 import cta.web.dto.DealershipCreateRequest
 import cta.web.dto.DealershipResponse
 import cta.web.dto.DealershipUpdateRequest
@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["*"])
 @Tag(name = "Dealership", description = "Dealership management operations")
 class DealershipController(
-    private val dealershipService: DealershipService
+    private val dealershipService: DealershipService,
 ) {
-
     @GetMapping
     @Operation(summary = "Get all dealerships")
     fun getAllDealerships(): ResponseEntity<List<DealershipResponse>> {
@@ -29,7 +28,9 @@ class DealershipController(
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a dealership by id")
-    fun getDealershipById(@PathVariable id: Long): ResponseEntity<DealershipResponse> {
+    fun getDealershipById(
+        @PathVariable id: Long,
+    ): ResponseEntity<DealershipResponse> {
         val dealership = dealershipService.findById(id)
         return ResponseEntity.ok(DealershipResponse.fromEntity(dealership))
     }
@@ -40,14 +41,15 @@ class DealershipController(
         @RequestParam(required = false) businessName: String?,
         @RequestParam(required = false) city: String?,
         @RequestParam(required = false) province: String?,
-        @RequestParam(required = false) cuit: String?
+        @RequestParam(required = false) cuit: String?,
     ): ResponseEntity<List<DealershipResponse>> {
-        val filters = DealershipSearchFilters(
-            businessName = businessName,
-            city = city,
-            province = province,
-            cuit = cuit
-        )
+        val filters =
+            DealershipSearchFilters(
+                businessName = businessName,
+                city = city,
+                province = province,
+                cuit = cuit,
+            )
 
         val dealerships = dealershipService.searchDealerships(filters)
         return ResponseEntity.ok(dealerships.map { DealershipResponse.fromEntity(it) })
@@ -55,23 +57,31 @@ class DealershipController(
 
     @GetMapping("/cuit/{cuit}")
     @Operation(summary = "Get a dealership by cuit")
-    fun getDealershipByCuit(@PathVariable cuit: String): ResponseEntity<DealershipResponse> {
-        val dealership = dealershipService.findByCuit(cuit)
-            ?: throw NoSuchElementException("Dealership with CUIT $cuit not found")
+    fun getDealershipByCuit(
+        @PathVariable cuit: String,
+    ): ResponseEntity<DealershipResponse> {
+        val dealership =
+            dealershipService.findByCuit(cuit)
+                ?: throw NoSuchElementException("Dealership with CUIT $cuit not found")
         return ResponseEntity.ok(DealershipResponse.fromEntity(dealership))
     }
 
     @GetMapping("/email/{email}")
     @Operation(summary = "Get a dealership by email")
-    fun getDealershipByEmail(@PathVariable email: String): ResponseEntity<DealershipResponse> {
-        val dealership = dealershipService.findByEmail(email)
-            ?: throw NoSuchElementException("Dealership with email $email not found")
+    fun getDealershipByEmail(
+        @PathVariable email: String,
+    ): ResponseEntity<DealershipResponse> {
+        val dealership =
+            dealershipService.findByEmail(email)
+                ?: throw NoSuchElementException("Dealership with email $email not found")
         return ResponseEntity.ok(DealershipResponse.fromEntity(dealership))
     }
 
     @PostMapping
     @Operation(summary = "Create a new dealership")
-    fun createDealership(@Valid @RequestBody request: DealershipCreateRequest): ResponseEntity<DealershipResponse> {
+    fun createDealership(
+        @Valid @RequestBody request: DealershipCreateRequest,
+    ): ResponseEntity<DealershipResponse> {
         val savedDealership = dealershipService.createDealership(request)
         return ResponseEntity.status(HttpStatus.CREATED).body(DealershipResponse.fromEntity(savedDealership))
     }
@@ -80,7 +90,7 @@ class DealershipController(
     @Operation(summary = "Update an existing dealership")
     fun updateDealership(
         @PathVariable id: Long,
-        @Valid @RequestBody request: DealershipUpdateRequest
+        @Valid @RequestBody request: DealershipUpdateRequest,
     ): ResponseEntity<DealershipResponse> {
         val updatedDealership = dealershipService.updateDealership(id, request.toMap())
         return ResponseEntity.ok(DealershipResponse.fromEntity(updatedDealership))
@@ -88,21 +98,27 @@ class DealershipController(
 
     @PatchMapping("/{id}/deactivate")
     @Operation(summary = "Deactivate a dealership")
-    fun deactivateDealership(@PathVariable id: Long): ResponseEntity<DealershipResponse> {
+    fun deactivateDealership(
+        @PathVariable id: Long,
+    ): ResponseEntity<DealershipResponse> {
         val updatedDealership = dealershipService.deactivate(id)
         return ResponseEntity.ok(DealershipResponse.fromEntity(updatedDealership))
     }
 
     @PatchMapping("/{id}/activate")
     @Operation(summary = "Activate a dealership")
-    fun activateDealership(@PathVariable id: Long): ResponseEntity<DealershipResponse> {
+    fun activateDealership(
+        @PathVariable id: Long,
+    ): ResponseEntity<DealershipResponse> {
         val updatedDealership = dealershipService.activate(id)
         return ResponseEntity.ok(DealershipResponse.fromEntity(updatedDealership))
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an existing dealership")
-    fun deleteDealership(@PathVariable id: Long): ResponseEntity<Unit> {
+    fun deleteDealership(
+        @PathVariable id: Long,
+    ): ResponseEntity<Unit> {
         dealershipService.deleteDealership(id)
         return ResponseEntity.noContent().build()
     }

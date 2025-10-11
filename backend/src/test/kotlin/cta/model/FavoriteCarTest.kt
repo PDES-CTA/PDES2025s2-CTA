@@ -4,14 +4,13 @@ import cta.enum.FuelType
 import cta.enum.TransmissionType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @DisplayName("FavoriteCar Entity Tests")
 class FavoriteCarTest {
-
     private lateinit var favoriteCar: FavoriteCar
     private lateinit var buyerT: Buyer
     private lateinit var carT: Car
@@ -19,39 +18,42 @@ class FavoriteCarTest {
     @BeforeEach
     fun setup() {
         // Create a buyer
-        buyerT = Buyer().apply {
-            email = "buyer@example.com"
-            password = "password123"
-            firstName = "John"
-            lastName = "Doe"
-            phone = "+54 11 1234-5678"
-            address = "Av. Corrientes 1234"
-            dni = 12345678
-            active = true
-        }
+        buyerT =
+            Buyer().apply {
+                email = "buyer@example.com"
+                password = "password123"
+                firstName = "John"
+                lastName = "Doe"
+                phone = "+54 11 1234-5678"
+                address = "Av. Corrientes 1234"
+                dni = 12345678
+                active = true
+            }
 
         // Create a car
-        carT = Car().apply {
-            brand = "Toyota"
-            model = "Corolla"
-            year = 2023
-            price = BigDecimal("25000.00")
-            mileage = 15000
-            color = "Blue"
-            fuelType = FuelType.GASOLINE
-            transmission = TransmissionType.AUTOMATIC
-            description = "Well maintained car"
-            dealershipId = 1L
-            available = true
-        }
+        carT =
+            Car().apply {
+                brand = "Toyota"
+                model = "Corolla"
+                year = 2023
+                price = BigDecimal("25000.00")
+                mileage = 15000
+                color = "Blue"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                description = "Well maintained car"
+                dealershipId = 1L
+                available = true
+            }
 
         // Create favorite car
-        favoriteCar = FavoriteCar().apply {
-            this.buyer = buyerT
-            this.car = carT
-            this.dateAdded = LocalDateTime.now()
-            this.priceNotifications = false
-        }
+        favoriteCar =
+            FavoriteCar().apply {
+                this.buyer = buyerT
+                this.car = carT
+                this.dateAdded = LocalDateTime.now()
+                this.priceNotifications = false
+            }
     }
 
     @Test
@@ -191,12 +193,13 @@ class FavoriteCarTest {
     @Test
     @DisplayName("Should allow changing associated buyer")
     fun shouldAllowChangingAssociatedBuyer() {
-        val newBuyer = Buyer().apply {
-            email = "newbuyer@example.com"
-            firstName = "Jane"
-            lastName = "Smith"
-            dni = 87654321
-        }
+        val newBuyer =
+            Buyer().apply {
+                email = "newbuyer@example.com"
+                firstName = "Jane"
+                lastName = "Smith"
+                dni = 87654321
+            }
 
         favoriteCar.buyer = newBuyer
 
@@ -207,12 +210,13 @@ class FavoriteCarTest {
     @Test
     @DisplayName("Should allow changing associated car")
     fun shouldAllowChangingAssociatedCar() {
-        val newCar = Car().apply {
-            brand = "Honda"
-            model = "Civic"
-            year = 2024
-            price = BigDecimal("30000.00")
-        }
+        val newCar =
+            Car().apply {
+                brand = "Honda"
+                model = "Civic"
+                year = 2024
+                price = BigDecimal("30000.00")
+            }
 
         favoriteCar.car = newCar
 
@@ -231,13 +235,14 @@ class FavoriteCarTest {
     @Test
     @DisplayName("Should create favorite with all optional fields set")
     fun shouldCreateFavoriteWithAllOptionalFieldsSet() {
-        val completeFavorite = FavoriteCar().apply {
-            this.buyer = buyerT
-            this.car = carT
-            this.rating = 4
-            this.comment = "Great car, good price"
-            this.priceNotifications = true
-        }
+        val completeFavorite =
+            FavoriteCar().apply {
+                this.buyer = buyerT
+                this.car = carT
+                this.rating = 4
+                this.comment = "Great car, good price"
+                this.priceNotifications = true
+            }
 
         assertEquals(buyerT, completeFavorite.buyer)
         assertEquals(carT, completeFavorite.car)
