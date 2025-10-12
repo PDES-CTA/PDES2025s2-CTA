@@ -21,10 +21,7 @@ FROM nginx:alpine
 
 RUN apk add --no-cache curl
 
-# Create non-root user and necessary directories
-RUN addgroup -g 101 -S nginx && \
-    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
-    mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
+RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
     touch /var/run/nginx.pid && \
     chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run/nginx.pid /etc/nginx/conf.d /usr/share/nginx/html
 
@@ -32,9 +29,10 @@ COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
 COPY --chown=nginx:nginx nginx.conf /etc/nginx/nginx.conf
 
+# Switch to non-root user
 USER nginx
 
-HEALTHCHECK --interval=50s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
 EXPOSE 3000
