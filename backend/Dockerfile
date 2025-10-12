@@ -2,11 +2,10 @@ FROM gradle:8-jdk21-alpine AS build
 WORKDIR /app
 
 # Copy only dependency files first for better caching
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties* ./
 COPY gradle gradle
 
-# Download dependencies (this layer will be cached if dependencies don't change)
-RUN gradle dependencies --no-daemon || return 0
+RUN gradle dependencies --no-daemon --quiet || true
 
 COPY src src
 
@@ -26,7 +25,7 @@ COPY --from=build --chown=spring:spring /app/build/libs/*.war app.jar
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=90s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # JVM optimization flags

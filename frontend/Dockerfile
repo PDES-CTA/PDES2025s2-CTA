@@ -10,9 +10,6 @@ RUN \
   fi
 
 COPY . .
-COPY vite.config.js ./
-COPY eslint.config.js ./
-
 # Build the application
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
@@ -28,8 +25,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-EXPOSE 80
+EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
