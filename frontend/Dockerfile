@@ -1,7 +1,4 @@
-FROM node:18-alpine AS base
-
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:18-alpine AS builder
 WORKDIR /app
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
@@ -12,15 +9,7 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-COPY vite.config.js ./
-COPY eslint.config.js ./
-
-# Build the Vite app
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
@@ -28,22 +17,26 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-FROM base AS runner
-WORKDIR /app
+FROM nginx:alpine
 
-ENV NODE_ENV=production
+RUN apk add --no-cache curl
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 viteuser
+# Create non-root user and necessary directories
+RUN addgroup -g 101 -S nginx && \
+    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run/nginx.pid /etc/nginx/conf.d /usr/share/nginx/html
 
-COPY --from=builder --chown=viteuser:nodejs /app/dist ./dist
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-RUN npm install -g serve
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/nginx.conf
 
-USER viteuser
+USER nginx
+
+HEALTHCHECK --interval=50s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
 
 EXPOSE 3000
 
-ENV PORT=3000
-
-CMD ["serve", "-s", "dist", "-l", "3000"]
+CMD ["nginx", "-g", "daemon off;"]
