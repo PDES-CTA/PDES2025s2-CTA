@@ -6,14 +6,12 @@ on:
 
 jobs:
   frontend-quality:
-    name: Frontend Checks & Analysis
+    name: Frontend Checks & Tests
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -60,33 +58,21 @@ jobs:
           exit 1
         fi
 
-    # === SONARCLOUD ===
-    - name: Cache SonarCloud packages
-      uses: actions/cache@v4
+    # Upload coverage for SonarCloud
+    - name: Upload frontend coverage
+      uses: actions/upload-artifact@v4
       with:
-        path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar-frontend
-        restore-keys: ${{ runner.os }}-sonar-frontend
-
-    - name: SonarCloud Frontend Scan
-      uses: SonarSource/sonarqube-scan-action@v5.0.0
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        projectBaseDir: ./frontend
-        args: >
-          -Dsonar.host.url=https://sonarcloud.io
+        name: frontend-coverage
+        path: frontend/coverage/
+        retention-days: 1
 
   backend-quality:
-    name: Backend Checks & Analysis
+    name: Backend Checks & Tests
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -113,21 +99,59 @@ jobs:
           exit 1
         fi
 
+    # Upload coverage for SonarCloud
+    - name: Upload backend coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-coverage
+        path: backend/coverage/
+        retention-days: 1
+
+  sonarcloud:
+    name: SonarCloud Analysis
+    needs: [frontend-quality, backend-quality]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Download coverage reports from previous jobs
+    - name: Download frontend coverage
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-coverage
+        path: frontend/coverage/
+
+    - name: Download backend coverage
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-coverage
+        path: backend/coverage/
+
+    - name: Verify coverage files exist
+      run: |
+        echo "Frontend coverage:"
+        ls -la frontend/coverage/
+        echo "Backend coverage:"
+        ls -la backend/coverage/
+
     # === SONARCLOUD ===
     - name: Cache SonarCloud packages
       uses: actions/cache@v4
       with:
         path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar-backend
-        restore-keys: ${{ runner.os }}-sonar-backend
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
 
-    - name: SonarCloud Backend Scan
+    - name: SonarCloud Scan
       uses: SonarSource/sonarqube-scan-action@v5.0.0
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        projectBaseDir: ./backend
         args: >
           -Dsonar.host.url=https://sonarcloud.io
 
@@ -152,7 +176,7 @@ jobs:
           docker-compose.yml
         sparse-checkout-cone-mode: false
 
-    - name: Run Trivy vulnerability scanner (dependencies only)
+    - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
@@ -171,7 +195,7 @@ jobs:
 
   checks-summary:
     name: Quality Gates Summary
-    needs: [frontend-quality, backend-quality, security-scan]
+    needs: [frontend-quality, backend-quality, sonarcloud, security-scan]
     runs-on: ubuntu-latest
     if: always()
     
@@ -181,8 +205,9 @@ jobs:
         echo "## Quality Checks Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Jobs Status:" >> $GITHUB_STEP_SUMMARY
-        echo "- Frontend Quality & Analysis: **${{ needs.frontend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
-        echo "- Backend Quality & Analysis: **${{ needs.backend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend Quality: **${{ needs.frontend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
+        echo "- Backend Quality: **${{ needs.backend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
+        echo "- SonarCloud Analysis: **${{ needs.sonarcloud.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "- Security Vulnerability Scan: **${{ needs.security-scan.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
@@ -199,6 +224,11 @@ jobs:
           FAILED=true
         fi
         
+        if [ "${{ needs.sonarcloud.result }}" != "success" ]; then
+          echo " **SonarCloud analysis failed**" >> $GITHUB_STEP_SUMMARY
+          FAILED=true
+        fi
+        
         if [ "${{ needs.security-scan.result }}" != "success" ]; then
           echo " **Security scan failed**" >> $GITHUB_STEP_SUMMARY
           FAILED=true
@@ -211,5 +241,5 @@ jobs:
           exit 1
         else
           echo "### All quality checks passed!" >> $GITHUB_STEP_SUMMARY
-          echo "Code meets quality standards. Ready to merge" >> $GITHUB_STEP_SUMMARY
+          echo "Code meets quality standards. Ready to merge! 🚀" >> $GITHUB_STEP_SUMMARY
         fi

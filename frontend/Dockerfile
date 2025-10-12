@@ -1,8 +1,6 @@
-# Build stage
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
@@ -11,10 +9,7 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Copy source files and build
 COPY . .
-
-# Build the application
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
@@ -22,34 +17,24 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Production stage with nginx
 FROM nginx:alpine
 
-# Install curl for healthcheck
 RUN apk add --no-cache curl
 
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G appgroup -g appgroup appuser
+# Create non-root user and necessary directories
+RUN addgroup -g 101 -S nginx && \
+    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    mkdir -p /var/cache/nginx /var/log/nginx /var/run && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run/nginx.pid /etc/nginx/conf.d /usr/share/nginx/html
 
-# Copy built files
-COPY --from=builder --chown=appuser:appgroup /app/dist /usr/share/nginx/html
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY --chown=appuser:appgroup nginx.conf /etc/nginx/nginx.conf
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/nginx.conf
 
-# Create necessary directories and set permissions
-RUN touch /var/run/nginx.pid && \
-    chown -R appuser:appgroup /var/run/nginx.pid && \
-    chown -R appuser:appgroup /var/cache/nginx && \
-    chown -R appuser:appgroup /var/log/nginx && \
-    chown -R appuser:appgroup /etc/nginx/conf.d
+USER nginx
 
-# Switch to non-root user
-USER appuser
-
-# Health check
-HEALTHCHECK --interval=90s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=50s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
 EXPOSE 3000
