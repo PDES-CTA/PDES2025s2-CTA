@@ -1,0 +1,171 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DOCKER_REGISTRY: docker.io
+  BACKEND_IMAGE_NAME: francomm/cta-backend
+  FRONTEND_IMAGE_NAME: francomm/cta-frontend
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      new_tag: ${{ steps.version.outputs.new_tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Calculate next version
+      id: version
+      run: |
+        # Get the latest tag, default to v0.0.0 if no tags exist
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Latest tag: ${LATEST_TAG}"
+        
+        # Remove 'v' prefix and split version
+        VERSION=${LATEST_TAG#v}
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        
+        # Check commit messages since last tag for version bump hints
+        COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+        
+        # Determine version bump based on commit messages
+        if echo "$COMMITS" | grep -qiE "^(breaking|major):"; then
+          # BREAKING or MAJOR: increment major version
+          MAJOR=$((MAJOR + 1))
+          MINOR=0
+          PATCH=0
+          echo "Major version bump detected (breaking changes)"
+        elif echo "$COMMITS" | grep -qiE "^(feat|feature):"; then
+          # FEAT: increment minor version
+          MINOR=$((MINOR + 1))
+          PATCH=0
+          echo "Minor version bump detected (new features)"
+        else
+          # Default: increment patch version
+          PATCH=$((PATCH + 1))
+          echo "🔧 Patch version bump (fixes and improvements)"
+        fi
+        
+        NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        NEW_TAG="v${NEW_VERSION}"
+        
+        echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+        echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+        echo "New version: ${NEW_VERSION}"
+
+    - name: Create and push new tag
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "${{ steps.version.outputs.new_tag }}" -m "Release ${{ steps.version.outputs.version }}"
+        git push origin "${{ steps.version.outputs.new_tag }}"
+
+  build-and-push:
+    needs: prepare
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          network=host
+          image=moby/buildkit:latest
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Generate image metadata
+      id: meta
+      run: |
+        VERSION="${{ needs.prepare.outputs.version }}"
+        if [ "${{ matrix.component }}" == "backend" ]; then
+          IMAGE="${{ env.BACKEND_IMAGE_NAME }}"
+        else
+          IMAGE="${{ env.FRONTEND_IMAGE_NAME }}"
+        fi
+        TAGS="${IMAGE}:${VERSION},${IMAGE}:latest,${IMAGE}:main"
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        echo "image=${IMAGE}" >> $GITHUB_OUTPUT
+        echo "Tags for ${{ matrix.component }}: ${TAGS}"
+
+    - name: Build and push ${{ matrix.component }} image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./${{ matrix.component }}
+        file: ./${{ matrix.component }}/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: |
+          org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+          org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+          org.opencontainers.image.revision=${{ github.sha }}
+        cache-from: type=gha,scope=${{ matrix.component }}
+        cache-to: type=gha,mode=max,scope=${{ matrix.component }}
+        platforms: linux/amd64,linux/arm64
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+
+  deployment-summary:
+    needs: [prepare, build-and-push]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Create deployment summary
+      run: |
+        VERSION="${{ needs.prepare.outputs.version }}"
+        TAG="${{ needs.prepare.outputs.new_tag }}"
+        
+        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Version: \`${VERSION}\` (${TAG})" >> $GITHUB_STEP_SUMMARY
+        echo "### Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Images Published:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend**: \`${{ env.BACKEND_IMAGE_NAME }}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend**: \`${{ env.FRONTEND_IMAGE_NAME }}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Also Tagged As:" >> $GITHUB_STEP_SUMMARY
+        echo "- \`latest\`" >> $GITHUB_STEP_SUMMARY
+        echo "- \`main\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 Quick Start:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+        echo "docker compose pull && docker compose up -d" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Docker Hub:" >> $GITHUB_STEP_SUMMARY
+        echo "- [Backend Image](https://hub.docker.com/r/${{ env.BACKEND_IMAGE_NAME }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Frontend Image](https://hub.docker.com/r/${{ env.FRONTEND_IMAGE_NAME }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Version Bumping Guide:" >> $GITHUB_STEP_SUMMARY
+        echo "Use these commit message prefixes to control versioning:" >> $GITHUB_STEP_SUMMARY
+        echo "- \`breaking:\` or \`major:\` → Bumps major version (e.g., 1.0.0 → 2.0.0)" >> $GITHUB_STEP_SUMMARY
+        echo "- \`feat:\` or \`feature:\` → Bumps minor version (e.g., 1.0.0 → 1.1.0)" >> $GITHUB_STEP_SUMMARY
+        echo "- Any other commit → Bumps patch version (e.g., 1.0.0 → 1.0.1)" >> $GITHUB_STEP_SUMMARY
