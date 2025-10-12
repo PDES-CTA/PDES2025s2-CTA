@@ -55,7 +55,6 @@ jobs:
       run: |
         if [ -f frontend/coverage/lcov.info ]; then
           echo "Frontend coverage report found"
-          ls -lh frontend/coverage/lcov.info
         else
           echo "Frontend coverage report not found"
           exit 1
@@ -109,7 +108,6 @@ jobs:
       run: |
         if [ -f backend/coverage/jacoco.xml ]; then
           echo "Backend coverage report found"
-          ls -lh backend/coverage/jacoco.xml
         else
           echo "Backend coverage report not found"
           exit 1
@@ -213,5 +211,5 @@ jobs:
           exit 1
         else
           echo "### All quality checks passed!" >> $GITHUB_STEP_SUMMARY
-          echo "Code meets quality standards. Ready to merge! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "Code meets quality standards. Ready to merge" >> $GITHUB_STEP_SUMMARY
         fi
