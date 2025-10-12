@@ -5,7 +5,8 @@ WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts gradle.properties* ./
 COPY gradle gradle
 
-RUN gradle dependencies --no-daemon --quiet || true
+RUN --mount=type=cache,target=/root/.gradle \
+    gradle dependencies --no-daemon --quiet
 
 COPY src src
 
