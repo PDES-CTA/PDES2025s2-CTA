@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=5",
-    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=5 --fix",
+    "lint": "eslint . --ext ts,tsx --max-warnings=5",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage"
@@ -27,6 +27,8 @@
     "@types/node": "^24.7.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",

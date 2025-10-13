@@ -51,20 +51,20 @@ export const truncateText = (text: string | null | undefined, maxLength: number 
   return `${text.substring(0, maxLength)}...`;
 };
 
-export const cleanObject = <T extends Record<string, any>>(obj: T): Partial<T> => {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
+export const cleanObject = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
+  return Object.entries(obj).reduce<Partial<T>>((acc, [key, value]) => {
     if (value !== null && value !== undefined && value !== '') {
-      acc[key as keyof T] = value;
+      (acc as Record<string, unknown>)[key] = value;
     }
     return acc;
-  }, {} as Partial<T>);
+  }, {});
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
