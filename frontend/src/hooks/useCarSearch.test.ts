@@ -75,7 +75,9 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.fetchAllCars();
+    await act(async () => {
+      await result.current.fetchAllCars();
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -94,7 +96,10 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    const fetchPromise = result.current.fetchAllCars();
+    let fetchPromise: Promise<any>;
+    await act(async () => {
+      fetchPromise = result.current.fetchAllCars();
+    });
 
     // Wait for loading to become true
     await waitFor(() => {
@@ -102,8 +107,10 @@ describe('useCarSearch', () => {
     });
 
     // Resolve the promise
-    resolvePromise!(mockCars);
-    await fetchPromise;
+    await act(async () => {
+      resolvePromise!(mockCars);
+      await fetchPromise!;
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -116,7 +123,10 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.fetchAllCars();
+    await act(async () => {
+      await result.current.fetchAllCars().catch(() => {
+      });
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -130,15 +140,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: 'toyota',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: 'toyota',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -152,15 +164,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '19000',
-      maxPrice: '24000',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '19000',
+        maxPrice: '24000',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -174,15 +188,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '2020',
-      maxYear: '2021',
-      brand: '',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '2020',
+        maxYear: '2021',
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -195,15 +211,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: 'Honda',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: 'Honda',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -217,15 +235,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: 'DIESEL',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: 'DIESEL',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -239,15 +259,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: '',
-      transmission: 'AUTOMATICA',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: '',
+        transmission: 'AUTOMATICA',
+      });
     });
 
     await waitFor(() => {
@@ -261,15 +283,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '15000',
-      maxPrice: '30000',
-      minYear: '2020',
-      maxYear: '',
-      brand: '',
-      fuelType: 'NAFTA',
-      transmission: 'MANUAL',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '15000',
+        maxPrice: '30000',
+        minYear: '2020',
+        maxYear: '',
+        brand: '',
+        fuelType: 'NAFTA',
+        transmission: 'MANUAL',
+      });
     });
 
     await waitFor(() => {
@@ -283,15 +307,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: '',
-      minPrice: '50000',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: '',
+        minPrice: '50000',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
@@ -305,7 +331,10 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    const car = await result.current.getCarById(1);
+    let car: Car | undefined;
+    await act(async () => {
+      car = await result.current.getCarById(1);
+    });
 
     await waitFor(() => {
       expect(car).toEqual(carToFind);
@@ -319,7 +348,9 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await expect(result.current.getCarById(999)).rejects.toThrow();
+    await act(async () => {
+      await expect(result.current.getCarById(999)).rejects.toThrow();
+    });
 
     await waitFor(() => {
       expect(result.current.error).toBe(errorMessage);
@@ -355,15 +386,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    await result.current.searchCars({
-      keyword: 'civic',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      brand: '',
-      fuelType: '',
-      transmission: '',
+    await act(async () => {
+      await result.current.searchCars({
+        keyword: 'civic',
+        minPrice: '',
+        maxPrice: '',
+        minYear: '',
+        maxYear: '',
+        brand: '',
+        fuelType: '',
+        transmission: '',
+      });
     });
 
     await waitFor(() => {
