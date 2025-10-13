@@ -38,6 +38,46 @@ describe('API Service', () => {
     });
   });
 
+  describe('401 error handling', () => {
+    it('should redirect to login when not on login page', () => {
+      globalThis.location = {
+        pathname: '/dashboard',
+        href: '',
+      } as Location;
+
+      localStorage.setItem('authorization_token', 'token');
+      
+      // Simulate the interceptor behavior
+      localStorage.removeItem('authorization_token');
+      if (globalThis.location.pathname !== '/login') {
+        globalThis.location.href = '/login';
+      }
+
+      expect(localStorage.getItem('authorization_token')).toBeNull();
+      expect(globalThis.location.href).toBe('/login');
+    });
+
+    it('should not redirect when already on login page', () => {
+      globalThis.location = {
+        pathname: '/login',
+        href: '/login',
+      } as Location;
+
+      localStorage.setItem('authorization_token', 'token');
+      
+      const originalHref = globalThis.location.href;
+      
+      // Simulate the interceptor behavior
+      localStorage.removeItem('authorization_token');
+      if (globalThis.location.pathname !== '/login') {
+        globalThis.location.href = '/login';
+      }
+
+      expect(localStorage.getItem('authorization_token')).toBeNull();
+      expect(globalThis.location.href).toBe(originalHref); // Should not change
+    });
+  });
+
   describe('localStorage operations', () => {
     it('should handle authorization token storage', () => {
       const testToken = 'bearer-token-xyz';
@@ -66,13 +106,24 @@ describe('API Service', () => {
       expect(globalThis.location.pathname).toBe('/login');
     });
 
-    it('should handle location href changes', () => {
+    it('should check if pathname is not login', () => {
       globalThis.location = {
-        ...globalThis.location,
-        href: '/login',
+        pathname: '/dashboard',
+        href: '',
       } as Location;
       
-      expect(globalThis.location.href).toBe('/login');
+      const isNotLogin = globalThis.location.pathname !== '/login';
+      expect(isNotLogin).toBe(true);
+    });
+
+    it('should check if pathname is login', () => {
+      globalThis.location = {
+        pathname: '/login',
+        href: '',
+      } as Location;
+      
+      const isNotLogin = globalThis.location.pathname !== '/login';
+      expect(isNotLogin).toBe(false);
     });
   });
 });

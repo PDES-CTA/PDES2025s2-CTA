@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Login Page', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to login page before each test
-    await page.goto('http://localhost:5173/login'); // Adjust port if needed
+    await page.goto('http://localhost:5173/login');
   });
 
   test('should display login form', async ({ page }) => {
