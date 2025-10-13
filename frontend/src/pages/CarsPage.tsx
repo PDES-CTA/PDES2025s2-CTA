@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
+import { SearchFiltersState } from '../components/organisms/SearchFilters';
 import { ErrorMessage } from '../components/molecules';
 import { LoadingSpinner } from '../components/atoms';
 import styles from './CarsPage.module.css';
@@ -11,7 +12,7 @@ import { useCarSearch } from '../hooks';
 export default function CarsPage() {
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<SearchFiltersState>({
     keyword: '',
     minPrice: '',
     maxPrice: '',
@@ -46,7 +47,7 @@ export default function CarsPage() {
     fetchAllCars();
   };
 
-  const handleViewDetails = (carId) => {
+  const handleViewDetails = (carId: string | number) => {
     navigate(`/cars/${carId}`);
   };
 

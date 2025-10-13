@@ -1,7 +1,12 @@
 import Button from '../atoms/Button';
 import styles from './ErrorMessage.module.css';
 
-export default function ErrorMessage({ error, onRetry }) {
+interface ErrorMessageProps {
+  readonly error: string;
+  readonly onRetry?: () => void;
+}
+
+export default function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
   return (
     <div className={styles.container}>
       <div className={styles.errorBox}>

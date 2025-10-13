@@ -1,21 +1,31 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Loader } from 'lucide-react';
 import { authService } from '../services/api';
 import { ROUTES } from '../constants';
 import styles from './LoginPage.module.css';
 
-export default function LoginPage({ onLogin }) {
+interface LoginPageProps {
+  readonly onLogin?: () => Promise<void>;
+}
+
+export default function LoginPage({ onLogin }: LoginPageProps) {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.currentTarget);
+    
+    const getStringValue = (key: string): string => {
+      const value = formData.get(key);
+      return typeof value === 'string' ? value : '';
+    };
+    
     const credentials = {
-      email: formData.get('email'),
-      password: formData.get('password'),
+      email: getStringValue('email'),
+      password: getStringValue('password'),
     };
 
     try {
@@ -25,7 +35,7 @@ export default function LoginPage({ onLogin }) {
       if (onLogin) await onLogin();
       navigate(ROUTES.CARS);
     } catch (err) {
-      setError(err.message || 'Error logging in');
+      setError(err instanceof Error ? err.message : 'Error logging in');
     } finally {
       setLoading(false);
     }
@@ -48,8 +58,9 @@ export default function LoginPage({ onLogin }) {
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Email</label>
+            <label htmlFor="email" className={styles.label}>Email</label>
             <input
+              id="email"
               name="email"
               type="email"
               placeholder="you@email.com"
@@ -59,8 +70,9 @@ export default function LoginPage({ onLogin }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Password</label>
+            <label htmlFor="password" className={styles.label}>Password</label>
             <input
+              id="password"
               name="password"
               type="password"
               placeholder="••••••••"

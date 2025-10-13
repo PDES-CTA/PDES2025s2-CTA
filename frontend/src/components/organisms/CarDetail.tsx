@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Button, Badge, LoadingSpinner } from '../atoms';
 import { formatPrice, formatDate, getFuelTypeClass, getTransmissionClass } from '../../utils/carUtils';
+import { Car } from '../../types/car';
 import styles from './CarDetail.module.css';
 
-export default function CarDetail({ carId, onBack, getCarById }) {
-  const [car, setCar] = useState(null);
+interface CarDetailProps {
+  readonly carId: string | number;
+  readonly onBack: () => void;
+  readonly getCarById: (id: string | number) => Promise<Car>;
+}
+
+export default function CarDetail({ carId, onBack, getCarById }: CarDetailProps) {
+  const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCar = async () => {
@@ -15,11 +22,12 @@ export default function CarDetail({ carId, onBack, getCarById }) {
         const carData = await getCarById(carId);
         setCar(carData);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
+
     fetchCar();
   }, [carId, getCarById]);
 
@@ -39,7 +47,7 @@ export default function CarDetail({ carId, onBack, getCarById }) {
 
       <article className={styles.carDetail}>
         <div className={styles.imageSection}>
-          {car.images?.length > 0 ? (
+          {car.images && car.images.length > 0 ? (
             <img
               src={car.images[0]}
               alt={`${car.brand} ${car.model}`}

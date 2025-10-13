@@ -1,20 +1,32 @@
 import { Image } from 'lucide-react';
+import { SyntheticEvent } from 'react';
 import { formatPrice, formatDate } from '../../utils/carUtils';
 import { Badge, Button } from '../atoms';
+import { Car } from '../../types/car';
 import styles from './CarCard.module.css';
 
-export default function CarCard({ car, onViewDetails }) {
-  const hasImages = car.images?.length > 0;
-  
-  const handleImageError = (e) => {
-    e.target.style.display = 'none';
-    e.target.nextSibling.style.display = 'flex';
+interface CarCardProps {
+  readonly car: Car;
+  readonly onViewDetails: () => void;
+}
+
+export default function CarCard({ car, onViewDetails }: CarCardProps) {
+  const hasImages = car.images && car.images.length > 0;
+
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    const placeholder = target.nextSibling as HTMLElement;
+    
+    target.style.display = 'none';
+    if (placeholder) {
+      placeholder.style.display = 'flex';
+    }
   };
 
   return (
     <article className={styles.card}>
       <div className={styles.imageContainer}>
-        {hasImages && (
+        {hasImages && car.images && (
           <img
             src={car.images[0]}
             alt={`${car.brand} ${car.model}`}

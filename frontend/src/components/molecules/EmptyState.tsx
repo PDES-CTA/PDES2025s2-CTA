@@ -2,7 +2,11 @@ import Button from '../atoms/Button';
 import { FileText } from 'lucide-react';
 import styles from './EmptyState.module.css';
 
-export default function EmptyState({ onClearFilters }) {
+interface EmptyStateProps {
+  readonly onClearFilters?: () => void;
+}
+
+export default function EmptyState({ onClearFilters }: EmptyStateProps) {
   return (
     <div className={styles.container}>
       <div className={styles.icon}>

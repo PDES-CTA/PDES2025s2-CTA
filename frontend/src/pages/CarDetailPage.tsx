@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader, AlertCircle, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { carService } from '../services/api';
+import { Car } from '../types/car';
 import { formatPrice, formatKilometers } from '../utils';
 import styles from './CarDetailPage.module.css';
 
 export default function CarDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [car, setCar] = useState(null);
+  const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCar = async () => {
+      if (!id) return;
+      
       try {
         setLoading(true);
         const data = await carService.getCarById(id);
         setCar(data);
       } catch (err) {
-        setError(err.message || 'Error loading car');
+        setError(err instanceof Error ? err.message : 'Error loading car');
         console.error(err);
       } finally {
         setLoading(false);
@@ -29,9 +32,10 @@ export default function CarDetailPage() {
     loadCar();
   }, [id]);
 
-  const handleImageError = (e) => {
-    e.target.onerror = null;
-    e.target.src = 'https://via.placeholder.com/600x400?text=No+Image';
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    target.onerror = null;
+    target.src = 'https://via.placeholder.com/600x400?text=No+Image';
   };
 
   if (loading) {
@@ -67,7 +71,6 @@ export default function CarDetailPage() {
 
         <div className={styles.card}>
           <div className={styles.cardLayout}>
-            {/* Image Section */}
             <div className={styles.imageSection}>
               {car.images?.[0] ? (
                 <img
@@ -83,7 +86,6 @@ export default function CarDetailPage() {
               )}
             </div>
 
-            {/* Info Section */}
             <div className={styles.infoSection}>
               <h1 className={styles.title}>
                 {car.brand} {car.model}

@@ -94,6 +94,6 @@ export const ROUTES = {
 
 // Helper for dynamic routes
 export const generateRoute = {
-  carDetail: (id) => `/cars/${id}`,
-  userProfile: (id) => `/profile/${id}`
+  carDetail: (id: string | number): string => `/cars/${id}`,
+  userProfile: (id: string | number): string => `/profile/${id}`
 };
