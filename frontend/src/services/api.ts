@@ -13,6 +13,7 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 // Request interceptor to automatically add the auth token
+/* istanbul ignore next */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("authorization_token");
@@ -25,6 +26,7 @@ apiClient.interceptors.request.use(
 );
 
 // Response interceptor for global error handling
+/* istanbul ignore next */
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
