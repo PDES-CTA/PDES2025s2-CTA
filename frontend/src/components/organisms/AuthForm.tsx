@@ -40,11 +40,11 @@ export default function AuthForm({
         <h1 className={styles.title}>{title}</h1>
 
         {error && (
-          <div className={styles.errorMessage}>
+          <div className={styles.errorMessage} role="alert" data-testid="error-message">
             {error}
           </div>
         )}
-
+        
         <form onSubmit={onSubmit} className={styles.form}>
           {children}
 
