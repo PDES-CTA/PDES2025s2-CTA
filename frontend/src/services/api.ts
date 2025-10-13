@@ -30,7 +30,9 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("authorization_token");
-      globalThis.location.href = "/login";
+      if (globalThis.location.pathname !== '/login') {
+        globalThis.location.href = "/login";
+      }
     }
     const message = error.response?.data || error.message;
     return Promise.reject(new Error(typeof message === 'string' ? message : 'An error occurred'));
@@ -100,6 +102,8 @@ interface Purchase {
   purchaseDate?: string;
   finalPrice?: number;
 }
+
+export type { Purchase };
 
 interface PurchaseData {
   carId: number;

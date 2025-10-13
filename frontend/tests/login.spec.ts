@@ -47,57 +47,24 @@ test.describe('Login Page', () => {
   });
 
     test('should show error message for invalid credentials', async ({ page }) => {
-  // Log all network requests to see if our mock is working
-  page.on('request', request => {
-    console.log('Request:', request.url(), request.method());
-  });
-  
-  page.on('response', response => {
-    console.log('Response:', response.url(), response.status());
-  });
-
-  // Mock failed login - try different URL patterns
-  let routeMatched = false;
-  await page.route('**/**/login', async (route) => {
-    console.log('Route matched!', route.request().url());
-    routeMatched = true;
-    await route.fulfill({
-      status: 401,
-      contentType: 'application/json',
-      body: JSON.stringify('Invalid credentials'),
+    await page.goto('/login');
+    await page.route('**/api/auth/login', async (route) => {
+      console.log('API route matched', route.request().url());
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify('Invalid credentials'),
+      });
     });
-  });
 
-  await page.getByLabel('Email').fill('wrong@example.com');
-  await page.getByLabel('Password').fill('wrongpassword');
-  await page.getByRole('button', { name: 'Log In' }).click();
+    await page.getByLabel('Email').fill('wrong@example.com');
+    await page.getByLabel('Password').fill('wrongpassword');
+    await page.getByRole('button', { name: 'Log In' }).click();
 
-  // Wait a bit
-  await page.waitForTimeout(2000);
-
-  console.log('Route was matched:', routeMatched);
-
-  // Take a screenshot
-  await page.screenshot({ path: 'test-results/error-state.png', fullPage: true });
-
-  // Check the page content
-  const bodyText = await page.textContent('body');
-  console.log('Body text after submit:', bodyText);
-
-  // Check for error using role="alert"
-  const alertExists = await page.getByRole('alert').count();
-  console.log('Alert count:', alertExists);
-
-  if (alertExists > 0) {
-    await expect(page.getByRole('alert')).toBeVisible();
+    // Wait for the error to appear
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('alert')).toContainText('Invalid credentials');
-  } else {
-    console.log('No alert found! Checking for any error text...');
-    // Try to find any text that might be an error
-    const pageContent = await page.content();
-    console.log('Full page HTML:', pageContent);
-  }
-});
+  });
 
   test('should show loading state during submission', async ({ page }) => {
     // Delay the API response
