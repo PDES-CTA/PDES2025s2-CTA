@@ -3,7 +3,7 @@ export const ROLES = {
   BUYER: 'BUYER',
   DEALERSHIP: 'DEALERSHIP',
   ADMINISTRATOR: 'ADMINISTRATOR'
-};
+} as const;
 
 // Fuel types
 export const FUEL_TYPES = {
@@ -12,7 +12,7 @@ export const FUEL_TYPES = {
   HYBRID: 'HYBRID',
   ELECTRIC: 'ELECTRIC',
   GNC: 'GNC'
-};
+} as const;
 
 export const FUEL_TYPE_LABELS = {
   GASOLINE: 'Gasoline',
@@ -27,7 +27,7 @@ export const TRANSMISSION_TYPES = {
   MANUAL: 'MANUAL',
   AUTOMATIC: 'AUTOMATIC',
   SEMI_AUTOMATIC: 'SEMI_AUTOMATIC'
-};
+} as const;
 
 export const TRANSMISSION_TYPE_LABELS = {
   MANUAL: 'Manual',
@@ -41,7 +41,7 @@ export const PURCHASE_STATUS = {
   CONFIRMED: 'CONFIRMED',
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED'
-};
+} as const;
 
 export const PURCHASE_STATUS_LABELS = {
   PENDING: 'Pending',
@@ -55,7 +55,7 @@ export const PAYMENT_METHODS = {
   CASH: 'CASH',
   CHECK: 'CHECK',
   CREDIT_CARD: 'CREDIT_CARD'
-};
+} as const;
 
 export const PAYMENT_METHOD_LABELS = {
   CASH: 'Cash',
@@ -69,7 +69,7 @@ export const REPORT_TYPES = {
   TOP_BUYERS: 'TOP_BUYERS',
   FAVORITE_CARS: 'FAVORITE_CARS',
   TOP_AGENCIES: 'TOP_AGENCIES'
-};
+} as const;
 
 export const REPORT_TYPE_LABELS = {
   MOST_SOLD_CARS: 'Most Sold Cars',
@@ -90,7 +90,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   ADMIN: '/admin',
   PROFILE: '/profile'
-};
+} as const;
 
 // Helper for dynamic routes
 export const generateRoute = {
