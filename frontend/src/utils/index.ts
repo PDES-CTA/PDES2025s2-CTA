@@ -33,17 +33,17 @@ export const isValidEmail = (email: string): boolean => {
 };
 
 export const isValidDNI = (dni: string): boolean => {
-  const cleanDni = dni.replace(/\D/g, '');
+  const cleanDni = dni.replaceAll(/\D/g, '');
   return /^\d{7,8}$/.test(cleanDni);
 };
 
 export const isValidCUIT = (cuit: string): boolean => {
-  const cleanCuit = cuit.replace(/[-_]/g, '');
+  const cleanCuit = cuit.replaceAll(/[-_]/g, '');
   return /^\d{11}$/.test(cleanCuit);
 };
 
 export const isValidPhone = (phone: string): boolean => {
-  const cleanPhone = phone.replace(/\D/g, '');
+  const cleanPhone = phone.replaceAll(/\D/g, '');
   return /^\d{10}$/.test(cleanPhone);
 };
 

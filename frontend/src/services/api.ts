@@ -30,7 +30,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("authorization_token");
-      window.location.href = "/login";
+      globalThis.location.href = "/login";
     }
     const message = error.response?.data || error.message;
     return Promise.reject(new Error(typeof message === 'string' ? message : 'An error occurred'));
@@ -164,7 +164,7 @@ export const authService = {
 
   logout(): void {
     localStorage.removeItem("authorization_token");
-    window.location.href = "/login";
+    globalThis.location.href = "/login";
   }
 };
 

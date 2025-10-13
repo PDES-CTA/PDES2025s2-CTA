@@ -16,7 +16,7 @@ export default function CarList({ cars, onViewDetails }: CarListProps) {
   return (
     <div className={styles.container}>
       <div className={styles.resultsCount}>
-        {cars.length} car{cars.length !== 1 ? 's' : ''} found
+        {cars.length} car{cars.length === 1 ? '' : 's'} found
       </div>
       <div className={styles.grid}>
         {cars.map((car) => (
