@@ -1,4 +1,7 @@
-export const formatPrice = (price) => {
+export type FuelType = 'NAFTA' | 'DIESEL' | 'HIBRIDO' | 'ELECTRICO' | 'GNC';
+export type TransmissionType = 'MANUAL' | 'AUTOMATICA' | 'SEMI_AUTOMATICA';
+
+export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -7,7 +10,7 @@ export const formatPrice = (price) => {
   }).format(price);
 };
 
-export const formatDate = (dateString) => {
+export const formatDate = (dateString: string | Date): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('es-AR', {
     year: 'numeric',
@@ -16,12 +19,12 @@ export const formatDate = (dateString) => {
   });
 };
 
-export const formatMileage = (mileage) => {
+export const formatMileage = (mileage: number): string => {
   return `${mileage.toLocaleString()} km`;
 };
 
-export const getFuelTypeClass = (fuelType) => {
-  const classes = {
+export const getFuelTypeClass = (fuelType: FuelType): string => {
+  const classes: Record<FuelType, string> = {
     'NAFTA': 'fuel-nafta',
     'DIESEL': 'fuel-diesel',
     'HIBRIDO': 'fuel-hybrid',
@@ -31,8 +34,8 @@ export const getFuelTypeClass = (fuelType) => {
   return classes[fuelType] || '';
 };
 
-export const getTransmissionClass = (transmission) => {
-  const classes = {
+export const getTransmissionClass = (transmission: TransmissionType): string => {
+  const classes: Record<TransmissionType, string> = {
     'MANUAL': 'transmission-manual',
     'AUTOMATICA': 'transmission-auto',
     'SEMI_AUTOMATICA': 'transmission-semi'
@@ -40,8 +43,8 @@ export const getTransmissionClass = (transmission) => {
   return classes[transmission] || '';
 };
 
-export const getFuelTypeLabel = (fuelType) => {
-  const labels = {
+export const getFuelTypeLabel = (fuelType: FuelType): string => {
+  const labels: Record<FuelType, string> = {
     'NAFTA': 'Nafta',
     'DIESEL': 'Diesel',
     'HIBRIDO': 'Híbrido',
@@ -51,8 +54,8 @@ export const getFuelTypeLabel = (fuelType) => {
   return labels[fuelType] || fuelType;
 };
 
-export const getTransmissionLabel = (transmission) => {
-  const labels = {
+export const getTransmissionLabel = (transmission: TransmissionType): string => {
+  const labels: Record<TransmissionType, string> = {
     'MANUAL': 'Manual',
     'AUTOMATICA': 'Automática',
     'SEMI_AUTOMATICA': 'Semi-automática'

@@ -1,4 +1,15 @@
+import { InputHTMLAttributes, ChangeEvent } from 'react';
 import styles from './Input.module.css';
+
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  readonly label?: string;
+  readonly type?: string;
+  readonly placeholder?: string;
+  readonly value?: string;
+  readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  readonly className?: string;
+}
+
 export default function Input({
   label,
   type = 'text',
@@ -7,7 +18,7 @@ export default function Input({
   onChange,
   className = '',
   ...props
-}) {
+}: InputProps) {
   return (
     <div className={styles.inputGroup}>
       {label && (

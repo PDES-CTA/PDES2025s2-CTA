@@ -1,4 +1,19 @@
+import { SelectHTMLAttributes, ChangeEvent } from 'react';
 import styles from './Select.module.css';
+
+interface SelectOption {
+  readonly value: string | number;
+  readonly label: string;
+}
+
+interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+  readonly label?: string;
+  readonly value?: string | number;
+  readonly onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
+  readonly options?: readonly SelectOption[];
+  readonly className?: string;
+}
+
 export default function Select({
   label,
   value,
@@ -6,7 +21,7 @@ export default function Select({
   options = [],
   className = '',
   ...props
-}) {
+}: SelectProps) {
   return (
     <div className={styles.selectGroup}>
       {label && (
