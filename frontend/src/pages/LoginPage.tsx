@@ -7,7 +7,7 @@ import FormField from '../components/atoms/FormField';
 import { useAuthForm } from '../hooks/useAuthForm';
 
 interface LoginPageProps {
-  onLogin?: () => Promise<void>;
+  readonly onLogin?: () => Promise<void>;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
