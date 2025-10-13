@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, waitFor, cleanup, act } from '@testing-library/react';
 import { useCarSearch } from './useCarSearch';
 import * as carService from '../services/api';
 import { Car } from '../types/car';
@@ -58,6 +58,10 @@ describe('useCarSearch', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it('should initialize with default values', () => {
     const { result } = renderHook(() => useCarSearch());
 
@@ -112,11 +116,7 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    try {
-      await result.current.fetchAllCars();
-    } catch (error) {
-      throw new Error(`Exception: ${error}`);
-    }
+    await result.current.fetchAllCars();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -329,21 +329,25 @@ describe('useCarSearch', () => {
   it('should allow setting cars manually', async () => {
     const { result } = renderHook(() => useCarSearch());
 
-    await waitFor(() => {
+    act(() => {
       result.current.setCars(mockCars);
     });
 
-    expect(result.current.cars).toEqual(mockCars);
+    await waitFor(() => {
+      expect(result.current.cars).toEqual(mockCars);
+    });
   });
 
   it('should allow setting error manually', async () => {
     const { result } = renderHook(() => useCarSearch());
 
-    await waitFor(() => {
+    act(() => {
       result.current.setError('Custom error');
     });
 
-    expect(result.current.error).toBe('Custom error');
+    await waitFor(() => {
+      expect(result.current.error).toBe('Custom error');
+    });
   });
 
   it('should search by keyword in model field', async () => {
