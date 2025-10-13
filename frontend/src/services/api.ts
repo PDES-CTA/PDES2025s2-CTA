@@ -103,8 +103,6 @@ interface Purchase {
   finalPrice?: number;
 }
 
-export type { Purchase };
-
 interface PurchaseData {
   carId: number;
   paymentMethod: string;
