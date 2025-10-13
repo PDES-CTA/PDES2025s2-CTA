@@ -1,105 +1,126 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Loader } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { UserPlus } from 'lucide-react';
 import { authService } from '../services/api';
 import { ROUTES } from '../constants';
-import styles from './LoginPage.module.css';
+import AuthForm from '../components/organisms/AuthForm';
+import FormField from '../components/atoms/FormField';
+import { useAuthForm } from '../hooks/useAuthForm';
 
-interface LoginPageProps {
-  readonly onLogin?: () => Promise<void>;
-}
-
-export default function LoginPage({ onLogin }: LoginPageProps) {
+export default function RegisterPage() {
   const navigate = useNavigate();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { error, loading, getStringValue, handleFormSubmit } = useAuthForm();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    const getStringValue = (key: string): string => {
-      const value = formData.get(key);
-      return typeof value === 'string' ? value : '';
-    };
-    
-    const credentials = {
-      email: getStringValue('email'),
-      password: getStringValue('password'),
-    };
+  const onSubmit = async (formData: FormData) => {
+    const password = getStringValue(formData, 'password');
+    const confirmPassword = getStringValue(formData, 'confirmPassword');
 
-    try {
-      setLoading(true);
-      setError('');
-      await authService.login(credentials);
-      if (onLogin) await onLogin();
-      navigate(ROUTES.CARS);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error logging in');
-    } finally {
-      setLoading(false);
+    if (password !== confirmPassword) {
+      throw new Error('Passwords do not match');
     }
+
+    const firstName = getStringValue(formData, 'firstName');
+    const lastName = getStringValue(formData, 'lastName');
+
+    const userData = {
+      email: getStringValue(formData, 'email'),
+      password: password,
+      name: `${firstName} ${lastName}`,
+      dni: getStringValue(formData, 'dni'),
+      role: 'BUYER' as const,
+    };
+
+    await authService.register(userData);
+    navigate(ROUTES.LOGIN);
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <div className={styles.iconContainer}>
-          <LogIn className={styles.icon} size={48} />
-        </div>
-
-        <h1 className={styles.title}>Log In</h1>
-
-        {error && (
-          <div className={styles.errorMessage}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@email.com"
-              className={styles.input}
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              className={styles.input}
-              required
-            />
-          </div>
-
-          <button type="submit" disabled={loading} className={styles.submitButton}>
-            {loading ? (
-              <>
-                <Loader className={styles.buttonSpinner} size={20} />
-                Logging in...
-              </>
-            ) : (
-              'Log In'
-            )}
-          </button>
-        </form>
-
-        <p className={styles.footer}>
-          Don't have an account?{' '}
-          <Link to={ROUTES.REGISTER} className={styles.link}>
-            Sign up
-          </Link>
-        </p>
+    <AuthForm
+      title="Create Account"
+      icon={UserPlus}
+      error={error}
+      loading={loading}
+      onSubmit={(e) => handleFormSubmit(e, onSubmit)}
+      submitButtonText="Sign Up"
+      loadingText="Creating account..."
+      footerText="Already have an account?"
+      footerLinkText="Log in"
+      footerLinkTo={ROUTES.LOGIN}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+        <FormField
+          label="First Name"
+          id="firstName"
+          name="firstName"
+          type="text"
+          required
+        />
+        <FormField
+          label="Last Name"
+          id="lastName"
+          name="lastName"
+          type="text"
+          required
+        />
       </div>
-    </div>
+
+      <FormField
+        label="Email"
+        id="email"
+        name="email"
+        type="email"
+        placeholder="you@email.com"
+        required
+      />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+        <FormField
+          label="ID Number"
+          id="dni"
+          name="dni"
+          type="text"
+          pattern="\d{7,8}"
+          placeholder="12345678"
+          required
+        />
+        <FormField
+          label="Phone"
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="1123456789"
+          required
+        />
+      </div>
+
+      <FormField
+        label="Address"
+        id="address"
+        name="address"
+        type="text"
+        placeholder="Street 123"
+        required
+      />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+        <FormField
+          label="Password"
+          id="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          minLength={8}
+          required
+        />
+        <FormField
+          label="Confirm Password"
+          id="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          placeholder="••••••••"
+          minLength={8}
+          required
+        />
+      </div>
+    </AuthForm>
   );
 }

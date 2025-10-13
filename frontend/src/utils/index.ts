@@ -26,6 +26,9 @@ export const formatDate = (date: string | Date | null | undefined): string => {
 // ============ VALIDATORS ============
 export const isValidEmail = (email: string): boolean => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (email.length > 254) return false;
+  
   return regex.test(email);
 };
 
