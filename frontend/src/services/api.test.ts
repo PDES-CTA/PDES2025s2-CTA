@@ -7,15 +7,15 @@ describe('API Service', () => {
   beforeEach(() => {
     localStorage.clear();
     // Mock globalThis.location
-    delete (globalThis as any).location;
-    (globalThis as any).location = {
+    delete (globalThis as { location?: Location }).location;
+    globalThis.location = {
       pathname: '/dashboard',
       href: '',
-    };
+    } as Location;
   });
 
   afterEach(() => {
-    (globalThis as any).location = originalLocation;
+    globalThis.location = originalLocation;
   });
 
   describe('authService', () => {
@@ -58,12 +58,20 @@ describe('API Service', () => {
     it('should handle pathname checks', () => {
       expect(globalThis.location.pathname).toBe('/dashboard');
       
-      (globalThis as any).location.pathname = '/login';
+      globalThis.location = {
+        ...globalThis.location,
+        pathname: '/login',
+      } as Location;
+      
       expect(globalThis.location.pathname).toBe('/login');
     });
 
     it('should handle location href changes', () => {
-      (globalThis as any).location.href = '/login';
+      globalThis.location = {
+        ...globalThis.location,
+        href: '/login',
+      } as Location;
+      
       expect(globalThis.location.href).toBe('/login');
     });
   });
