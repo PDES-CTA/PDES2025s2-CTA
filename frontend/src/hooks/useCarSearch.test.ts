@@ -115,7 +115,7 @@ describe('useCarSearch', () => {
     try {
       await result.current.fetchAllCars();
     } catch (error) {
-      console.log(`Exception: ${error}`);
+      throw new Error(`Exception: ${error}`);
     }
 
     await waitFor(() => {
