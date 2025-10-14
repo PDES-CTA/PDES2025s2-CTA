@@ -8,7 +8,7 @@ jobs:
   frontend-quality:
     name: Frontend Checks & Tests
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -44,8 +44,8 @@ jobs:
       working-directory: ./frontend
       run: npm audit --audit-level=moderate
 
-    # === TESTS & COVERAGE ===
-    - name: Run frontend tests with coverage
+    # === UNIT TESTS & COVERAGE ===
+    - name: Run frontend unit tests with coverage
       working-directory: ./frontend
       run: npm run test:coverage
 
@@ -66,10 +66,27 @@ jobs:
         path: frontend/coverage/
         retention-days: 1
 
+    # === E2E TESTS WITH PLAYWRIGHT ===
+    - name: Install Playwright Browsers
+      working-directory: ./frontend
+      run: npx playwright install --with-deps chromium
+
+    - name: Run Playwright E2E tests
+      working-directory: ./frontend
+      run: npm run test:e2e
+
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: frontend/playwright-report/
+        retention-days: 7
+
   backend-quality:
     name: Backend Checks & Tests
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -111,7 +128,7 @@ jobs:
     name: SonarCloud Analysis
     needs: [frontend-quality, backend-quality]
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -158,11 +175,11 @@ jobs:
   security-scan:
     name: Security Vulnerability Scan
     runs-on: ubuntu-latest
-    
+
     permissions:
       security-events: write
       contents: read
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -198,42 +215,42 @@ jobs:
     needs: [frontend-quality, backend-quality, sonarcloud, security-scan]
     runs-on: ubuntu-latest
     if: always()
-    
+
     steps:
     - name: Check all jobs status
       run: |
         echo "## Quality Checks Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Jobs Status:" >> $GITHUB_STEP_SUMMARY
-        echo "- Frontend Quality: **${{ needs.frontend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend Quality (Unit + E2E): **${{ needs.frontend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "- Backend Quality: **${{ needs.backend-quality.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "- SonarCloud Analysis: **${{ needs.sonarcloud.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "- Security Vulnerability Scan: **${{ needs.security-scan.result }}**" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         # Check if any critical job failed
         FAILED=false
-        
+
         if [ "${{ needs.frontend-quality.result }}" != "success" ]; then
           echo " **Frontend quality checks failed**" >> $GITHUB_STEP_SUMMARY
           FAILED=true
         fi
-        
+
         if [ "${{ needs.backend-quality.result }}" != "success" ]; then
           echo " **Backend quality checks failed**" >> $GITHUB_STEP_SUMMARY
           FAILED=true
         fi
-        
+
         if [ "${{ needs.sonarcloud.result }}" != "success" ]; then
           echo " **SonarCloud analysis failed**" >> $GITHUB_STEP_SUMMARY
           FAILED=true
         fi
-        
+
         if [ "${{ needs.security-scan.result }}" != "success" ]; then
           echo " **Security scan failed**" >> $GITHUB_STEP_SUMMARY
           FAILED=true
         fi
-        
+
         if [ "$FAILED" = true ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Quality gates not met!" >> $GITHUB_STEP_SUMMARY

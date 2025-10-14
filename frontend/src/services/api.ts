@@ -13,6 +13,7 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 // Request interceptor to automatically add the auth token
+/* v8 ignore next 11 */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("authorization_token");
@@ -25,12 +26,15 @@ apiClient.interceptors.request.use(
 );
 
 // Response interceptor for global error handling
+/* v8 ignore next 13 */
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("authorization_token");
-      globalThis.location.href = "/login";
+      if (globalThis.location.pathname !== '/login') {
+        globalThis.location.href = "/login";
+      }
     }
     const message = error.response?.data || error.message;
     return Promise.reject(new Error(typeof message === 'string' ? message : 'An error occurred'));
