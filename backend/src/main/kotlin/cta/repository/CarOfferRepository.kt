@@ -14,12 +14,13 @@ interface CarOfferRepository : JpaRepository<CarOffer, Long> {
         dealershipId: Long,
     ): CarOffer?
 
-    @Query("""
+    @Query(
+        """
         SELECT c
         FROM CarOffer c 
         LEFT JOIN c.car car
         WHERE car.available
-    """
+    """,
     )
     fun findByAvailableCar(): List<CarOffer>
 }

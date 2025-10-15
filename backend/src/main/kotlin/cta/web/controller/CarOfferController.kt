@@ -4,7 +4,6 @@ import cta.service.CarOfferService
 import cta.web.dto.CarOfferCreateRequest
 import cta.web.dto.CarOfferResponse
 import cta.web.dto.CarOfferUpdateRequest
-import cta.web.dto.CarResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController
 class CarOfferController(
     private val carOfferService: CarOfferService,
 ) {
-
     @GetMapping("/available")
     @Operation(summary = "Get all available cars")
     fun getAllAvailableCarOffers(): ResponseEntity<List<CarOfferResponse>> {

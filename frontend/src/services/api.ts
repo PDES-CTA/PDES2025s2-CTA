@@ -52,9 +52,9 @@ interface RegisterData {
   email: string;
   password: string;
   firstName: string;
-  lastName: String;
-  address: String;
-  phone: String;
+  lastName: string;
+  address: string;
+  phone: string;
   dni?: string;
   cuit?: string;
   role: 'BUYER' | 'DEALERSHIP';
