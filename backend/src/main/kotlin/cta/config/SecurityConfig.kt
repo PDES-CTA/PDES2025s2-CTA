@@ -61,6 +61,8 @@ class SecurityConfig(
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**",
+                        "/api/offer/available",
+                        "/api/cars"
                     ).permitAll()
                     // Routes that require authentication
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")

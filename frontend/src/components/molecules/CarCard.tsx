@@ -3,15 +3,17 @@ import { SyntheticEvent } from 'react';
 import { formatPrice, formatDate } from '../../utils/carUtils';
 import { Badge, Button } from '../atoms';
 import { Car } from '../../types/car';
+import { CarOffer } from '../../types/carOffer';
 import styles from './CarCard.module.css';
 
 interface CarCardProps {
   readonly car: Car;
+  readonly carOffer: CarOffer;
   readonly onViewDetails: () => void;
 }
 
-export default function CarCard({ car, onViewDetails }: CarCardProps) {
-  const hasImages = car.images && car.images.length > 0;
+export default function CarCard({ car, carOffer, onViewDetails }: CarCardProps) {
+  const hasImages = carOffer.images && carOffer.images.length > 0;
 
   const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
@@ -26,9 +28,9 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   return (
     <article className={styles.card}>
       <div className={styles.imageContainer}>
-        {hasImages && car.images && (
+        {hasImages && carOffer.images && (
           <img
-            src={car.images[0]}
+            src={carOffer.images[0]}
             alt={`${car.brand} ${car.model}`}
             className={styles.image}
             onError={handleImageError}
@@ -51,7 +53,8 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         </header>
 
         <div className={styles.priceSection}>
-          <div className={styles.price}>{formatPrice(car.price)}</div>
+          <div className={styles.price}>{formatPrice(carOffer.price)}</div>
+          
           <div className={styles.details}>
             Year {car.year} • {car.mileage.toLocaleString()} km
           </div>
@@ -63,8 +66,8 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
           <Badge variant="neutral" text={car.color} />
         </div>
 
-        {car.description && (
-          <p className={styles.description}>{car.description}</p>
+        {carOffer.dealershipNotes && (
+          <p className={styles.description}>{carOffer.dealershipNotes}</p>
         )}
 
         <footer className={styles.footer}>

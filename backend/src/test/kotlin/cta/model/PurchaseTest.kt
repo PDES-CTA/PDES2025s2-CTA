@@ -29,13 +29,10 @@ class PurchaseTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2023
-                price = BigDecimal("25000.00")
                 mileage = 15000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
-                description = "Well maintained car"
-                dealershipId = 1L
                 available = true
             }
 

@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.math.BigDecimal
 
 @SpringBootTest(
     properties = [
@@ -49,8 +48,8 @@ class CarControllerTest {
         id: Long = 1L,
         brand: String = "Toyota",
         model: String = "Corolla",
+        plate: String = "ABC123",
         year: Int = 2020,
-        price: BigDecimal = BigDecimal("20000"),
         available: Boolean = true,
     ): Car {
         return Car().apply {
@@ -58,10 +57,10 @@ class CarControllerTest {
             this.brand = brand
             this.model = model
             this.year = year
-            this.price = price
             this.fuelType = FuelType.GASOLINE
             this.transmission = TransmissionType.AUTOMATIC
             this.mileage = 50000
+            this.plate = plate
             this.color = "White"
             this.available = available
         }
@@ -118,7 +117,7 @@ class CarControllerTest {
             .andExpect(jsonPath("$.brand").value("Toyota"))
             .andExpect(jsonPath("$.model").value("Corolla"))
             .andExpect(jsonPath("$.year").value(2020))
-            .andExpect(jsonPath("$.price").value(20000))
+            .andExpect(jsonPath("$.plate").value("ABC123"))
 
         verify(carService).findById(1L)
     }
@@ -149,25 +148,6 @@ class CarControllerTest {
             .andExpect(jsonPath("$").isArray)
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].brand").value("Toyota"))
-
-        verify(carService).searchCars(any())
-    }
-
-    @Test
-    fun `should search cars with price range and return 200 OK`() {
-        // Given
-        val cars = listOf(createMockCar(price = BigDecimal("20000")))
-        whenever(carService.searchCars(any())).thenReturn(cars)
-
-        // When & Then
-        mockMvc.perform(
-            get("/api/cars/search")
-                .param("minPrice", "15000")
-                .param("maxPrice", "25000"),
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(1))
 
         verify(carService).searchCars(any())
     }
@@ -270,43 +250,6 @@ class CarControllerTest {
     }
 
     @Test
-    fun `should get cars by dealership and return 200 OK`() {
-        // Given
-        val dealershipId = 1L
-        val cars =
-            listOf(
-                createMockCar(id = 1L, brand = "Toyota"),
-                createMockCar(id = 2L, brand = "Honda"),
-            )
-        whenever(carService.findByDealership(dealershipId)).thenReturn(cars)
-
-        // When & Then
-        mockMvc.perform(get("/api/cars/dealership/{dealershipId}", dealershipId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].brand").value("Toyota"))
-            .andExpect(jsonPath("$[1].brand").value("Honda"))
-
-        verify(carService).findByDealership(dealershipId)
-    }
-
-    @Test
-    fun `should return empty list when dealership has no cars`() {
-        // Given
-        val dealershipId = 1L
-        whenever(carService.findByDealership(dealershipId)).thenReturn(emptyList())
-
-        // When & Then
-        mockMvc.perform(get("/api/cars/dealership/{dealershipId}", dealershipId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(0))
-
-        verify(carService).findByDealership(dealershipId)
-    }
-
-    @Test
     fun `should create car and return 201 CREATED`() {
         // Given
         val request =
@@ -314,12 +257,11 @@ class CarControllerTest {
                 brand = "Toyota",
                 model = "Corolla",
                 year = 2020,
-                price = BigDecimal("20000"),
                 fuelType = FuelType.GASOLINE,
                 transmission = TransmissionType.AUTOMATIC,
                 mileage = 50000,
                 color = "White",
-                dealershipId = 1L,
+                plate = "ABC123",
             )
 
         val savedCar = createMockCar(id = 1L)
@@ -336,7 +278,7 @@ class CarControllerTest {
             .andExpect(jsonPath("$.brand").value("Toyota"))
             .andExpect(jsonPath("$.model").value("Corolla"))
             .andExpect(jsonPath("$.year").value(2020))
-            .andExpect(jsonPath("$.price").value(20000))
+            .andExpect(jsonPath("$.plate").value("ABC123"))
 
         verify(carService).createCar(any())
     }
@@ -372,7 +314,6 @@ class CarControllerTest {
                 brand = "Toyota",
                 model = "Camry",
                 year = 2021,
-                price = BigDecimal("25000"),
                 fuelType = FuelType.HYBRID,
                 transmission = TransmissionType.AUTOMATIC,
                 mileage = 30000,
@@ -416,27 +357,6 @@ class CarControllerTest {
                 .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should update car price and return 200 OK`() {
-        // Given
-        val carId = 1L
-        val newPrice = BigDecimal("22000")
-        val updatedCar = createMockCar(id = carId, price = newPrice)
-
-        whenever(carService.updatePrice(carId, newPrice)).thenReturn(updatedCar)
-
-        // When & Then
-        mockMvc.perform(
-            patch("/api/cars/{id}/price", carId)
-                .param("price", newPrice.toString()),
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(carId))
-            .andExpect(jsonPath("$.price").value(22000))
-
-        verify(carService).updatePrice(carId, newPrice)
     }
 
     @Test

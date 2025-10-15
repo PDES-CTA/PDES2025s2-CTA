@@ -23,7 +23,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
-import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -54,14 +53,11 @@ class FavoriteServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = 15000
                 color = "White"
-                description = "Excellent condition"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
 
@@ -630,13 +626,11 @@ class FavoriteServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
 

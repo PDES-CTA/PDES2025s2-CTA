@@ -23,14 +23,14 @@ export default function CarsPage() {
     transmission: ''
   });
 
-  const { cars, loading, error, fetchAllCars, searchCars } = useCarSearch();
+  const { carOffers, loading, error, fetchAllCarOffers, searchCarOffers } = useCarSearch();
 
   useEffect(() => {
-    fetchAllCars();
-  }, [fetchAllCars]);
+    fetchAllCarOffers();
+  }, [fetchAllCarOffers]);
 
   const handleSearch = async () => {
-    await searchCars(filters);
+    await searchCarOffers(filters);
   };
 
   const handleClearFilters = () => {
@@ -44,7 +44,7 @@ export default function CarsPage() {
       fuelType: '',
       transmission: ''
     });
-    fetchAllCars();
+    fetchAllCarOffers();
   };
 
   const handleViewDetails = (carId: string | number) => {
@@ -57,7 +57,7 @@ export default function CarsPage() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage error={error} onRetry={fetchAllCars} />;
+  if (error) return <ErrorMessage error={error} onRetry={fetchAllCarOffers} />;
 
   return (
     <div className={styles.page}>
@@ -82,7 +82,7 @@ export default function CarsPage() {
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
 
-        <CarList cars={cars} onViewDetails={handleViewDetails} />
+        <CarList carOffers={carOffers} onViewDetails={handleViewDetails} />
       </div>
     </div>
   );

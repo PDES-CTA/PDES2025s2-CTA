@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 
 @RestController
 @RequestMapping("/api/cars")
@@ -52,8 +51,6 @@ class CarController(
     @Operation(summary = "Search cars using filters")
     fun searchCars(
         @RequestParam(required = false) keyword: String?,
-        @RequestParam(required = false) minPrice: BigDecimal?,
-        @RequestParam(required = false) maxPrice: BigDecimal?,
         @RequestParam(required = false) minYear: Int?,
         @RequestParam(required = false) maxYear: Int?,
         @RequestParam(required = false) brand: String?,
@@ -83,8 +80,6 @@ class CarController(
         val filters =
             CarSearchFilters(
                 keyword = keyword,
-                minPrice = minPrice,
-                maxPrice = maxPrice,
                 minYear = minYear,
                 maxYear = maxYear,
                 brand = brand,
@@ -93,15 +88,6 @@ class CarController(
             )
 
         val cars = carService.searchCars(filters)
-        return ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
-    }
-
-    @GetMapping("/dealership/{dealershipId}")
-    @Operation(summary = "Get cars by an existent dealership ID")
-    fun getCarsByDealership(
-        @PathVariable dealershipId: Long,
-    ): ResponseEntity<List<CarResponse>> {
-        val cars = carService.findByDealership(dealershipId)
         return ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
     }
 
@@ -122,16 +108,6 @@ class CarController(
         @Valid @RequestBody request: CarUpdateRequest,
     ): ResponseEntity<CarResponse> {
         val updatedCar = carService.updateCar(id, request.toMap())
-        return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
-    }
-
-    @PatchMapping("/{id}/price")
-    @Operation(summary = "Update the price of an existing car")
-    fun updatePrice(
-        @PathVariable id: Long,
-        @RequestParam price: BigDecimal,
-    ): ResponseEntity<CarResponse> {
-        val updatedCar = carService.updatePrice(id, price)
         return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
     }
 
