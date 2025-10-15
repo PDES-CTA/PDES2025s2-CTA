@@ -16,6 +16,8 @@ vi.mock('../services/api', () => ({
   },
 }));
 
+type CarOfferResponse = Omit<CarOffer, 'car'>;
+
 const mockCars: Car[] = [
   {
     id: 1,
@@ -58,7 +60,7 @@ const mockCars: Car[] = [
   },
 ];
 
-const mockCarOffers: CarOffer[] = [
+const mockCarOffersResponse: CarOfferResponse[] = [
   {
     id: 1,
     carId: 1,
@@ -67,7 +69,6 @@ const mockCarOffers: CarOffer[] = [
     offerDate: '2024-01-15',
     dealershipNotes: 'Excellent condition',
     images: ['https://example.com/car1.jpg'],
-    car: mockCars[0],
   },
   {
     id: 2,
@@ -77,7 +78,6 @@ const mockCarOffers: CarOffer[] = [
     offerDate: '2024-01-20',
     dealershipNotes: 'Like new',
     images: ['https://example.com/car2.jpg'],
-    car: mockCars[1],
   },
   {
     id: 3,
@@ -87,7 +87,6 @@ const mockCarOffers: CarOffer[] = [
     offerDate: '2024-01-10',
     dealershipNotes: 'Good deal',
     images: ['https://example.com/car3.jpg'],
-    car: mockCars[2],
   },
 ];
 
@@ -109,7 +108,7 @@ describe('useCarSearch', () => {
   });
 
   it('should fetch all car offers successfully', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -127,8 +126,8 @@ describe('useCarSearch', () => {
   });
 
   it('should set loading to true while fetching', async () => {
-    let resolvePromise: (value: any[]) => void;
-    const promise = new Promise<any[]>((resolve) => {
+    let resolvePromise: (value: CarOffer[]) => void;
+    const promise = new Promise<CarOffer[]>((resolve) => {
       resolvePromise = resolve;
     });
 
@@ -137,19 +136,17 @@ describe('useCarSearch', () => {
 
     const { result } = renderHook(() => useCarSearch());
 
-    let fetchPromise: Promise<any>;
+    let fetchPromise: Promise<CarOffer[]>;
     await act(async () => {
       fetchPromise = result.current.fetchAllCarOffers();
     });
 
-    // Wait for loading to become true
     await waitFor(() => {
       expect(result.current.loading).toBe(true);
     });
 
-    // Resolve the promise
     await act(async () => {
-      resolvePromise!(mockCarOffers.map(({ car, ...offer }) => offer));
+      resolvePromise!(mockCarOffersResponse as CarOffer[]);
       await fetchPromise!;
     });
 
@@ -176,7 +173,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by keyword', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -201,7 +198,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by price range', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -226,7 +223,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by year range', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -250,7 +247,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by brand', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -275,7 +272,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by fuel type', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -300,7 +297,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers by transmission', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -325,7 +322,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search car offers with multiple filters', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -350,7 +347,7 @@ describe('useCarSearch', () => {
   });
 
   it('should return empty array when no car offers match filters', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -374,8 +371,7 @@ describe('useCarSearch', () => {
   });
 
   it('should get car offer by id successfully', async () => {
-    const offerToFind = mockCarOffers[0];
-    vi.mocked(api.carOfferService.getById).mockResolvedValue({ ...offerToFind, car: undefined as any });
+    vi.mocked(api.carOfferService.getById).mockResolvedValue(mockCarOffersResponse[0] as CarOffer);
     vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
 
     const { result } = renderHook(() => useCarSearch());
@@ -409,13 +405,16 @@ describe('useCarSearch', () => {
 
   it('should allow setting car offers manually', async () => {
     const { result } = renderHook(() => useCarSearch());
+    const testOffers: CarOffer[] = [
+      { ...mockCarOffersResponse[0], car: mockCars[0] } as CarOffer
+    ];
 
     act(() => {
-      result.current.setCarOffers(mockCarOffers);
+      result.current.setCarOffers(testOffers);
     });
 
     await waitFor(() => {
-      expect(result.current.carOffers).toEqual(mockCarOffers);
+      expect(result.current.carOffers).toEqual(testOffers);
     });
   });
 
@@ -432,7 +431,7 @@ describe('useCarSearch', () => {
   });
 
   it('should search by keyword in model field', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
@@ -457,7 +456,7 @@ describe('useCarSearch', () => {
   });
 
   it('should merge cars with car offers correctly', async () => {
-    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers.map(({ car, ...offer }) => offer) as any);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
     vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
