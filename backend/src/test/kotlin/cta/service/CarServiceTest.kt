@@ -21,7 +21,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
@@ -45,14 +44,11 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = 15000
                 color = "White"
-                description = "Excellent condition"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
     }
@@ -103,13 +99,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -149,13 +143,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val availableCars = listOf(validCar, car2)
@@ -170,24 +162,6 @@ class CarServiceTest {
         verify(carRepository).findByAvailableTrue()
     }
 
-    // ========== findByDealership Tests ==========
-
-    @Test
-    @DisplayName("Should find cars by dealership")
-    fun shouldFindCarsByDealership() {
-        // Given
-        val dealershipCars = listOf(validCar)
-        `when`(carRepository.findByDealershipIdAndAvailableTrue(1L)).thenReturn(dealershipCars)
-
-        // When
-        val result = carService.findByDealership(1L)
-
-        // Then
-        assertEquals(1, result.size)
-        assertEquals(1L, result[0].dealershipId)
-        verify(carRepository).findByDealershipIdAndAvailableTrue(1L)
-    }
-
     // ========== searchCars Tests ==========
 
     @Test
@@ -200,13 +174,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -223,58 +195,6 @@ class CarServiceTest {
     }
 
     @Test
-    @DisplayName("Should search cars by price range")
-    fun shouldSearchCarsByPriceRange() {
-        // Given
-        val car2 =
-            Car().apply {
-                id = 2L
-                brand = "Honda"
-                model = "Accord"
-                year = 2023
-                price = BigDecimal("30000.00")
-                mileage = 5000
-                color = "Silver"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
-                dealershipId = 1L
-                publicationDate = LocalDateTime.now()
-            }
-        val car3 =
-            Car().apply {
-                id = 3L
-                brand = "Mazda"
-                model = "3"
-                year = 2021
-                price = BigDecimal("15000.00")
-                mileage = 30000
-                color = "Red"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.MANUAL
-                available = true
-                dealershipId = 1L
-                publicationDate = LocalDateTime.now()
-            }
-        val cars = listOf(validCar, car2, car3)
-        `when`(carRepository.findByAvailableTrue()).thenReturn(cars)
-
-        val filters =
-            CarSearchFilters(
-                minPrice = BigDecimal("20000.00"),
-                maxPrice = BigDecimal("28000.00"),
-            )
-
-        // When
-        val result = carService.searchCars(filters)
-
-        // Then
-        assertEquals(1, result.size)
-        assertTrue(result[0].price >= BigDecimal("20000.00"))
-        assertTrue(result[0].price <= BigDecimal("28000.00"))
-    }
-
-    @Test
     @DisplayName("Should search cars by year range")
     fun shouldSearchCarsByYearRange() {
         // Given
@@ -284,13 +204,11 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2020
-                price = BigDecimal("20000.00")
                 mileage = 40000
                 color = "White"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val car2 =
@@ -299,13 +217,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2022
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val car3 =
@@ -314,13 +230,11 @@ class CarServiceTest {
                 brand = "Mazda"
                 model = "6"
                 year = 2024
-                price = BigDecimal("35000.00")
                 mileage = 1000
                 color = "Black"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(car1, car2, car3)
@@ -346,13 +260,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -378,13 +290,11 @@ class CarServiceTest {
                 brand = "Volkswagen"
                 model = "Jetta"
                 year = 2023
-                price = BigDecimal("27000.00")
                 mileage = 8000
                 color = "Gray"
                 fuelType = FuelType.DIESEL
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -410,13 +320,11 @@ class CarServiceTest {
                 brand = "Mazda"
                 model = "MX-5"
                 year = 2023
-                price = BigDecimal("32000.00")
                 mileage = 5000
                 color = "Red"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.MANUAL
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -442,13 +350,11 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
-                price = BigDecimal("28000.00")
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
@@ -474,14 +380,11 @@ class CarServiceTest {
                 brand = "Ford"
                 model = "Mustang"
                 year = 2023
-                price = BigDecimal("45000.00")
                 mileage = 0
                 color = "Red"
-                description = "Brand new"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
         val savedCar =
@@ -490,14 +393,11 @@ class CarServiceTest {
                 brand = "Ford"
                 model = "Mustang"
                 year = 2023
-                price = BigDecimal("45000.00")
                 mileage = 0
                 color = "Red"
-                description = "Brand new"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
-                dealershipId = 1L
                 publicationDate = LocalDateTime.now()
             }
 
@@ -522,10 +422,8 @@ class CarServiceTest {
                 brand = ""
                 model = "Model"
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "Blue"
-                dealershipId = 1L
             }
 
         // When & Then
@@ -546,10 +444,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = ""
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "Blue"
-                dealershipId = 1L
             }
 
         // When & Then
@@ -569,10 +465,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Model T"
                 year = 1900
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "Black"
-                dealershipId = 1L
             }
 
         // When & Then
@@ -592,10 +486,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Future"
                 year = LocalDate.now().year + 2
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "Silver"
-                dealershipId = 1L
             }
 
         // When & Then
@@ -607,29 +499,6 @@ class CarServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when price is zero or negative")
-    fun shouldThrowExceptionWhenPriceIsInvalid() {
-        // Given
-        val invalidCar =
-            Car().apply {
-                brand = "Toyota"
-                model = "Corolla"
-                year = 2022
-                price = BigDecimal.ZERO
-                mileage = 0
-                color = "White"
-                dealershipId = 1L
-            }
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                carService.createCar(invalidCar)
-            }
-        assertEquals("Price must be greater than zero", exception.message)
-    }
-
-    @Test
     @DisplayName("Should throw exception when mileage is negative")
     fun shouldThrowExceptionWhenMileageIsNegative() {
         // Given
@@ -638,10 +507,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = -1000
                 color = "White"
-                dealershipId = 1L
             }
 
         // When & Then
@@ -661,10 +528,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = ""
-                dealershipId = 1L
             }
 
         // When & Then
@@ -673,29 +538,6 @@ class CarServiceTest {
                 carService.createCar(invalidCar)
             }
         assertEquals("Color cannot be empty", exception.message)
-    }
-
-    @Test
-    @DisplayName("Should throw exception when dealership ID is invalid")
-    fun shouldThrowExceptionWhenDealershipIdIsInvalid() {
-        // Given
-        val invalidCar =
-            Car().apply {
-                brand = "Toyota"
-                model = "Corolla"
-                year = 2022
-                price = BigDecimal("25000.00")
-                mileage = 0
-                color = "White"
-                dealershipId = 0
-            }
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                carService.createCar(invalidCar)
-            }
-        assertEquals("Valid dealership ID is required", exception.message)
     }
 
     // ========== updateCar Tests ==========
@@ -728,10 +570,8 @@ class CarServiceTest {
         assertEquals("Honda", result.brand)
         assertEquals("Accord", result.model)
         assertEquals(2023, result.year)
-        assertEquals(BigDecimal("30000.00"), result.price)
         assertEquals(20000, result.mileage)
         assertEquals("Black", result.color)
-        assertEquals("Updated description", result.description)
         assertEquals(FuelType.DIESEL, result.fuelType)
         assertEquals(TransmissionType.MANUAL, result.transmission)
         assertFalse(result.available)
@@ -782,32 +622,13 @@ class CarServiceTest {
         // Given
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
 
-        val updates = mapOf("price" to "0")
+        val updates = mapOf("year" to "Fail")
 
         // When & Then
         assertThrows(IllegalArgumentException::class.java) {
             carService.updateCar(1L, updates)
         }
         verify(carRepository, never()).save(any(Car::class.java))
-    }
-
-    // ========== updatePrice Tests ==========
-
-    @Test
-    @DisplayName("Should update car price successfully")
-    fun shouldUpdateCarPrice() {
-        // Given
-        `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
-
-        val newPrice = BigDecimal("28000.00")
-
-        // When
-        val result = carService.updatePrice(1L, newPrice)
-
-        // Then
-        assertEquals(newPrice, result.price)
-        verify(carRepository).save(any(Car::class.java))
     }
 
     // ========== markAsSold Tests ==========
@@ -907,10 +728,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = LocalDate.now().year + 1
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "White"
-                dealershipId = 1L
             }
         `when`(carRepository.save(any(Car::class.java))).thenReturn(car)
 
@@ -931,10 +750,8 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2024
-                price = BigDecimal("25000.00")
                 mileage = 0
                 color = "White"
-                dealershipId = 1L
             }
         `when`(carRepository.save(any(Car::class.java))).thenReturn(newCar)
 

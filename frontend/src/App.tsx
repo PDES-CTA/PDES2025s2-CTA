@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Loader } from 'lucide-react';
-import { authService } from './services/api';
+import { authService, User } from './services/api';
 import { ROUTES } from './constants';
 
 import HomePage from './pages/HomePage';
@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CarsPage from './pages/CarsPage';
 import CarDetailPage from './pages/CarDetailPage';
+
 // import FavoritesPage from './pages/FavoritesPage';
 // import PurchasesPage from './pages/PurchasesPage';
 // import DashboardPage from './pages/DashboardPage';
@@ -16,12 +17,20 @@ import CarDetailPage from './pages/CarDetailPage';
 
 import styles from './App.module.css';
 
-const PrivateRoute = ({ children }) => {
+interface PrivateRouteProps {
+  children: React.ReactNode;
+}
+
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
   const token = localStorage.getItem('authorization_token');
   return token ? children : <Navigate to={ROUTES.LOGIN} />;
 };
 
-const Layout = ({ children }) => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
@@ -37,7 +46,7 @@ const Layout = ({ children }) => {
 };
 
 function App() {
-  const [_user, setUser] = useState(null);
+  const [_user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -56,7 +56,6 @@ class PurchaseControllerTest {
             this.brand = "Toyota"
             this.model = "Corolla"
             this.year = 2020
-            this.price = BigDecimal("20000")
             this.fuelType = FuelType.GASOLINE
             this.transmission = TransmissionType.AUTOMATIC
             this.mileage = 50000

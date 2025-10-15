@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @SpringBootTest(
@@ -64,7 +63,6 @@ class FavoriteControllerTest {
             this.brand = "Toyota"
             this.model = "Corolla"
             this.year = 2020
-            this.price = BigDecimal("20000")
             this.fuelType = FuelType.GASOLINE
             this.transmission = TransmissionType.AUTOMATIC
             this.mileage = 50000

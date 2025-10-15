@@ -20,11 +20,16 @@ export default function RegisterPage() {
 
     const firstName = getStringValue(formData, 'firstName');
     const lastName = getStringValue(formData, 'lastName');
+    const phone = getStringValue(formData, 'phone');
+    const address = getStringValue(formData, 'address');
 
     const userData = {
       email: getStringValue(formData, 'email'),
       password: password,
-      name: `${firstName} ${lastName}`,
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      address: address,
       dni: getStringValue(formData, 'dni'),
       role: 'BUYER' as const,
     };

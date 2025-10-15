@@ -51,8 +51,8 @@ describe('RegisterPage', () => {
   it('should submit form with valid data', async () => {
     vi.mocked(authService.authService.register).mockResolvedValue({
       id: 1,
-      email: 'test@test.com',
-      name: 'Test User',
+      email: 'john@test.com',
+      name: 'John Doe',
       role: 'BUYER',
     });
 
@@ -74,7 +74,10 @@ describe('RegisterPage', () => {
       expect(authService.authService.register).toHaveBeenCalledWith({
         email: 'john@test.com',
         password: 'password123',
-        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '1123456789',
+        address: 'Test Street 123',
         dni: '12345678',
         role: 'BUYER',
       });
@@ -147,5 +150,39 @@ describe('RegisterPage', () => {
     fireEvent.click(submitButton);
 
     expect(screen.getByText('Creating account...')).toBeInTheDocument();
+  });
+
+  it('should validate required fields', async () => {
+    renderWithRouter(<RegisterPage />);
+
+    const submitButton = screen.getByRole('button', { name: /Sign Up/i });
+    fireEvent.click(submitButton);
+
+    // HTML5 validation should prevent submission
+    expect(authService.authService.register).not.toHaveBeenCalled();
+  });
+
+  it('should validate DNI format', () => {
+    renderWithRouter(<RegisterPage />);
+
+    const dniInput = screen.getByLabelText('ID Number');
+    expect(dniInput).toHaveAttribute('pattern', '\\d{7,8}');
+  });
+
+  it('should validate minimum password length', () => {
+    renderWithRouter(<RegisterPage />);
+
+    const passwordInput = screen.getByLabelText('Password');
+    const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    
+    expect(passwordInput).toHaveAttribute('minlength', '8');
+    expect(confirmPasswordInput).toHaveAttribute('minlength', '8');
+  });
+
+  it('should navigate to login page when clicking login link', () => {
+    renderWithRouter(<RegisterPage />);
+
+    const loginLink = screen.getByText('Log in');
+    expect(loginLink).toHaveAttribute('href', '/login');
   });
 });

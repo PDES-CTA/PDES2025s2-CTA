@@ -3,8 +3,6 @@ package cta.service
 import cta.enum.PaymentMethod
 import cta.enum.PurchaseStatus
 import cta.model.Purchase
-import cta.repository.CarRepository
-import cta.repository.DealershipRepository
 import cta.repository.PurchaseRepository
 import cta.web.dto.PurchaseCreateRequest
 import org.springframework.data.repository.findByIdOrNull
@@ -16,9 +14,10 @@ import java.time.LocalDateTime
 @Service
 class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
-    private val carRepository: CarRepository,
-    // private val buyerRepository: BuyerRepository,
-    private val dealershipRepository: DealershipRepository,
+    private val carOfferService: CarOfferService,
+    private val carService: CarService,
+    private val buyerService: BuyerService,
+    private val dealershipService: DealershipService,
 ) {
     fun findById(id: Long): Purchase {
         return purchaseRepository.findByIdOrNull(id)
@@ -120,32 +119,15 @@ class PurchaseService(
     }
 
     private fun validateAndTransformPurchaseCreateRequest(request: PurchaseCreateRequest): Purchase {
-        val car =
-            carRepository.findByIdOrNull(request.carId)
-                ?: throw NoSuchElementException("Car with ID ${request.carId} not found")
-        // val buyer = buyerRepository.findById(request.buyerId)
-        //    .orElseThrow { NoSuchElementException("Buyer with ID ${request.buyerId} not found") }
-        val dealership =
-            dealershipRepository.findByIdOrNull(request.dealershipId)
-                ?: throw NoSuchElementException("Dealership with ID ${request.dealershipId} not found")
+        val car = carService.findById(request.carId)
+        carOfferService.findByCarIdAndDealershipId(request.carId, request.dealershipId)
+            ?: throw IllegalArgumentException("Car ${request.carId} was not offered by dealership ${request.dealershipId}")
+        val buyer = buyerService.findById(request.buyerId)
+        val dealership = dealershipService.findById(request.dealershipId)
 
         require(car.available) { "Car ${car.id} is not available for purchase" }
-
-        // require(car.dealershipId == request.dealershipId) {
-        //     "Car ${car.id} doesn't belong to dealership ${request.dealershipId}"
-        // }
-
-        // require(buyerRepository.findById(request.buyerId)) {
-        //    "Buyer with ID ${request.buyerId} not found"
-        // }
-
-        // require(dealershipRepository.existsById(request.dealershipId)) {
-        //    "Dealership with ID ${request.dealershipId} not found"
-        // }
-
-        require(car.dealershipId == request.dealershipId) {
-            "Car ${car.id} doesn't belong to dealership ${request.dealershipId}"
-        }
+        require(buyer.isActive()) { "Buyer ${buyer.id} is not active" }
+        require(dealership.isActive()) { "Dealership ${dealership.id} is not active" }
 
         val purchase =
             Purchase().apply {

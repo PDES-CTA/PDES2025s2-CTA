@@ -5,7 +5,7 @@ export interface Car {
   brand: string;
   model: string;
   year: number;
-  price: number;
+  plate: string;
   mileage: number;
   fuelType: FuelType;
   transmission: TransmissionType;

@@ -5,6 +5,7 @@ import { ReactElement } from 'react';
 import CarsPage from './CarsPage';
 import * as useCarSearchHook from '../hooks/useCarSearch';
 import * as authServiceModule from '../services/api';
+import { CarOffer } from '../types/carOffer';
 import { Car } from '../types/car';
 
 const mockNavigate = vi.fn();
@@ -26,7 +27,7 @@ const mockCars: Car[] = [
     brand: 'Toyota',
     model: 'Corolla',
     year: 2020,
-    price: 20000,
+    plate: 'ABC123',
     mileage: 30000,
     fuelType: 'NAFTA',
     transmission: 'MANUAL',
@@ -39,7 +40,7 @@ const mockCars: Car[] = [
     brand: 'Honda',
     model: 'Civic',
     year: 2021,
-    price: 25000,
+    plate: 'XYZ789',
     mileage: 15000,
     fuelType: 'NAFTA',
     transmission: 'AUTOMATICA',
@@ -49,21 +50,44 @@ const mockCars: Car[] = [
   },
 ];
 
+const mockCarOffers: CarOffer[] = [
+  {
+    id: 1,
+    carId: 1,
+    dealershipId: 1,
+    price: 20000,
+    offerDate: '2024-01-15',
+    dealershipNotes: 'Excellent condition',
+    images: ['https://example.com/car1.jpg'],
+    car: mockCars[0],
+  },
+  {
+    id: 2,
+    carId: 2,
+    dealershipId: 1,
+    price: 25000,
+    offerDate: '2024-01-20',
+    dealershipNotes: 'Like new',
+    images: ['https://example.com/car2.jpg'],
+    car: mockCars[1],
+  },
+];
+
 describe('CarsPage', () => {
-  const mockFetchAllCars = vi.fn();
-  const mockSearchCars = vi.fn();
+  const mockFetchAllCarOffers = vi.fn();
+  const mockSearchCarOffers = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      cars: mockCars,
+      carOffers: mockCarOffers,
       loading: false,
       error: null,
-      fetchAllCars: mockFetchAllCars,
-      searchCars: mockSearchCars,
-      getCarById: vi.fn(),
-      setCars: vi.fn(),
+      fetchAllCarOffers: mockFetchAllCarOffers,
+      searchCarOffers: mockSearchCarOffers,
+      getCarOfferById: vi.fn(),
+      setCarOffers: vi.fn(),
       setError: vi.fn(),
     });
 
@@ -81,12 +105,12 @@ describe('CarsPage', () => {
     expect(screen.getByRole('button', { name: /Log Out/i })).toBeInTheDocument();
   });
 
-  it('should call fetchAllCars on mount', () => {
+  it('should call fetchAllCarOffers on mount', () => {
     renderWithRouter(<CarsPage />);
-    expect(mockFetchAllCars).toHaveBeenCalledTimes(1);
+    expect(mockFetchAllCarOffers).toHaveBeenCalledTimes(1);
   });
 
-  it('should render car list when cars are loaded', () => {
+  it('should render car list when car offers are loaded', () => {
     renderWithRouter(<CarsPage />);
     expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
     expect(screen.getByText('Honda Civic')).toBeInTheDocument();
@@ -94,13 +118,13 @@ describe('CarsPage', () => {
 
   it('should show loading spinner when loading', () => {
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      cars: [],
+      carOffers: [],
       loading: true,
       error: null,
-      fetchAllCars: mockFetchAllCars,
-      searchCars: mockSearchCars,
-      getCarById: vi.fn(),
-      setCars: vi.fn(),
+      fetchAllCarOffers: mockFetchAllCarOffers,
+      searchCarOffers: mockSearchCarOffers,
+      getCarOfferById: vi.fn(),
+      setCarOffers: vi.fn(),
       setError: vi.fn(),
     });
 
@@ -109,15 +133,15 @@ describe('CarsPage', () => {
   });
 
   it('should show error message when there is an error', () => {
-    const errorMessage = 'Failed to load cars';
+    const errorMessage = 'Failed to load car offers';
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      cars: [],
+      carOffers: [],
       loading: false,
       error: errorMessage,
-      fetchAllCars: mockFetchAllCars,
-      searchCars: mockSearchCars,
-      getCarById: vi.fn(),
-      setCars: vi.fn(),
+      fetchAllCarOffers: mockFetchAllCarOffers,
+      searchCarOffers: mockSearchCarOffers,
+      getCarOfferById: vi.fn(),
+      setCarOffers: vi.fn(),
       setError: vi.fn(),
     });
 
@@ -125,14 +149,14 @@ describe('CarsPage', () => {
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('should call searchCars when search button is clicked', async () => {
+  it('should call searchCarOffers when search button is clicked', async () => {
     renderWithRouter(<CarsPage />);
 
     const searchButton = screen.getByRole('button', { name: /Search/i });
     fireEvent.click(searchButton);
 
     await waitFor(() => {
-      expect(mockSearchCars).toHaveBeenCalled();
+      expect(mockSearchCarOffers).toHaveBeenCalled();
     });
   });
 
@@ -176,7 +200,7 @@ describe('CarsPage', () => {
     fireEvent.click(clearButton);
 
     await waitFor(() => {
-      expect(mockFetchAllCars).toHaveBeenCalledTimes(2); // Once on mount, once on clear
+      expect(mockFetchAllCarOffers).toHaveBeenCalledTimes(2); // Once on mount, once on clear
     });
 
     // Keyword should be cleared
@@ -211,15 +235,15 @@ describe('CarsPage', () => {
   });
 
   it('should show retry button in error state', () => {
-    const errorMessage = 'Failed to load cars';
+    const errorMessage = 'Failed to load car offers';
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      cars: [],
+      carOffers: [],
       loading: false,
       error: errorMessage,
-      fetchAllCars: mockFetchAllCars,
-      searchCars: mockSearchCars,
-      getCarById: vi.fn(),
-      setCars: vi.fn(),
+      fetchAllCarOffers: mockFetchAllCarOffers,
+      searchCarOffers: mockSearchCarOffers,
+      getCarOfferById: vi.fn(),
+      setCarOffers: vi.fn(),
       setError: vi.fn(),
     });
 
@@ -228,6 +252,24 @@ describe('CarsPage', () => {
     const retryButton = screen.getByRole('button', { name: /Retry/i });
     fireEvent.click(retryButton);
 
-    expect(mockFetchAllCars).toHaveBeenCalled();
+    expect(mockFetchAllCarOffers).toHaveBeenCalled();
+  });
+
+  it('should display car offer prices', () => {
+    renderWithRouter(<CarsPage />);
+    
+    // Check that prices from carOffers are displayed
+    expect(screen.getByText(/20,?000|20\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/25,?000|25\.000/)).toBeInTheDocument();
+  });
+
+  it('should display car details from nested car object', () => {
+    renderWithRouter(<CarsPage />);
+    
+    // Check year, mileage from car object
+    expect(screen.getByText(/2020/)).toBeInTheDocument();
+    expect(screen.getByText(/2021/)).toBeInTheDocument();
+    expect(screen.getByText(/30,?000/)).toBeInTheDocument();
+    expect(screen.getByText(/15,?000/)).toBeInTheDocument();
   });
 });

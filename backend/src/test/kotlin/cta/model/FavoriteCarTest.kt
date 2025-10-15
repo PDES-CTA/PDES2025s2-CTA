@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @DisplayName("FavoriteCar Entity Tests")
@@ -40,13 +39,10 @@ class FavoriteCarTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2023
-                price = BigDecimal("25000.00")
                 mileage = 15000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
-                description = "Well maintained car"
-                dealershipId = 1L
                 available = true
             }
 
@@ -219,7 +215,6 @@ class FavoriteCarTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2024
-                price = BigDecimal("30000.00")
             }
 
         favoriteCar.car = newCar

@@ -1,15 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor, cleanup, act } from '@testing-library/react';
 import { useCarSearch } from './useCarSearch';
-import * as carService from '../services/api';
+import * as api from '../services/api';
 import { Car } from '../types/car';
+import { CarOffer } from '../types/carOffer';
 
 vi.mock('../services/api', () => ({
+  carOfferService: {
+    getAll: vi.fn(),
+    getById: vi.fn(),
+  },
   carService: {
     getAllCars: vi.fn(),
     getCarById: vi.fn(),
   },
 }));
+
+type CarOfferResponse = Omit<CarOffer, 'car'>;
 
 const mockCars: Car[] = [
   {
@@ -17,7 +24,7 @@ const mockCars: Car[] = [
     brand: 'Toyota',
     model: 'Corolla',
     year: 2020,
-    price: 20000,
+    plate: 'ACC199',
     mileage: 30000,
     fuelType: 'NAFTA',
     transmission: 'MANUAL',
@@ -30,7 +37,7 @@ const mockCars: Car[] = [
     brand: 'Honda',
     model: 'Civic',
     year: 2021,
-    price: 25000,
+    plate: 'YYK109',
     mileage: 15000,
     fuelType: 'NAFTA',
     transmission: 'AUTOMATICA',
@@ -43,13 +50,43 @@ const mockCars: Car[] = [
     brand: 'Ford',
     model: 'Focus',
     year: 2019,
-    price: 18000,
+    plate: 'PPL221',
     mileage: 40000,
     fuelType: 'DIESEL',
     transmission: 'MANUAL',
     color: 'Blue',
     available: false,
     publicationDate: '2024-01-10',
+  },
+];
+
+const mockCarOffersResponse: CarOfferResponse[] = [
+  {
+    id: 1,
+    carId: 1,
+    dealershipId: 1,
+    price: 20000,
+    offerDate: '2024-01-15',
+    dealershipNotes: 'Excellent condition',
+    images: ['https://example.com/car1.jpg'],
+  },
+  {
+    id: 2,
+    carId: 2,
+    dealershipId: 1,
+    price: 23000,
+    offerDate: '2024-01-20',
+    dealershipNotes: 'Like new',
+    images: ['https://example.com/car2.jpg'],
+  },
+  {
+    id: 3,
+    carId: 3,
+    dealershipId: 1,
+    price: 15000,
+    offerDate: '2024-01-10',
+    dealershipNotes: 'Good deal',
+    images: ['https://example.com/car3.jpg'],
   },
 ];
 
@@ -65,50 +102,51 @@ describe('useCarSearch', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() => useCarSearch());
 
-    expect(result.current.cars).toEqual([]);
+    expect(result.current.carOffers).toEqual([]);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(null);
   });
 
-  it('should fetch all cars successfully', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should fetch all car offers successfully', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.fetchAllCars();
+      await result.current.fetchAllCarOffers();
     });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.cars).toEqual(mockCars);
+      expect(result.current.carOffers).toHaveLength(3);
+      expect(result.current.carOffers[0].car).toEqual(mockCars[0]);
       expect(result.current.error).toBe(null);
     });
   });
 
   it('should set loading to true while fetching', async () => {
-    let resolvePromise: (value: Car[]) => void;
-    const promise = new Promise<Car[]>((resolve) => {
+    let resolvePromise: (value: CarOffer[]) => void;
+    const promise = new Promise<CarOffer[]>((resolve) => {
       resolvePromise = resolve;
     });
 
-    vi.mocked(carService.carService.getAllCars).mockReturnValue(promise);
+    vi.mocked(api.carOfferService.getAll).mockReturnValue(promise);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
-    let fetchPromise: Promise<any>;
+    let fetchPromise: Promise<CarOffer[]>;
     await act(async () => {
-      fetchPromise = result.current.fetchAllCars();
+      fetchPromise = result.current.fetchAllCarOffers();
     });
 
-    // Wait for loading to become true
     await waitFor(() => {
       expect(result.current.loading).toBe(true);
     });
 
-    // Resolve the promise
     await act(async () => {
-      resolvePromise!(mockCars);
+      resolvePromise!(mockCarOffersResponse as CarOffer[]);
       await fetchPromise!;
     });
 
@@ -118,30 +156,30 @@ describe('useCarSearch', () => {
   });
 
   it('should handle fetch error', async () => {
-    const errorMessage = 'Failed to fetch cars';
-    vi.mocked(carService.carService.getAllCars).mockRejectedValue(new Error(errorMessage));
+    const errorMessage = 'Failed to fetch car offers';
+    vi.mocked(api.carOfferService.getAll).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.fetchAllCars().catch(() => {
-      });
+      await result.current.fetchAllCarOffers().catch(() => {});
     });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(errorMessage);
-      expect(result.current.cars).toEqual([]);
+      expect(result.current.carOffers).toEqual([]);
     });
   });
 
-  it('should search cars by keyword', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by keyword', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: 'toyota',
         minPrice: '',
         maxPrice: '',
@@ -154,21 +192,22 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].brand).toBe('Toyota');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.brand).toBe('Toyota');
     });
   });
 
-  it('should search cars by price range', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by price range', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '19000',
-        maxPrice: '24000',
+        maxPrice: '22000',
         minYear: '',
         maxYear: '',
         brand: '',
@@ -178,18 +217,19 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].brand).toBe('Toyota');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].price).toBe(20000);
     });
   });
 
-  it('should search cars by year range', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by year range', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '',
         maxPrice: '',
@@ -202,17 +242,18 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(2);
+      expect(result.current.carOffers).toHaveLength(2);
     });
   });
 
-  it('should search cars by brand', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by brand', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '',
         maxPrice: '',
@@ -225,18 +266,19 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].brand).toBe('Honda');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.brand).toBe('Honda');
     });
   });
 
-  it('should search cars by fuel type', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by fuel type', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '',
         maxPrice: '',
@@ -249,18 +291,19 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].fuelType).toBe('DIESEL');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.fuelType).toBe('DIESEL');
     });
   });
 
-  it('should search cars by transmission', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers by transmission', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '',
         maxPrice: '',
@@ -273,21 +316,22 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].transmission).toBe('AUTOMATICA');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.transmission).toBe('AUTOMATICA');
     });
   });
 
-  it('should search cars with multiple filters', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should search car offers with multiple filters', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '15000',
-        maxPrice: '30000',
+        maxPrice: '25000',
         minYear: '2020',
         maxYear: '',
         brand: '',
@@ -297,18 +341,19 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].brand).toBe('Toyota');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.brand).toBe('Toyota');
     });
   });
 
-  it('should return empty array when no cars match filters', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+  it('should return empty array when no car offers match filters', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: '',
         minPrice: '50000',
         maxPrice: '',
@@ -321,35 +366,36 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(0);
+      expect(result.current.carOffers).toHaveLength(0);
     });
   });
 
-  it('should get car by id successfully', async () => {
-    const carToFind = mockCars[0];
-    vi.mocked(carService.carService.getCarById).mockResolvedValue(carToFind);
+  it('should get car offer by id successfully', async () => {
+    vi.mocked(api.carOfferService.getById).mockResolvedValue(mockCarOffersResponse[0] as CarOffer);
+    vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
 
     const { result } = renderHook(() => useCarSearch());
 
-    let car: Car | undefined;
+    let carOffer: CarOffer | undefined;
     await act(async () => {
-      car = await result.current.getCarById(1);
+      carOffer = await result.current.getCarOfferById(1);
     });
 
     await waitFor(() => {
-      expect(car).toEqual(carToFind);
-      expect(carService.carService.getCarById).toHaveBeenCalledWith(1);
+      expect(carOffer).toBeDefined();
+      expect(carOffer?.car).toEqual(mockCars[0]);
+      expect(api.carOfferService.getById).toHaveBeenCalledWith(1);
     });
   });
 
-  it('should handle error when getting car by id', async () => {
-    const errorMessage = 'Car not found';
-    vi.mocked(carService.carService.getCarById).mockRejectedValue(new Error(errorMessage));
+  it('should handle error when getting car offer by id', async () => {
+    const errorMessage = 'Car offer not found';
+    vi.mocked(api.carOfferService.getById).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await expect(result.current.getCarById(999)).rejects.toThrow();
+      await expect(result.current.getCarOfferById(999)).rejects.toThrow();
     });
 
     await waitFor(() => {
@@ -357,15 +403,18 @@ describe('useCarSearch', () => {
     });
   });
 
-  it('should allow setting cars manually', async () => {
+  it('should allow setting car offers manually', async () => {
     const { result } = renderHook(() => useCarSearch());
+    const testOffers: CarOffer[] = [
+      { ...mockCarOffersResponse[0], car: mockCars[0] } as CarOffer
+    ];
 
     act(() => {
-      result.current.setCars(mockCars);
+      result.current.setCarOffers(testOffers);
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toEqual(mockCars);
+      expect(result.current.carOffers).toEqual(testOffers);
     });
   });
 
@@ -382,12 +431,13 @@ describe('useCarSearch', () => {
   });
 
   it('should search by keyword in model field', async () => {
-    vi.mocked(carService.carService.getAllCars).mockResolvedValue(mockCars);
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
 
     const { result } = renderHook(() => useCarSearch());
 
     await act(async () => {
-      await result.current.searchCars({
+      await result.current.searchCarOffers({
         keyword: 'civic',
         minPrice: '',
         maxPrice: '',
@@ -400,8 +450,27 @@ describe('useCarSearch', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.cars).toHaveLength(1);
-      expect(result.current.cars[0].model).toBe('Civic');
+      expect(result.current.carOffers).toHaveLength(1);
+      expect(result.current.carOffers[0].car.model).toBe('Civic');
+    });
+  });
+
+  it('should merge cars with car offers correctly', async () => {
+    vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffersResponse as CarOffer[]);
+    vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+
+    const { result } = renderHook(() => useCarSearch());
+
+    await act(async () => {
+      await result.current.fetchAllCarOffers();
+    });
+
+    await waitFor(() => {
+      expect(result.current.carOffers).toHaveLength(3);
+      result.current.carOffers.forEach((offer, index) => {
+        expect(offer.car).toEqual(mockCars[index]);
+        expect(offer.carId).toBe(mockCars[index].id);
+      });
     });
   });
 });

@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { Car } from "../types/car";
-
+import { CarOffer } from "../types/carOffer";
+ 
 // Centralized configuration
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
@@ -50,13 +51,16 @@ interface LoginCredentials {
 interface RegisterData {
   email: string;
   password: string;
-  name: string;
-  dni: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  phone: string;
+  dni?: string;
   cuit?: string;
   role: 'BUYER' | 'DEALERSHIP';
 }
 
-interface User {
+export interface User {
   id: number;
   email: string;
   name: string;
@@ -113,11 +117,16 @@ interface PurchaseData {
 
 interface Dealership {
   id: number;
-  name: string;
+  businessName: string;
   cuit: string;
-  address?: string;
-  phone?: string;
   email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  registrationDate: string;
+  active: boolean;
+  description?: string;
 }
 
 interface Statistics {
@@ -170,6 +179,19 @@ export const authService = {
     localStorage.removeItem("authorization_token");
     globalThis.location.href = "/login";
   }
+};
+
+// ==================== CAR OFFER SERVICE ====================
+
+export const carOfferService = {
+  getAll: async (): Promise<CarOffer[]> => {
+    const response = await apiClient.get<CarOffer[]>('/offer/available');
+    return response.data;
+  },
+  getById: async (id: string | number): Promise<CarOffer> => {
+    const response = await apiClient.get<CarOffer>(`/car-offers/${id}`);
+    return response.data;
+  },
 };
 
 // ==================== CAR SERVICE ====================
