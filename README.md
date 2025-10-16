@@ -70,7 +70,7 @@ docker-compose down
 
 ---
 
-## 📊 System Architecture
+## Arquitectura
 ```mermaid
 classDiagram
     %% MODEL AND ENTITIES
@@ -418,84 +418,3 @@ classDiagram
     DealershipService --> DealershipRepository
     BuyerService --> BuyerRepository
 ```
-
----
-
-## 📁 Project Structure
-```
-PDES2025s2-CTA/
-├── backend/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── kotlin/
-│   │   │   │   └── cta/
-│   │   │   │       ├── model/          # Entities
-│   │   │   │       ├── repository/     # JPA Repositories
-│   │   │   │       ├── service/        # Business Logic
-│   │   │   │       ├── web/
-│   │   │   │       │   ├── controller/ # REST Controllers
-│   │   │   │       │   └── dto/        # Request/Response DTOs
-│   │   │   │       └── enum/           # Enumerations
-│   │   │   └── resources/
-│   │   └── test/                       # Unit & Integration Tests
-│   └── build.gradle.kts
-│
-└── frontend/
-    ├── src/
-    │   ├── components/                 # React Components
-    │   │   ├── atoms/
-    │   │   ├── molecules/
-    │   │   └── organisms/
-    │   ├── pages/                      # Page Components
-    │   ├── hooks/                      # Custom React Hooks
-    │   ├── services/                   # API Services
-    │   ├── types/                      # TypeScript Types
-    │   └── utils/                      # Utility Functions
-    ├── tests/                          # E2E Tests (Playwright)
-    └── package.json
-```
-
----
-
-## 🔑 Key Features
-
-- **User Management**: Registration and authentication for buyers and dealerships
-- **Car Listings**: Browse and search available cars with filters
-- **Car Offers**: Dealerships can create offers for cars with custom pricing and images
-- **Purchase Flow**: Complete purchase process with multiple payment methods
-- **Purchase Tracking**: Track purchase status (Pending → Confirmed → Delivered)
-- **Role-Based Access**: Different permissions for buyers, dealerships, and administrators
-
----
-
-## 🧪 Testing
-
-The project includes comprehensive testing:
-
-- **Backend**: Unit tests with JUnit 5 + Mockito
-- **Frontend**: Unit tests with Vitest + React Testing Library
-- **E2E**: Playwright tests for critical user flows
-
-**Test Coverage:**
-- PurchaseService: 95%+ coverage
-- CarCard, CarList components: Full coverage
-- Login, Register, Cars pages: E2E tested
-
----
-
-## 📝 API Documentation
-
-Once the backend is running, access the API documentation at:
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-
----
-
-## 👥 Contributors
-
-- Development Team: PDES 2025 S2
-
----
-
-## 📄 License
-
-This project is part of an academic course.
