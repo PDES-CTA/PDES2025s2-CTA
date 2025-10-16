@@ -1,254 +1,420 @@
 # PDES2025s2-CTA
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PDES-CTA_PDES2025s2-CTA&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PDES-CTA_PDES2025s2-CTA)
+
+## Compra Tu Auto - CTA
+
+### Tech Stack
+
+**Backend:**
+- Kotlin + Spring Boot
+- PostgreSQL / H2 (for testing)
+- JPA/Hibernate
+- Spring Security
+- JUnit 5 + Mockito
+
+**Frontend:**
+- React + TypeScript
+- Vite
+- Vitest
+- Playwright (E2E testing)
+
+---
+
+## Setup del proyecto
+
+### Prerrequisitos
+
+- Docker
+- Docker Compose
+
+### Ejecutar la aplicación
+
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/PDES-CTA/PDES2025s2-CTA.git
+cd PDES2025s2-CTA
+```
+
+2. crear un `.env` file (opcional - usa valores por default si no se provee uno):
+```env
+# Database
+POSTGRES_DB=cta
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=admin
+POSTGRES_PORT=5432
+
+# Backend
+BACKEND_PORT=8080
+JWT_SECRET=my-secret-key-minimum-32-characters-long
+JWT_EXPIRATION=86400000
+
+# Frontend
+FRONTEND_PORT=3000
+REACT_APP_BACKEND_URL=http://localhost:8080
+```
+
+3. Inicializar todos los servicios:
+```bash
+docker-compose up -d
+```
+
+4. Acceder a los servicios:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **API Swagger**: http://localhost:8080/swagger-ui.html
+
+5. Parar la aplicación:
+```bash
+docker-compose down
+```
+
+---
+
+## Arquitectura
 ```mermaid
 classDiagram
-    %% Entidades principales del dominio
-    class Usuario {
+    %% MODEL AND ENTITIES
+    class User {
         <<abstract>>
         -id: Long
         -email: String
         -password: String
-        -nombre: String
-        -apellido: String
-        -telefono: String
-        -fechaRegistro: DateTime
-        -activo: Boolean
-        +login(email: String, password: String): Boolean
-        +updateProfile(datos: Map): void
+        -firstName: String
+        -lastName: String
+        -phone: String
+        -registrationDate: DateTime
+        -active: Boolean
         +isActive(): Boolean
+        +activate(): void
+        +deactivate(): void
     }
 
-    class Comprador {
-        -direccion: String
-        -dni: String
-        +guardarFavorito(auto: Auto): AutoFavorito
-        +eliminarFavorito(autoId: Long): void
-        +realizarCompra(auto: Auto): Compra
-        +obtenerFavoritos(): List<AutoFavorito>
-        +obtenerCompras(): List<Compra>
+    class BaseEntity {
+        <<abstract>>
+        -id: Long
+        -createdAt: LocalDateTime
+        -updatedAt: LocalDateTime
+        +preUpdate(): void
     }
 
-    class Concesionaria {
-        -razonSocial: String
+    class Buyer {
+        -address: String
+        -dni: Int
+        +create(email, password, firstName, lastName, phone, address, dni): Buyer
+    }
+
+    class Dealership {
+        -businessName: String
         -cuit: String
-        -direccion: String
-        -ciudad: String
-        -provincia: String
-        +agregarAuto(auto: Auto): void
-        +modificarAuto(autoId: Long, datos: Map): void
-        +eliminarAuto(autoId: Long): void
-        +obtenerVentas(): List<Compra>
-        +obtenerAutosEnVenta(): List<Auto>
+        -address: String
+        -city: String
+        -province: String
+        -description: String
+        +getFullAddress(): String
+        +getDisplayName(): String
     }
 
-    class Administrador {
-        -permisos: List<String>
-        +obtenerUsuarios(): List<Usuario>
-        +generarReporte(tipo: TipoReporte): Reporte
-        +obtenerEstadisticas(): Map<String, Object>
-        +gestionarConcesionaria(accion: String, concesionaria: Concesionaria): void
-    }
-
-    class Auto {
-        -id: Long
-        -marca: String
-        -modelo: String
-        -anio: Integer
-        -precio: BigDecimal
-        -kilometraje: Integer
+    class Car {
+        -brand: String
+        -model: String
+        -year: Integer
+        -plate: String
+        -mileage: Integer
         -color: String
-        -combustible: TipoCombustible
-        -transmision: TipoTransmision
-        -descripcion: String
-        -fechaPublicacion: DateTime
-        -disponible: Boolean
-        -concesionariaId: Long
-        -imagenes: List<String>
-        +actualizarPrecio(nuevoPrecio: BigDecimal): void
-        +marcarComoVendido(): void
-        +isDisponible(): Boolean
-        +calcularPrecioConDescuento(porcentaje: Double): BigDecimal
+        -fuelType: FuelType
+        -transmission: TransmissionType
+        -publicationDate: DateTime
+        -available: Boolean
+        +markAsSold(): void
+        +markAsAvailable(): void
+        +isAvailable(): Boolean
+        +getFullName(): String
     }
 
-    class AutoFavorito {
-        -id: Long
-        -compradorId: Long
-        -autoId: Long
-        -fechaAgregado: DateTime
-        -puntaje: Integer
-        -comentario: String
-        -notificacionesPrecio: Boolean
-        +actualizarResenia(puntaje: Integer, comentario: String): void
-        +activarNotificaciones(): void
-        +desactivarNotificaciones(): void
+    class CarOffer {
+        -carId: Long
+        -dealershipId: Long
+        -price: BigDecimal
+        -offerDate: LocalDateTime
+        -dealershipNotes: String
+        -images: MutableList<String>
+        +updatePrice(newPrice: BigDecimal): void
     }
 
-    class Compra {
-        -id: Long
-        -compradorId: Long
-        -autoId: Long
-        -concesionariaId: Long
-        -precioFinal: BigDecimal
-        -fechaCompra: DateTime
-        -estado: EstadoCompra
-        -metodoPago: String
-        -observaciones: String
-        +confirmarCompra(): void
-        +cancelarCompra(): void
-        +obtenerDetalles(): Map<String, Object>
+    class Purchase {
+        -buyerId: Long
+        -car: Car
+        -dealership: Dealership
+        -finalPrice: BigDecimal
+        -purchaseDate: LocalDateTime
+        -purchaseStatus: PurchaseStatus
+        -paymentMethod: PaymentMethod
+        -observations: String
+        +confirmPurchase(): void
+        +cancelPurchase(): void
+        +deliverPurchase(): void
+        +pendingPurchase(): void
     }
 
-    %% Enums
-    class TipoCombustible {
+    %% ENUMS
+    class FuelType {
         <<enumeration>>
-        NAFTA
+        GASOLINE
         DIESEL
-        HIBRIDO
-        ELECTRICO
+        HYBRID
+        ELECTRIC
         GNC
     }
 
-    class TipoTransmision {
+    class TransmissionType {
         <<enumeration>>
         MANUAL
-        AUTOMATICA
-        SEMI_AUTOMATICA
+        AUTOMATIC
+        SEMI_AUTOMATIC
     }
 
-    class EstadoCompra {
+    class PurchaseStatus {
         <<enumeration>>
-        PENDIENTE
-        CONFIRMADA
-        ENTREGADA
-        CANCELADA
+        PENDING
+        CONFIRMED
+        DELIVERED
+        CANCELLED
     }
 
-    class TipoReporte {
+    class PaymentMethod {
         <<enumeration>>
-        AUTOS_MAS_VENDIDOS
-        USUARIOS_MAS_COMPRAS
-        AUTOS_FAVORITOS
-        AGENCIAS_MAS_VENTAS
+        CASH
+        CHECK
+        CREDIT_CARD
+        BANK_TRANSFER
     }
 
-    %% Clases de servicio
-    class AutoService {
-        -autoRepository: IAutoRepository
-        -concesionariaService: ConcesionariaService
-        +buscarAutos(criterios: CriterioBusqueda): List<Auto>
-        +obtenerAutoPorId(id: Long): Auto
-        +crearAuto(auto: Auto, concesionariaId: Long): Auto
-        +actualizarAuto(id: Long, datos: Map): Auto
-        +eliminarAuto(id: Long): void
-        +obtenerAutosPorConcesionaria(concesionariaId: Long): List<Auto>
+    class UserRole {
+        <<enumeration>>
+        BUYER
+        DEALERSHIP
+        ADMINISTRATOR
     }
 
-    class CompraService {
-        -compraRepository: ICompraRepository
-        -autoService: AutoService
-        -notificationService: INotificationService
-        +procesarCompra(compra: Compra): Compra
-        +obtenerComprasPorComprador(compradorId: Long): List<Compra>
-        +obtenerComprasPorConcesionaria(concesionariaId: Long): List<Compra>
-        +confirmarEntrega(compraId: Long): void
-    }
-
-    class FavoritoService {
-        -favoritoRepository: IFavoritoRepository
-        -autoService: AutoService
-        +agregarFavorito(compradorId: Long, autoId: Long): AutoFavorito
-        +eliminarFavorito(favoritoId: Long): void
-        +actualizarResenia(favoritoId: Long, puntaje: Integer, comentario: String): void
-        +obtenerFavoritosPorComprador(compradorId: Long): List<AutoFavorito>
-    }
-
-    class ReporteService {
-        -compraRepository: ICompraRepository
-        -favoritoRepository: IFavoritoRepository
-        -autoRepository: IAutoRepository
-        +generarReporteAutosVendidos(limite: Integer): List<Auto>
-        +generarReporteUsuariosActivos(limite: Integer): List<Comprador>
-        +generarReporteFavoritos(limite: Integer): List<Auto>
-        +generarReporteConcesionarias(limite: Integer): List<Concesionaria>
-    }
-
-    %% Interfaces para repositorios
-    class IAutoRepository {
+    %% REPOSITORIES
+    class CarRepository {
         <<interface>>
-        +save(auto: Auto): Auto
-        +findById(id: Long): Auto
-        +findAll(): List<Auto>
-        +findByCriteria(criterios: CriterioBusqueda): List<Auto>
-        +findByConcesionariaId(id: Long): List<Auto>
-        +delete(id: Long): void
+        +findByAvailableTrue(): List<Car>
+        +findById(id: Long): Optional<Car>
+        +findAll(): List<Car>
+        +save(car: Car): Car
+        +delete(car: Car): void
     }
 
-    class ICompraRepository {
+    class CarOfferRepository {
         <<interface>>
-        +save(compra: Compra): Compra
-        +findById(id: Long): Compra
-        +findByCompradorId(id: Long): List<Compra>
-        +findByConcesionariaId(id: Long): List<Compra>
-        +findMostSoldCars(limite: Integer): List<Auto>
-        +findTopBuyers(limite: Integer): List<Comprador>
+        +findAll(): List<CarOffer>
+        +findById(id: Long): Optional<CarOffer>
+        +findByCarIdAndDealershipId(carId: Long, dealershipId: Long): CarOffer?
+        +save(carOffer: CarOffer): CarOffer
     }
 
-    class IFavoritoRepository {
+    class PurchaseRepository {
         <<interface>>
-        +save(favorito: AutoFavorito): AutoFavorito
-        +findByCompradorId(id: Long): List<AutoFavorito>
-        +findMostFavorited(limite: Integer): List<Auto>
-        +delete(id: Long): void
+        +findByIdOrNull(id: Long): Purchase?
+        +findAll(): List<Purchase>
+        +findByBuyerId(buyerId: Long): List<Purchase>
+        +findByCarId(carId: Long): Purchase
+        +findByDealershipId(dealershipId: Long): List<Purchase>
+        +save(purchase: Purchase): Purchase
+        +delete(purchase: Purchase): void
     }
 
-    class INotificationService {
+    class DealershipRepository {
         <<interface>>
-        +enviarNotificacionCompra(compra: Compra): void
-        +enviarNotificacionCambioPrecio(favorito: AutoFavorito, nuevoPrecio: BigDecimal): void
+        +findById(id: Long): Optional<Dealership>
+        +findAll(): List<Dealership>
+        +findByActiveTrue(): List<Dealership>
+        +findByCuit(cuit: String): Dealership?
+        +findByEmail(email: String): Dealership?
+        +save(dealership: Dealership): Dealership
+        +delete(dealership: Dealership): void
     }
 
-    %% Clase para criterios de busqueda 
-    class CriterioBusqueda {
-        -palabraClave: String
-        -marcas: List<String>
-        -precioMinimo: BigDecimal
-        -precioMaximo: BigDecimal
-        -anioMinimo: Integer
-        -anioMaximo: Integer
-        -combustible: TipoCombustible
-        -transmision: TipoTransmision
-        -ciudades: List<String>
-        +aplicarFiltros(): Map<String, Object>
-        +isValid(): Boolean
+    class BuyerRepository {
+        <<interface>>
+        +findById(id: Long): Optional<Buyer>
+        +findAll(): List<Buyer>
+        +save(buyer: Buyer): Buyer
+        +delete(buyer: Buyer): void
     }
 
-    %% Relaciones de herencia
-    Usuario <|-- Comprador
-    Usuario <|-- Concesionaria
-    Usuario <|-- Administrador
+    %% SERVICES
+    class CarService {
+        -carRepository: CarRepository
+        +findById(id: Long): Car
+        +getAllCars(): List<Car>
+        +getCarById(id: Long): Car
+    }
 
-    %% Relaciones de asociacion
-    Comprador "1" --> "*" AutoFavorito : tiene favoritos
-    Comprador "1" --> "*" Compra : realiza compras
-    Concesionaria "1" --> "*" Auto : ofrece autos
-    Concesionaria "1" --> "*" Compra : recibe compras
-    Auto "1" --> "*" AutoFavorito : es favorito de
-    Auto "1" --> "0..1" Compra : es comprado en
+    class CarOfferService {
+        -carOfferRepository: CarOfferRepository
+        +findAll(): List<CarOffer>
+        +findById(id: Long): CarOffer
+        +findByCarIdAndDealershipId(carId: Long, dealershipId: Long): CarOffer?
+    }
 
-    %% Relaciones con enums
-    Auto --> TipoCombustible
-    Auto --> TipoTransmision
-    Compra --> EstadoCompra
+    class PurchaseService {
+        -purchaseRepository: PurchaseRepository
+        -carOfferService: CarOfferService
+        -carService: CarService
+        -buyerService: BuyerService
+        -dealershipService: DealershipService
+        +findById(id: Long): Purchase
+        +findAll(): List<Purchase>
+        +findByBuyerId(buyerId: Long): List<Purchase>
+        +findByCarId(carId: Long): Purchase
+        +findByDealershipId(dealershipId: Long): List<Purchase>
+        +createPurchase(request: PurchaseCreateRequest): Purchase
+        +updatePurchase(id: Long, updateData: Map<String, Any>): Purchase
+        +deletePurchase(id: Long): void
+        +markAsConfirmed(id: Long): Purchase
+        +markAsPending(id: Long): Purchase
+        +markAsCanceled(id: Long): Purchase
+        +markAsDelivered(id: Long): Purchase
+        -validatePurchase(purchase: Purchase): void
+        -validateAndTransformPurchaseCreateRequest(request): Purchase
+    }
 
-    %% Dependencias de servicios
-    AutoService --> IAutoRepository
-    CompraService --> ICompraRepository
-    CompraService --> INotificationService
-    FavoritoService --> IFavoritoRepository
-    ReporteService --> IAutoRepository
-    ReporteService --> ICompraRepository
-    ReporteService --> IFavoritoRepository
+    class DealershipService {
+        -dealershipRepository: DealershipRepository
+        +findById(id: Long): Dealership
+        +findAll(): List<Dealership>
+        +findActive(): List<Dealership>
+        +findByCuit(cuit: String): Dealership?
+        +findByEmail(email: String): Dealership?
+        +createDealership(request: DealershipCreateRequest): Dealership
+        +updateDealership(id: Long, updateData: Map<String, Any>): Dealership
+        +deactivate(id: Long): Dealership
+        +activate(id: Long): Dealership
+        +deleteDealership(id: Long): void
+    }
 
-    %% Uso de criterios
-    AutoService --> CriterioBusqueda
+    class BuyerService {
+        -buyerRepository: BuyerRepository
+        +findById(id: Long): Buyer
+        +findAll(): List<Buyer>
+        +createBuyer(buyer: Buyer): Buyer
+        +updateBuyer(id: Long, updateData: Map<String, Any>): Buyer
+        +deleteBuyer(id: Long): void
+    }
+
+    class AuthService {
+        +login(credentials: LoginCredentials): LoginResponse
+        +register(data: RegisterData): User
+        +logout(): void
+        +getLoggedUser(): User
+    }
+
+    %% CONTROLLERS
+    class AuthController {
+        -authService: AuthService
+        +login(credentials: LoginCredentials): ResponseEntity<LoginResponse>
+        +register(request: BuyerCreateRequest): ResponseEntity<UserResponse>
+    }
+
+    class CarController {
+        -carService: CarService
+        +getAllCars(): ResponseEntity<List<CarResponse>>
+        +getCarById(id: Long): ResponseEntity<CarResponse>
+    }
+
+    class CarOfferController {
+        -carOfferService: CarOfferService
+        +getAllCarOffers(): ResponseEntity<List<CarOfferResponse>>
+        +getCarOfferById(id: Long): ResponseEntity<CarOfferResponse>
+    }
+
+    class PurchaseController {
+        -purchaseService: PurchaseService
+        +getAllPurchases(): ResponseEntity<List<PurchaseResponse>>
+        +getPurchaseById(id: Long): ResponseEntity<PurchaseResponse>
+        +getPurchaseByBuyerId(id: Long): ResponseEntity<List<PurchaseResponse>>
+        +getPurchaseByCarId(id: Long): ResponseEntity<PurchaseResponse>
+        +getPurchaseByDealershipId(id: Long): ResponseEntity<List<PurchaseResponse>>
+        +createPurchase(request: PurchaseCreateRequest): ResponseEntity<PurchaseResponse>
+        +updatePurchase(id: Long, request: Map): ResponseEntity<PurchaseResponse>
+        +deletePurchase(id: Long): ResponseEntity<Unit>
+        +markAsConfirmed(id: Long): ResponseEntity<PurchaseResponse>
+        +markAsPending(id: Long): ResponseEntity<PurchaseResponse>
+        +markAsCanceled(id: Long): ResponseEntity<PurchaseResponse>
+        +markAsDelivered(id: Long): ResponseEntity<PurchaseResponse>
+    }
+
+    class DealershipController {
+        -dealershipService: DealershipService
+        +getAllDealerships(): ResponseEntity<List<DealershipResponse>>
+        +getDealershipById(id: Long): ResponseEntity<DealershipResponse>
+        +getDealershipByCuit(cuit: String): ResponseEntity<DealershipResponse>
+        +getDealershipByEmail(email: String): ResponseEntity<DealershipResponse>
+        +createDealership(request: DealershipCreateRequest): ResponseEntity<DealershipResponse>
+        +updateDealership(id: Long, request: DealershipUpdateRequest): ResponseEntity<DealershipResponse>
+        +deactivateDealership(id: Long): ResponseEntity<DealershipResponse>
+        +activateDealership(id: Long): ResponseEntity<DealershipResponse>
+        +deleteDealership(id: Long): ResponseEntity<Unit>
+    }
+
+    class BuyerController {
+        -buyerService: BuyerService
+        +getAllBuyers(): ResponseEntity<List<BuyerResponse>>
+        +getBuyerById(id: Long): ResponseEntity<BuyerResponse>
+        +createBuyer(request: BuyerCreateRequest): ResponseEntity<BuyerResponse>
+        +updateBuyer(id: Long, request: BuyerUpdateRequest): ResponseEntity<BuyerResponse>
+        +deleteBuyer(id: Long): ResponseEntity<Unit>
+    }
+
+    class GlobalExceptionHandler {
+        +handleNoSuchElementException(e): ResponseEntity<ErrorResponse>
+        +handleIllegalArgumentException(e): ResponseEntity<ErrorResponse>
+        +handleGenericException(e): ResponseEntity<ErrorResponse>
+    }
+
+    %% INHERITANCE
+    BaseEntity <|-- Car
+    BaseEntity <|-- Purchase
+    BaseEntity <|-- CarOffer
+    User <|-- Buyer
+    User <|-- Dealership
+
+    %% ASSOCIATIONS
+    Buyer "1" --> "*" Purchase : makes
+    Dealership "1" --> "*" CarOffer : creates
+    Dealership "1" --> "*" Purchase : receives
+    Car "1" --> "*" CarOffer : has offers
+    Car "1" --> "0..1" Purchase : is bought in
+    CarOffer "*" --> "1" Car : references
+    CarOffer "*" --> "1" Dealership : belongs to
+    Purchase "1" --> "1" Car : involves
+    Purchase "1" --> "1" Dealership : processed by
+
+    %% ENUMS RELATIONSHIPS
+    Car --> FuelType
+    Car --> TransmissionType
+    Purchase --> PurchaseStatus
+    Purchase --> PaymentMethod
+    User --> UserRole
+
+    %% DEPENDENCIES
+    AuthController --> AuthService
+    CarController --> CarService
+    CarOfferController --> CarOfferService
+    PurchaseController --> PurchaseService
+    DealershipController --> DealershipService
+    BuyerController --> BuyerService
+    
+    PurchaseService --> PurchaseRepository
+    PurchaseService --> CarOfferService
+    PurchaseService --> CarService
+    PurchaseService --> BuyerService
+    PurchaseService --> DealershipService
+    
+    CarOfferService --> CarOfferRepository
+    CarService --> CarRepository
+    DealershipService --> DealershipRepository
+    BuyerService --> BuyerRepository
 ```
