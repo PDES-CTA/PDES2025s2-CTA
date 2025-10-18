@@ -1,7 +1,7 @@
 import { FuelType, TransmissionType } from '../utils/carUtils';
 
 export interface Car {
-  id: string | number;
+  id: number | string;
   brand: string;
   model: string;
   year: number;

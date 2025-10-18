@@ -1,4 +1,3 @@
-// src/types/carOffer.ts
 import { Car } from './car';
 import { Dealership } from './dealership';
 
@@ -11,5 +10,5 @@ export interface CarOffer {
   price: number;
   offerDate: string;
   dealershipNotes?: string;
-  images?: string[];
+  available: boolean;
 }
