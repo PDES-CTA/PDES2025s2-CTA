@@ -8,17 +8,17 @@ import cta.model.FavoriteCar
 import cta.repository.FavoriteCarRepository
 import cta.web.dto.FavoriteCarCreateRequest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -53,6 +53,7 @@ class FavoriteServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
+                plate = "ABC123"
                 mileage = 15000
                 color = "White"
                 fuelType = FuelType.GASOLINE
@@ -64,658 +65,304 @@ class FavoriteServiceTest {
         validBuyer =
             Buyer().apply {
                 id = 1L
-                email = "buyer@example.com"
-                password = "password123"
                 firstName = "John"
                 lastName = "Doe"
-                phone = "+54 11 1234-5678"
-                address = "Av. Corrientes 1234"
+                email = "john.doe@example.com"
+                password = "password"
+                phone = "123456789"
                 dni = 12345678
+                address = "123 Main St"
+                registrationDate = LocalDateTime.now()
                 active = true
             }
 
         validFavoriteCar =
             FavoriteCar().apply {
                 id = 1L
-                buyer = validBuyer
                 car = validCar
-                rating = 8
-                comment = "Great car!"
+                buyer = validBuyer
                 dateAdded = LocalDateTime.now()
+                rating = 5
+                comment = "Excellent car"
                 priceNotifications = true
             }
+    }
+
+    // ========== findById Tests ==========
+    @Test
+    @DisplayName("Should find favorite car by id")
+    fun shouldFindFavoriteCarById() {
+        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
+        val result = favoriteService.findById(1L)
+        assertNotNull(result)
+        assertEquals(1L, result.id)
+        verify(favoriteCarRepository).findById(1L)
+    }
+
+    @Test
+    @DisplayName("Should throw exception when favorite car not found by id")
+    fun shouldThrowExceptionWhenFavoriteCarNotFoundById() {
+        `when`(favoriteCarRepository.findById(999L)).thenReturn(Optional.empty())
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                favoriteService.findById(999L)
+            }
+        assertEquals("Favorite car with id 999 not found", exception.message)
     }
 
     // ========== saveFavorite Tests ==========
-
     @Test
-    @DisplayName("Should save favorite car successfully")
-    fun shouldSaveFavoriteCarSuccessfully() {
-        // Given
-        val request =
+    @DisplayName("Should create favorite car successfully")
+    fun shouldCreateFavoriteCar() {
+        val createRequest =
             FavoriteCarCreateRequest(
                 buyerId = 1L,
                 carId = 1L,
-                rating = 8,
-                comment = "Great car!",
                 dateAdded = LocalDateTime.now(),
+                rating = 5,
+                comment = "Loved it!",
                 priceNotifications = true,
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(null)
         `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
 
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
+        val result = favoriteService.saveFavorite(createRequest)
         assertNotNull(result)
-        assertEquals(validBuyer, result.buyer)
-        assertEquals(validCar, result.car)
-        assertEquals(8, result.rating)
-        assertEquals("Great car!", result.comment)
+        assertEquals(5, result.rating)
+        assertEquals("Excellent car", result.comment)
         verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
     }
 
     @Test
-    @DisplayName("Should throw exception when car is already in favorites")
-    fun shouldThrowExceptionWhenCarAlreadyInFavorites() {
-        // Given
-        val request =
+    @DisplayName("Should throw exception when buyer not found on create")
+    fun shouldThrowExceptionWhenBuyerNotFoundOnCreate() {
+        val createRequest =
             FavoriteCarCreateRequest(
-                buyerId = 1L,
+                buyerId = 999L,
                 carId = 1L,
-                rating = 8,
-                comment = "Great car!",
                 dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
-            )
-
-        val existingFavorites = listOf(validFavoriteCar)
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(existingFavorites)
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.saveFavorite(request)
-            }
-        assertEquals("Car with id 1 is already in favorites", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when rating is less than 0")
-    fun shouldThrowExceptionWhenRatingIsLessThanZero() {
-        // Given
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 1L,
-                rating = -1,
+                rating = 5,
                 comment = "Test",
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
+                priceNotifications = false,
             )
+        `when`(buyerService.findById(999L)).thenThrow(NoSuchElementException("Buyer with id 999 not found"))
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-
-        // When & Then
         val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.saveFavorite(request)
+            assertThrows(NoSuchElementException::class.java) {
+                favoriteService.saveFavorite(createRequest)
             }
-        assertEquals("Rating must be greater or equal 0", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
+        assertEquals("Buyer with id 999 not found", exception.message)
     }
 
     @Test
-    @DisplayName("Should throw exception when rating is greater than 10")
-    fun shouldThrowExceptionWhenRatingIsGreaterThan10() {
-        // Given
-        val request =
+    @DisplayName("Should throw exception when car not found on create")
+    fun shouldThrowExceptionWhenCarNotFoundOnCreate() {
+        val createRequest =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 999L,
+                dateAdded = LocalDateTime.now(),
+                rating = 5,
+                comment = "Test",
+                priceNotifications = false,
+            )
+        
+        `when`(carService.findById(999L)).thenThrow(NoSuchElementException("Car with id 999 not found"))
+
+        val exception =
+            assertThrows(NoSuchElementException::class.java) {
+                favoriteService.saveFavorite(createRequest)
+            }
+        assertEquals("Car with id 999 not found", exception.message)
+    }
+
+    @Test
+    @DisplayName("Should throw exception when favorite car already exists")
+    fun shouldThrowExceptionWhenFavoriteAlreadyExists() {
+        val createRequest =
             FavoriteCarCreateRequest(
                 buyerId = 1L,
                 carId = 1L,
+                dateAdded = LocalDateTime.now(),
+                rating = 5,
+                comment = "Test",
+                priceNotifications = false,
+            )
+        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(validFavoriteCar)
+
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(createRequest)
+            }
+        assertEquals("Buyer 1 already has car 1 as favorite", exception.message)
+    }
+
+    // ========== Validation Tests ==========
+    @Test
+    @DisplayName("Should throw exception for invalid rating (too high)")
+    fun shouldThrowExceptionForInvalidRatingHigh() {
+        val createRequest =
+            FavoriteCarCreateRequest(
+                buyerId = 1L,
+                carId = 1L,
+                dateAdded = LocalDateTime.now(),
                 rating = 11,
                 comment = "Test",
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
+                priceNotifications = false,
             )
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(null)
 
-        // When & Then
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.saveFavorite(request)
+                favoriteService.saveFavorite(createRequest)
             }
-        assertEquals("Rating must be less or equal 10", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
+        assertEquals("Rating must be between 0 and 10", exception.message)
     }
 
     @Test
-    @DisplayName("Should accept rating of 0")
-    fun shouldAcceptRatingOfZero() {
-        // Given
-        val request =
+    @DisplayName("Should throw exception for invalid rating (too low)")
+    fun shouldThrowExceptionForInvalidRatingLow() {
+        val createRequest =
             FavoriteCarCreateRequest(
                 buyerId = 1L,
                 carId = 1L,
-                rating = 0,
-                comment = "Not impressed",
                 dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
+                rating = -1,
+                comment = "Test",
+                priceNotifications = false,
             )
-
-        val favoriteWithZeroRating =
-            FavoriteCar().apply {
-                id = 4L
-                buyer = validBuyer
-                car = validCar
-                rating = 0
-                comment = "Not impressed"
-                dateAdded = LocalDateTime.now()
-                priceNotifications = true
-            }
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(favoriteWithZeroRating)
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(null)
 
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
-        assertNotNull(result)
-        assertEquals(0, result.rating)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                favoriteService.saveFavorite(createRequest)
+            }
+        assertEquals("Rating must be between 0 and 10", exception.message)
     }
 
     @Test
-    @DisplayName("Should accept rating of 10")
-    fun shouldAcceptRatingOf10() {
-        // Given
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 1L,
-                rating = 10,
-                comment = "Perfect!",
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
-            )
-
-        val favoriteWithMaxRating =
-            FavoriteCar().apply {
-                id = 5L
-                buyer = validBuyer
-                car = validCar
-                rating = 10
-                comment = "Perfect!"
-                dateAdded = LocalDateTime.now()
-                priceNotifications = true
-            }
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(favoriteWithMaxRating)
-
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
-        assertNotNull(result)
-        assertEquals(10, result.rating)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when comment exceeds 1000 characters")
-    fun shouldThrowExceptionWhenCommentExceeds1000Characters() {
-        // Given
+    @DisplayName("Should throw exception for long comment")
+    fun shouldThrowExceptionForLongComment() {
         val longComment = "a".repeat(1001)
-        val request =
+        val createRequest =
             FavoriteCarCreateRequest(
                 buyerId = 1L,
                 carId = 1L,
-                rating = 8,
+                dateAdded = LocalDateTime.now(),
+                rating = 5,
                 comment = longComment,
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = true,
+                priceNotifications = false,
             )
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(null)
 
-        // When & Then
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.saveFavorite(request)
+                favoriteService.saveFavorite(createRequest)
             }
-        assertEquals("Observations cannot exceed 1000 characters", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
+        assertEquals("Comment cannot exceed 1000 characters", exception.message)
     }
 
     @Test
-    @DisplayName("Should accept comment with exactly 1000 characters")
-    fun shouldAcceptCommentWith1000Characters() {
-        // Given
-        val maxComment = "a".repeat(1000)
-        val request =
+    @DisplayName("Should accept empty comment")
+    fun shouldAcceptEmptyComment() {
+        val createRequest =
             FavoriteCarCreateRequest(
                 buyerId = 1L,
                 carId = 1L,
-                rating = 8,
-                comment = maxComment,
                 dateAdded = LocalDateTime.now(),
+                rating = 5,
+                comment = "",
                 priceNotifications = true,
             )
-
-        val favoriteWithMaxComment =
-            FavoriteCar().apply {
-                id = 6L
-                buyer = validBuyer
-                car = validCar
-                rating = 8
-                comment = maxComment
-                dateAdded = LocalDateTime.now()
-                priceNotifications = true
-            }
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
+        validFavoriteCar.comment = null
         `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(favoriteWithMaxComment)
+        `when`(carService.findById(1L)).thenReturn(validCar)
+        `when`(favoriteCarRepository.findByBuyerIdAndCarId(1L, 1L)).thenReturn(null)
+        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
 
-        // When
-        val result = favoriteService.saveFavorite(request)
+        val result = favoriteService.saveFavorite(createRequest)
+    }
 
-        // Then
-        assertNotNull(result)
-        assertEquals(1000, result.comment?.length)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
+    // ========== updateReview Tests ==========
+    @Test
+    @DisplayName("Should update review successfully")
+    fun shouldUpdateReview() {
+        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
+        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
+
+        val result = favoriteService.updateReview(1L, 3, "Updated comment")
+        assertEquals(3, result.rating)
+        assertEquals("Updated comment", result.comment)
+        verify(favoriteCarRepository).save(validFavoriteCar)
     }
 
     @Test
-    @DisplayName("Should throw exception when date is before year 2000")
-    fun shouldThrowExceptionWhenDateIsBeforeYear2000() {
-        // Given
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 1L,
-                rating = 8,
-                comment = "Test",
-                dateAdded = LocalDateTime.of(1999, 12, 31, 23, 59),
-                priceNotifications = true,
-            )
+    @DisplayName("Should clear review successfully")
+    fun shouldClearReview() {
+        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
+        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.saveFavorite(request)
-            }
-        assertEquals("Car must be added as favorite after January 1, 2000", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
+        val result = favoriteService.updateReview(1L, null, null)
+        assertNull(result.rating)
+        assertNull(result.comment)
+        verify(favoriteCarRepository).save(validFavoriteCar)
     }
 
-    @Test
-    @DisplayName("Should accept date exactly on January 1, 2000 00:00:01")
-    fun shouldAcceptDateOnJanuary1_2000() {
-        // Given
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 1L,
-                rating = 8,
-                comment = "Test",
-                dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1),
-                priceNotifications = true,
-            )
-
-        val favoriteWithMinDate =
-            FavoriteCar().apply {
-                id = 7L
-                buyer = validBuyer
-                car = validCar
-                rating = 8
-                comment = "Test"
-                dateAdded = LocalDateTime.of(2000, 1, 1, 0, 0, 1)
-                priceNotifications = true
-            }
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(favoriteWithMinDate)
-
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
-        assertNotNull(result)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    // ========== deleteFavoriteCar Tests ==========
-
+    // ========== deleteFavorite Tests ==========
     @Test
     @DisplayName("Should delete favorite car successfully")
-    fun shouldDeleteFavoriteCarSuccessfully() {
-        // Given
+    fun shouldDeleteFavorite() {
         `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        doNothing().`when`(favoriteCarRepository).delete(any(FavoriteCar::class.java))
-
-        // When
         favoriteService.deleteFavoriteCar(1L)
-
-        // Then
-        verify(favoriteCarRepository).findById(1L)
         verify(favoriteCarRepository).delete(validFavoriteCar)
     }
 
     @Test
-    @DisplayName("Should throw exception when deleting non-existent favorite car")
-    fun shouldThrowExceptionWhenDeletingNonExistentFavoriteCar() {
-        // Given
+    @DisplayName("Should throw exception when deleting non-existent favorite")
+    fun shouldThrowExceptionWhenDeletingNonExistentFavorite() {
         `when`(favoriteCarRepository.findById(999L)).thenReturn(Optional.empty())
-
-        // When & Then
         val exception =
-            assertThrows(Exception::class.java) {
+            assertThrows(NoSuchElementException::class.java) {
                 favoriteService.deleteFavoriteCar(999L)
             }
-        assertEquals("Favorite car with ID 999 not found", exception.message)
+        assertEquals("Favorite car with id 999 not found", exception.message)
         verify(favoriteCarRepository, never()).delete(any(FavoriteCar::class.java))
     }
 
-    // ========== updateReview Tests ==========
-
+    // ========== Other Tests ==========
     @Test
-    @DisplayName("Should update review with both rating and comment")
-    fun shouldUpdateReviewWithBothRatingAndComment() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
-
-        val updates =
-            mapOf(
-                "rating" to 9,
-                "comment" to "Updated comment - even better!",
-            )
-
-        // When
-        val result = favoriteService.updateReview(1L, updates)
-
-        // Then
-        assertEquals(9, result.rating)
-        assertEquals("Updated comment - even better!", result.comment)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
+    @DisplayName("Should find favorites by buyer id")
+    fun shouldFindFavoritesByBuyerId() {
+        `when`(favoriteCarRepository.findByBuyerId(1L)).thenReturn(listOf(validFavoriteCar))
+        val result = favoriteService.findByBuyerId(1L)
+        assertEquals(1, result.size)
+        assertEquals(1L, result[0].buyer.id)
+        verify(favoriteCarRepository).findByBuyerId(1L)
     }
 
     @Test
-    @DisplayName("Should update only rating")
-    fun shouldUpdateOnlyRating() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
+    @DisplayName("Should find favorites by car id")
+    fun shouldFindFavoritesByCarId() {
+        `when`(favoriteCarRepository.findByCarId(1L)).thenReturn(listOf(validFavoriteCar))
+        `when`(favoriteCarRepository.findByCarId(2L)).thenReturn(emptyList())
 
-        val originalComment = validFavoriteCar.comment
+        val result1 = favoriteService.findByCarId(1L)
+        val result2 = favoriteService.findByCarId(2L)
 
-        val updates = mapOf("rating" to 10)
-
-        // When
-        val result = favoriteService.updateReview(1L, updates)
-
-        // Then
-        assertEquals(10, result.rating)
-        assertEquals(originalComment, result.comment)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should update only comment")
-    fun shouldUpdateOnlyComment() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
-
-        val originalRating = validFavoriteCar.rating
-
-        val updates = mapOf("comment" to "New comment only")
-
-        // When
-        val result = favoriteService.updateReview(1L, updates)
-
-        // Then
-        assertEquals(originalRating, result.rating)
-        assertEquals("New comment only", result.comment)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when updating non-existent favorite car")
-    fun shouldThrowExceptionWhenUpdatingNonExistentFavoriteCar() {
-        // Given
-        `when`(favoriteCarRepository.findById(999L)).thenReturn(Optional.empty())
-
-        val updates = mapOf("rating" to 9)
-
-        // When & Then
-        val exception =
-            assertThrows(Exception::class.java) {
-                favoriteService.updateReview(999L, updates)
-            }
-        assertEquals("Favorite car with ID 999 not found", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when updating with invalid rating less than 0")
-    fun shouldThrowExceptionWhenUpdatingWithInvalidRatingLessThanZero() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-
-        val updates = mapOf("rating" to -1)
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.updateReview(1L, updates)
-            }
-        assertEquals("Rating must be greater or equal 0", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when updating with invalid rating greater than 10")
-    fun shouldThrowExceptionWhenUpdatingWithInvalidRatingGreaterThan10() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-
-        val updates = mapOf("rating" to 11)
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.updateReview(1L, updates)
-            }
-        assertEquals("Rating must be less or equal 10", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when updating with comment exceeding 1000 characters")
-    fun shouldThrowExceptionWhenUpdatingWithLongComment() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-
-        val longComment = "a".repeat(1001)
-        val updates = mapOf("comment" to longComment)
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                favoriteService.updateReview(1L, updates)
-            }
-        assertEquals("Observations cannot exceed 1000 characters", exception.message)
-        verify(favoriteCarRepository, never()).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should handle empty update map")
-    fun shouldHandleEmptyUpdateMap() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
-
-        val originalRating = validFavoriteCar.rating
-        val originalComment = validFavoriteCar.comment
-
-        // When
-        val result = favoriteService.updateReview(1L, emptyMap())
-
-        // Then
-        assertEquals(originalRating, result.rating)
-        assertEquals(originalComment, result.comment)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should convert string rating to integer")
-    fun shouldConvertStringRatingToInteger() {
-        // Given
-        `when`(favoriteCarRepository.findById(1L)).thenReturn(Optional.of(validFavoriteCar))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(validFavoriteCar)
-
-        val updates = mapOf("rating" to "7")
-
-        // When
-        val result = favoriteService.updateReview(1L, updates)
-
-        // Then
-        assertEquals(7, result.rating)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    // ========== Edge Cases ==========
-
-    @Test
-    @DisplayName("Should allow multiple favorites from same buyer for different cars")
-    fun shouldAllowMultipleFavoritesFromSameBuyerForDifferentCars() {
-        // Given
-        val car2 =
-            Car().apply {
-                id = 2L
-                brand = "Honda"
-                model = "Civic"
-                year = 2023
-                mileage = 10000
-                color = "Blue"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
-                publicationDate = LocalDateTime.now()
-            }
-
-        val existingFavorite =
-            FavoriteCar().apply {
-                id = 2L
-                buyer = validBuyer
-                car = validCar
-                rating = 7
-                comment = "First favorite"
-                dateAdded = LocalDateTime.now()
-                priceNotifications = true
-            }
-
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 2L,
-                rating = 9,
-                comment = "Second favorite",
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = false,
-            )
-
-        val newFavorite =
-            FavoriteCar().apply {
-                id = 3L
-                buyer = validBuyer
-                car = car2
-                rating = 9
-                comment = "Second favorite"
-                dateAdded = LocalDateTime.now()
-                priceNotifications = false
-            }
-
-        `when`(carService.findById(2L)).thenReturn(car2)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(listOf(existingFavorite))
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(newFavorite)
-
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
-        assertNotNull(result)
-        assertEquals(2L, result.car.id)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
-    }
-
-    @Test
-    @DisplayName("Should handle priceNotifications false")
-    fun shouldHandlePriceNotificationsFalse() {
-        // Given
-        val request =
-            FavoriteCarCreateRequest(
-                buyerId = 1L,
-                carId = 1L,
-                rating = 5,
-                comment = "Monitoring price",
-                dateAdded = LocalDateTime.now(),
-                priceNotifications = false,
-            )
-
-        val favoriteWithoutNotifications =
-            FavoriteCar().apply {
-                id = 8L
-                buyer = validBuyer
-                car = validCar
-                rating = 5
-                comment = "Monitoring price"
-                dateAdded = LocalDateTime.now()
-                priceNotifications = false
-            }
-
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(favoriteCarRepository.findFavoriteCarByBuyer(validBuyer)).thenReturn(emptyList())
-        `when`(favoriteCarRepository.save(any(FavoriteCar::class.java))).thenReturn(favoriteWithoutNotifications)
-
-        // When
-        val result = favoriteService.saveFavorite(request)
-
-        // Then
-        assertNotNull(result)
-        assertFalse(result.priceNotifications)
-        verify(favoriteCarRepository).save(any(FavoriteCar::class.java))
+        assertEquals(1, result1.size)
+        assertTrue(result2.isEmpty())
+        verify(favoriteCarRepository).findByCarId(1L)
+        verify(favoriteCarRepository).findByCarId(2L)
     }
 }

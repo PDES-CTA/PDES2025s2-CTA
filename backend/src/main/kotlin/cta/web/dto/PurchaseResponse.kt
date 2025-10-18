@@ -31,8 +31,8 @@ data class PurchaseResponse(
             return PurchaseResponse(
                 id = purchase.id,
                 buyerId = purchase.buyerId,
-                carId = purchase.car.id,
-                dealershipId = purchase.dealership.id,
+                carId = purchase.carOffer.car.id,
+                dealershipId = purchase.carOffer.dealership.id,
                 purchaseDate = purchase.purchaseDate,
                 finalPrice = purchase.finalPrice,
                 purchaseStatus = purchase.purchaseStatus.toString(),

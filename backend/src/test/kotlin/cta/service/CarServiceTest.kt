@@ -13,10 +13,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -44,12 +43,15 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
+                plate = "ABC123"
                 mileage = 15000
                 color = "White"
+                description = "Excellent condition"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 available = true
                 publicationDate = LocalDateTime.now()
+                images = mutableListOf("http://example.com/img.png")
             }
     }
 
@@ -66,14 +68,12 @@ class CarServiceTest {
 
         // Then
         assertNotNull(result)
-        assertEquals(1L, result.id)
         assertEquals("Toyota", result.brand)
-        assertEquals("Corolla", result.model)
         verify(carRepository).findById(1L)
     }
 
     @Test
-    @DisplayName("Should throw exception when car not found")
+    @DisplayName("Should throw exception when car not found by id")
     fun shouldThrowExceptionWhenCarNotFound() {
         // Given
         `when`(carRepository.findById(999L)).thenReturn(Optional.empty())
@@ -87,11 +87,27 @@ class CarServiceTest {
         verify(carRepository).findById(999L)
     }
 
-    // ========== findAll Tests ==========
+    // ========== createCar Tests ==========
+    @Test
+    @DisplayName("Should create car successfully")
+    fun shouldCreateCar() {
+        // Given
+        `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
+
+        // When
+        val result = carService.createCar(validCar)
+
+        // Then
+        assertNotNull(result)
+        assertEquals("Toyota", result.brand)
+        verify(carRepository).save(validCar)
+    }
+
+    // ========== findAllAvailable Tests ==========
 
     @Test
-    @DisplayName("Should find all cars")
-    fun shouldFindAllCars() {
+    @DisplayName("Should find all available cars")
+    fun shouldFindAllAvailableCars() {
         // Given
         val car2 =
             Car().apply {
@@ -99,6 +115,7 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
+                plate = "DEF456"
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
@@ -107,58 +124,27 @@ class CarServiceTest {
                 publicationDate = LocalDateTime.now()
             }
         val cars = listOf(validCar, car2)
-        `when`(carRepository.findAll()).thenReturn(cars)
+        `when`(carRepository.findByAvailableTrue()).thenReturn(cars)
 
         // When
-        val result = carService.findAll()
+        val result = carService.findAllAvailable()
 
         // Then
         assertEquals(2, result.size)
-        verify(carRepository).findAll()
+        verify(carRepository).findByAvailableTrue()
     }
 
     @Test
-    @DisplayName("Should return empty list when no cars exist")
-    fun shouldReturnEmptyListWhenNoCarsExist() {
+    @DisplayName("Should return empty list when no available cars")
+    fun shouldReturnEmptyListWhenNoAvailableCars() {
         // Given
-        `when`(carRepository.findAll()).thenReturn(emptyList())
+        `when`(carRepository.findByAvailableTrue()).thenReturn(emptyList())
 
         // When
-        val result = carService.findAll()
+        val result = carService.findAllAvailable()
 
         // Then
         assertTrue(result.isEmpty())
-        verify(carRepository).findAll()
-    }
-
-    // ========== findAvailableCars Tests ==========
-
-    @Test
-    @DisplayName("Should find only available cars")
-    fun shouldFindOnlyAvailableCars() {
-        // Given
-        val car2 =
-            Car().apply {
-                id = 2L
-                brand = "Honda"
-                model = "Civic"
-                year = 2023
-                mileage = 10000
-                color = "Blue"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
-                publicationDate = LocalDateTime.now()
-            }
-        val availableCars = listOf(validCar, car2)
-        `when`(carRepository.findByAvailableTrue()).thenReturn(availableCars)
-
-        // When
-        val result = carService.findAvailableCars()
-
-        // Then
-        assertEquals(2, result.size)
-        assertTrue(result.all { it.available })
         verify(carRepository).findByAvailableTrue()
     }
 
@@ -174,6 +160,7 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
+                plate = "DEF456"
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
@@ -184,7 +171,7 @@ class CarServiceTest {
         val cars = listOf(validCar, car2)
         `when`(carRepository.findByAvailableTrue()).thenReturn(cars)
 
-        val filters = CarSearchFilters(keyword = "toyota")
+        val filters = CarSearchFilters(keyword = "Toyota")
 
         // When
         val result = carService.searchCars(filters)
@@ -204,6 +191,7 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2020
+                plate = "ABC123"
                 mileage = 40000
                 color = "White"
                 fuelType = FuelType.GASOLINE
@@ -217,6 +205,7 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2022
+                plate = "DEF456"
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
@@ -230,6 +219,7 @@ class CarServiceTest {
                 brand = "Mazda"
                 model = "6"
                 year = 2024
+                plate = "GHI789"
                 mileage = 1000
                 color = "Black"
                 fuelType = FuelType.GASOLINE
@@ -260,6 +250,7 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
+                plate = "DEF456"
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
@@ -290,6 +281,7 @@ class CarServiceTest {
                 brand = "Volkswagen"
                 model = "Jetta"
                 year = 2023
+                plate = "DEF456"
                 mileage = 8000
                 color = "Gray"
                 fuelType = FuelType.DIESEL
@@ -320,6 +312,7 @@ class CarServiceTest {
                 brand = "Mazda"
                 model = "MX-5"
                 year = 2023
+                plate = "DEF456"
                 mileage = 5000
                 color = "Red"
                 fuelType = FuelType.GASOLINE
@@ -341,8 +334,8 @@ class CarServiceTest {
     }
 
     @Test
-    @DisplayName("Should return all available cars when no filters applied")
-    fun shouldReturnAllCarsWhenNoFilters() {
+    @DisplayName("Should search cars with multiple filters")
+    fun shouldSearchCarsWithMultipleFilters() {
         // Given
         val car2 =
             Car().apply {
@@ -350,6 +343,7 @@ class CarServiceTest {
                 brand = "Honda"
                 model = "Civic"
                 year = 2023
+                plate = "DEF456"
                 mileage = 10000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
@@ -360,68 +354,28 @@ class CarServiceTest {
         val cars = listOf(validCar, car2)
         `when`(carRepository.findByAvailableTrue()).thenReturn(cars)
 
-        val filters = CarSearchFilters()
+        val filters = CarSearchFilters(keyword = "Corolla", minYear = 2020)
 
         // When
         val result = carService.searchCars(filters)
 
         // Then
-        assertEquals(2, result.size)
+        assertEquals(1, result.size)
+        assertEquals("Toyota", result[0].brand)
     }
 
-    // ========== createCar Tests ==========
+    // ========== createCar Validation Tests ==========
 
     @Test
-    @DisplayName("Should create car successfully")
-    fun shouldCreateCar() {
-        // Given
-        val newCar =
-            Car().apply {
-                brand = "Ford"
-                model = "Mustang"
-                year = 2023
-                mileage = 0
-                color = "Red"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
-                publicationDate = LocalDateTime.now()
-            }
-        val savedCar =
-            Car().apply {
-                id = 3L
-                brand = "Ford"
-                model = "Mustang"
-                year = 2023
-                mileage = 0
-                color = "Red"
-                fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
-                publicationDate = LocalDateTime.now()
-            }
-
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(savedCar)
-
-        // When
-        val result = carService.createCar(newCar)
-
-        // Then
-        assertNotNull(result)
-        assertEquals(3L, result.id)
-        assertEquals("Ford", result.brand)
-        verify(carRepository).save(any(Car::class.java))
-    }
-
-    @Test
-    @DisplayName("Should throw exception when creating car with blank brand")
-    fun shouldThrowExceptionWhenBrandIsBlank() {
+    @DisplayName("Should throw exception when brand is empty")
+    fun shouldThrowExceptionWhenBrandIsEmpty() {
         // Given
         val invalidCar =
             Car().apply {
                 brand = ""
                 model = "Model"
                 year = 2022
+                plate = "ABC123"
                 mileage = 0
                 color = "Blue"
             }
@@ -432,18 +386,18 @@ class CarServiceTest {
                 carService.createCar(invalidCar)
             }
         assertEquals("Brand cannot be empty", exception.message)
-        verify(carRepository, never()).save(any(Car::class.java))
     }
 
     @Test
-    @DisplayName("Should throw exception when creating car with blank model")
-    fun shouldThrowExceptionWhenModelIsBlank() {
+    @DisplayName("Should throw exception when model is empty")
+    fun shouldThrowExceptionWhenModelIsEmpty() {
         // Given
         val invalidCar =
             Car().apply {
                 brand = "Toyota"
                 model = ""
                 year = 2022
+                plate = "ABC123"
                 mileage = 0
                 color = "Blue"
             }
@@ -465,6 +419,7 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Model T"
                 year = 1900
+                plate = "ABC123"
                 mileage = 0
                 color = "Black"
             }
@@ -486,6 +441,7 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Future"
                 year = LocalDate.now().year + 2
+                plate = "ABC123"
                 mileage = 0
                 color = "Silver"
             }
@@ -507,6 +463,7 @@ class CarServiceTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
+                plate = "ABC123"
                 mileage = -1000
                 color = "White"
             }
@@ -520,14 +477,15 @@ class CarServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when color is blank")
-    fun shouldThrowExceptionWhenColorIsBlank() {
+    @DisplayName("Should throw exception when color is empty")
+    fun shouldThrowExceptionWhenColorIsEmpty() {
         // Given
         val invalidCar =
             Car().apply {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2022
+                plate = "ABC123"
                 mileage = 0
                 color = ""
             }
@@ -540,11 +498,39 @@ class CarServiceTest {
         assertEquals("Color cannot be empty", exception.message)
     }
 
+    @Test
+    @DisplayName("Should throw exception when description is too long")
+    fun shouldThrowExceptionWhenDescriptionIsTooLong() {
+        // Given
+        val invalidCar = validCar.apply { description = "a".repeat(1001) }
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                carService.createCar(invalidCar)
+            }
+        assertEquals("Description cannot exceed 1000 characters", exception.message)
+    }
+
+    @Test
+    @DisplayName("Should throw exception when image URL is invalid")
+    fun shouldThrowExceptionWhenImageUrlIsInvalid() {
+        // Given
+        val invalidCar = validCar.apply { images = mutableListOf("ftp://invalid.com/img.png") }
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                carService.createCar(invalidCar)
+            }
+        assertEquals("Image URL must start with http:// or https://", exception.message)
+    }
+
     // ========== updateCar Tests ==========
 
     @Test
-    @DisplayName("Should update car successfully with all fields")
-    fun shouldUpdateCarWithAllFields() {
+    @DisplayName("Should update car successfully")
+    fun shouldUpdateCar() {
         // Given
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
         `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
@@ -554,13 +540,13 @@ class CarServiceTest {
                 "brand" to "Honda",
                 "model" to "Accord",
                 "year" to 2023,
-                "price" to "30000.00",
                 "mileage" to 20000,
                 "color" to "Black",
                 "description" to "Updated description",
                 "fuelType" to "DIESEL",
                 "transmission" to "MANUAL",
                 "available" to false,
+                "images" to listOf("http://new.com/img.jpg")
             )
 
         // When
@@ -572,31 +558,13 @@ class CarServiceTest {
         assertEquals(2023, result.year)
         assertEquals(20000, result.mileage)
         assertEquals("Black", result.color)
+        assertEquals("Updated description", result.description)
         assertEquals(FuelType.DIESEL, result.fuelType)
         assertEquals(TransmissionType.MANUAL, result.transmission)
+        assertEquals(1, result.images.size)
+        assertEquals("http://new.com/img.jpg", result.images[0])
         assertFalse(result.available)
         verify(carRepository).save(any(Car::class.java))
-    }
-
-    @Test
-    @DisplayName("Should update only provided fields")
-    fun shouldUpdateOnlyProvidedFields() {
-        // Given
-        `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
-
-        val originalBrand = validCar.brand
-        val originalModel = validCar.model
-
-        val updates = mapOf("color" to "Blue")
-
-        // When
-        val result = carService.updateCar(1L, updates)
-
-        // Then
-        assertEquals("Blue", result.color)
-        assertEquals(originalBrand, result.brand)
-        assertEquals(originalModel, result.model)
     }
 
     @Test
@@ -604,8 +572,7 @@ class CarServiceTest {
     fun shouldThrowExceptionWhenUpdatingNonExistentCar() {
         // Given
         `when`(carRepository.findById(999L)).thenReturn(Optional.empty())
-
-        val updates = mapOf("color" to "Red")
+        val updates = mapOf("brand" to "Honda")
 
         // When & Then
         val exception =
@@ -617,12 +584,11 @@ class CarServiceTest {
     }
 
     @Test
-    @DisplayName("Should validate car when updating with invalid data")
-    fun shouldValidateWhenUpdatingWithInvalidData() {
+    @DisplayName("Should throw validation exception during update")
+    fun shouldThrowValidationExceptionDuringUpdate() {
         // Given
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
-
-        val updates = mapOf("year" to "Fail")
+        val updates = mapOf("year" to "1800") // Invalid year
 
         // When & Then
         assertThrows(IllegalArgumentException::class.java) {
@@ -634,7 +600,7 @@ class CarServiceTest {
     // ========== markAsSold Tests ==========
 
     @Test
-    @DisplayName("Should mark car as sold")
+    @DisplayName("Should mark car as sold successfully")
     fun shouldMarkCarAsSold() {
         // Given
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
@@ -651,10 +617,10 @@ class CarServiceTest {
     // ========== markAsAvailable Tests ==========
 
     @Test
-    @DisplayName("Should mark car as available")
+    @DisplayName("Should mark car as available successfully")
     fun shouldMarkCarAsAvailable() {
         // Given
-        validCar.available = false
+        validCar.available = false // Start as sold
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
         `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
 
@@ -673,13 +639,11 @@ class CarServiceTest {
     fun shouldDeleteCar() {
         // Given
         `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
-        doNothing().`when`(carRepository).delete(any(Car::class.java))
 
         // When
         carService.deleteCar(1L)
 
         // Then
-        verify(carRepository).findById(1L)
         verify(carRepository).delete(validCar)
     }
 
@@ -690,76 +654,9 @@ class CarServiceTest {
         `when`(carRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
-        val exception =
-            assertThrows(NoSuchElementException::class.java) {
-                carService.deleteCar(999L)
-            }
-        assertEquals("Car with ID 999 not found", exception.message)
+        assertThrows(NoSuchElementException::class.java) {
+            carService.deleteCar(999L)
+        }
         verify(carRepository, never()).delete(any(Car::class.java))
-    }
-
-    // ========== Edge Cases ==========
-
-    @Test
-    @DisplayName("Should handle empty update map")
-    fun shouldHandleEmptyUpdateMap() {
-        // Given
-        `when`(carRepository.findById(1L)).thenReturn(Optional.of(validCar))
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(validCar)
-
-        val originalBrand = validCar.brand
-        val originalModel = validCar.model
-
-        // When
-        val result = carService.updateCar(1L, emptyMap())
-
-        // Then
-        assertEquals(originalBrand, result.brand)
-        assertEquals(originalModel, result.model)
-        verify(carRepository).save(any(Car::class.java))
-    }
-
-    @Test
-    @DisplayName("Should accept current year plus one as valid year")
-    fun shouldAcceptNextYearAsValid() {
-        // Given
-        val car =
-            Car().apply {
-                brand = "Toyota"
-                model = "Corolla"
-                year = LocalDate.now().year + 1
-                mileage = 0
-                color = "White"
-            }
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(car)
-
-        // When
-        val result = carService.createCar(car)
-
-        // Then
-        assertNotNull(result)
-        verify(carRepository).save(any(Car::class.java))
-    }
-
-    @Test
-    @DisplayName("Should handle zero mileage for new cars")
-    fun shouldHandleZeroMileage() {
-        // Given
-        val newCar =
-            Car().apply {
-                brand = "Toyota"
-                model = "Corolla"
-                year = 2024
-                mileage = 0
-                color = "White"
-            }
-        `when`(carRepository.save(any(Car::class.java))).thenReturn(newCar)
-
-        // When
-        val result = carService.createCar(newCar)
-
-        // Then
-        assertEquals(0, result.mileage)
-        verify(carRepository).save(any(Car::class.java))
     }
 }

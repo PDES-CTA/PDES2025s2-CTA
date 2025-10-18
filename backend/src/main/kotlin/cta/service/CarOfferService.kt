@@ -21,7 +21,7 @@ class CarOfferService(
     }
 
     fun findAvailableCarOffers(): List<CarOffer> {
-        return carOfferRepository.findByAvailableCar()
+        return carOfferRepository.findByAvailableTrue()
     }
 
     @Transactional
@@ -49,24 +49,13 @@ class CarOfferService(
 
         updateData["price"]?.let { carOffer.price = (it.toString().toBigDecimal()) }
         updateData["dealershipNotes"]?.let { carOffer.dealershipNotes = (it.toString()) }
-        updateData["images"]?.let {
-            carOffer.images =
-                when (it) {
-                    is List<*> -> {
-                        it.mapNotNull { item ->
-                            item as? String
-                        }.also { validImages ->
-                            if (validImages.size != it.size) {
-                                throw IllegalArgumentException("All images must be strings")
-                            }
-                        }
-                    }
-
-                    else -> throw IllegalArgumentException("Images must be a List")
-                } as MutableList<String>?
-        }
 
         validateCarOffer(carOffer)
+        return carOfferRepository.save(carOffer)
+    }
+
+    @Transactional
+    fun save(carOffer: CarOffer): CarOffer {
         return carOfferRepository.save(carOffer)
     }
 
@@ -96,18 +85,6 @@ class CarOfferService(
 
         require(carOffer.offerDate <= LocalDateTime.now().plusMinutes(5)) { "Offer date cannot be in the future" }
 
-        carOffer.images?.let { images ->
-            require(images.size <= 20) { "Cannot have more than 20 images per offer" }
-
-            images.forEach { imageUrl ->
-                require(imageUrl.isNotBlank()) { "Image URL cannot be blank" }
-
-                require(imageUrl.length <= 500) { "Image URL cannot exceed 500 characters" }
-
-                require(imageUrl.matches(Regex("^https?://.*"))) { "Image URL must start with http:// or https://" }
-            }
-        }
-
         carOffer.dealershipNotes?.let { notes ->
             require(notes.length <= 1000) { "Dealership notes cannot exceed 1000 characters" }
         }
@@ -129,7 +106,7 @@ class CarOfferService(
                 this.price = request.price
                 this.offerDate = LocalDateTime.now()
                 this.dealershipNotes = request.dealershipNotes
-                this.images = request.images
+                this.available = true
             }
 
         validateCarOffer(carOffer)

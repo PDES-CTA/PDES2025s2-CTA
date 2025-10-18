@@ -8,7 +8,6 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.DecimalMin
@@ -18,20 +17,13 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "purchase")
 class Purchase : BaseEntity() {
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "buyer_id", nullable = false)
-    // lateinit var buyer: Buyer
     // TODO: Replace buyer ID with the right mapping of the Buyer entity
     @Column(name = "buyer_id", nullable = false)
     var buyerId: Long = 0
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id", nullable = false)
-    lateinit var car: Car
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dealership_id", nullable = false)
-    lateinit var dealership: Dealership
+    @JoinColumn(name = "car_offer_id", nullable = false, unique = true)
+    lateinit var carOffer: CarOffer
 
     @DecimalMin("0.0")
     @Column(name = "final_price", nullable = false, precision = 15, scale = 2)
@@ -53,12 +45,12 @@ class Purchase : BaseEntity() {
 
     fun confirmPurchase() {
         this.purchaseStatus = PurchaseStatus.CONFIRMED
-        this.car.markAsSold()
+        this.carOffer.markAsSold()
     }
 
     fun cancelPurchase() {
         this.purchaseStatus = PurchaseStatus.CANCELLED
-        this.car.available = true
+        this.carOffer.markAsAvailable()
     }
 
     fun deliverPurchase() {
@@ -73,8 +65,8 @@ class Purchase : BaseEntity() {
     fun obtainDetails(): Map<String, Any?> {
         return mapOf(
             "Purchase ID" to this.id,
-            "Car" to this.car.getFullName(),
-            "Dealership" to this.dealership.getDisplayName(),
+            "Car" to this.carOffer.car.getFullName(),
+            "Dealership" to this.carOffer.dealership.getDisplayName(),
             "Final price" to this.finalPrice,
             "Purchase date" to this.purchaseDate,
             "Status" to this.purchaseStatus,
