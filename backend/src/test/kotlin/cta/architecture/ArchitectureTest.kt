@@ -66,7 +66,7 @@ class ArchitectureTest {
                 com.tngtech.archunit.base.DescribedPredicate.describe("DataInitializer") {
                     it.name.contains("DataInitializer")
                 },
-                com.tngtech.archunit.base.DescribedPredicate.alwaysTrue()
+                com.tngtech.archunit.base.DescribedPredicate.alwaysTrue(),
             )
             .check(importedClasses)
     }
