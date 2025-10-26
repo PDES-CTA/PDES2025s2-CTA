@@ -4,12 +4,14 @@ import cta.model.Dealership
 import cta.repository.DealershipRepository
 import cta.web.dto.DealershipCreateRequest
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DealershipService(
     private val dealershipRepository: DealershipRepository,
+    private val passwordEncoder: PasswordEncoder,
 ) {
     fun findById(id: Long): Dealership {
         return try {
@@ -110,6 +112,9 @@ class DealershipService(
         return try {
             validateDealershipCreate(request)
             val dealership = request.toEntity()
+
+            dealership.password = passwordEncoder.encode(dealership.password)
+
             validateDealership(dealership)
             dealershipRepository.save(dealership)
         } catch (e: IllegalArgumentException) {

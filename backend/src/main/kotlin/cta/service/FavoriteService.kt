@@ -1,13 +1,11 @@
 package cta.service
 
 import cta.model.FavoriteCar
-import cta.repository.BuyerRepository
 import cta.repository.FavoriteCarRepository
 import cta.web.dto.FavoriteCarCreateRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 class FavoriteService(
@@ -68,7 +66,7 @@ class FavoriteService(
         }
         updateData["comment"]?.let {
             val c = it.toString()
-             favoriteCar.comment = c.ifBlank { null }
+            favoriteCar.comment = c.ifBlank { null }
         }
 
         validateFavoriteCar(favoriteCar)
@@ -82,7 +80,6 @@ class FavoriteService(
         favoriteCar.comment?.let {
             require(it.length <= 1000) { "Comment cannot exceed 1000 characters" }
         }
-
     }
 
     private fun validateAndTransformFavoriteRequest(request: FavoriteCarCreateRequest): FavoriteCar {

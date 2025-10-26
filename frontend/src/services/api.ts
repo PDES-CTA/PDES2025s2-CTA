@@ -72,16 +72,16 @@ interface LoginResponse {
   user: User;
 }
 
-interface SearchFilters {
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minYear?: number;
-  maxYear?: number;
-  brand?: string;
-  fuelType?: string;
-  transmission?: string;
-}
+//interface SearchFilters {
+//  keyword?: string;
+//  minPrice?: number;
+//  maxPrice?: number;
+//  minYear?: number;
+//  maxYear?: number;
+//  brand?: string;
+//  fuelType?: string;
+//  transmission?: string;
+//}
 
 interface Favorite {
   id: number;
@@ -190,6 +190,21 @@ export const carOfferService = {
   },
   getById: async (id: string | number): Promise<CarOffer> => {
     const response = await apiClient.get<CarOffer>(`/offer/${id}`);
+    return response.data;
+  },
+  getByDealershipId: async (dealershipId: string | number): Promise<CarOffer[]> => {
+    const response = await apiClient.get<CarOffer[]>(`/offer/dealership/${dealershipId}`);
+    return response.data;
+  },
+  deleteCarOffer: async (id: string | number): Promise<void> => {
+    await apiClient.delete(`/offer/${id}`);
+  },
+  updateCarOffer: async (id: string | number, data: unknown): Promise<CarOffer> => {
+    const response = await apiClient.put<CarOffer>(`/offer/${id}`, data);
+    return response.data;
+  },
+  createCarOffer: async (data: unknown): Promise<CarOffer> => {
+    const response = await apiClient.post<CarOffer>('/offer', data);
     return response.data;
   },
 };

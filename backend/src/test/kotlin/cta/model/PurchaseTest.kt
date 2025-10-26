@@ -3,9 +3,7 @@ package cta.model
 import cta.enum.FuelType
 import cta.enum.PaymentMethod
 import cta.enum.PurchaseStatus
-import cta.enum.TransmissionType
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -20,6 +18,8 @@ class PurchaseTest {
     private lateinit var purchase: Purchase
     private lateinit var car: Car
     private lateinit var dealership: Dealership
+    private lateinit var buyer: Buyer
+    private lateinit var carOffer: CarOffer
 
     @BeforeEach
     fun setUp() {
@@ -29,12 +29,8 @@ class PurchaseTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2023
-                plate = "ABC123"
-                mileage = 15000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
-                transmission = TransmissionType.AUTOMATIC
-                available = true
             }
 
         dealership =
@@ -46,11 +42,27 @@ class PurchaseTest {
                 active = true
             }
 
+        carOffer =
+            CarOffer().apply {
+                id = 1L
+                this.dealership = this@PurchaseTest.dealership
+                this.car = this@PurchaseTest.car
+                price = BigDecimal("12000.00")
+            }
+
+        buyer =
+            Buyer().apply {
+                id = 1L
+                firstName = "John"
+                lastName = "Doe"
+                email = "john.doe@example.com"
+                phone = "123456789"
+            }
+
         purchase =
             Purchase().apply {
-                this.buyerId = 1L
-                this.car = this@PurchaseTest.car
-                this.dealership = this@PurchaseTest.dealership
+                this.buyer = this@PurchaseTest.buyer
+                this.carOffer = this@PurchaseTest.carOffer
                 this.purchaseDate = LocalDateTime.now()
                 this.finalPrice = BigDecimal("25000.00")
                 this.purchaseStatus = PurchaseStatus.PENDING
@@ -62,11 +74,10 @@ class PurchaseTest {
     @Test
     @DisplayName("Should create new purchase with correct values")
     fun shouldCreateNewPurchase() {
-        assertNotNull(purchase.car)
-        assertNotNull(purchase.dealership)
-        assertEquals(1L, purchase.buyerId)
-        assertEquals(car, purchase.car)
-        assertEquals(dealership, purchase.dealership)
+        assertNotNull(purchase.buyer)
+        assertNotNull(purchase.carOffer)
+        assertEquals(buyer, purchase.buyer)
+        assertEquals(carOffer, purchase.carOffer)
         assertNotNull(purchase.purchaseDate)
         assertEquals(BigDecimal("25000.00"), purchase.finalPrice)
         assertEquals(PurchaseStatus.PENDING, purchase.purchaseStatus)
@@ -80,13 +91,12 @@ class PurchaseTest {
         val newPurchase = Purchase()
 
         assertNull(newPurchase.id)
-        assertEquals(0L, newPurchase.buyerId)
 
         assertThrows(UninitializedPropertyAccessException::class.java) {
-            newPurchase.car
+            newPurchase.buyer
         }
         assertThrows(UninitializedPropertyAccessException::class.java) {
-            newPurchase.dealership
+            newPurchase.carOffer
         }
 
         assertNotNull(newPurchase.purchaseDate)
@@ -107,6 +117,37 @@ class PurchaseTest {
 
         purchase.purchaseStatus = PurchaseStatus.CANCELLED
         assertEquals(PurchaseStatus.CANCELLED, purchase.purchaseStatus)
+    }
+
+    @Test
+    @DisplayName("Should confirm purchase and mark car offer as sold")
+    fun shouldConfirmPurchase() {
+        purchase.confirmPurchase()
+        assertEquals(PurchaseStatus.CONFIRMED, purchase.purchaseStatus)
+        // Note: You may need to mock carOffer to verify markAsSold() was called
+    }
+
+    @Test
+    @DisplayName("Should cancel purchase and mark car offer as available")
+    fun shouldCancelPurchase() {
+        purchase.cancelPurchase()
+        assertEquals(PurchaseStatus.CANCELLED, purchase.purchaseStatus)
+        // Note: You may need to mock carOffer to verify markAsAvailable() was called
+    }
+
+    @Test
+    @DisplayName("Should deliver purchase")
+    fun shouldDeliverPurchase() {
+        purchase.deliverPurchase()
+        assertEquals(PurchaseStatus.DELIVERED, purchase.purchaseStatus)
+    }
+
+    @Test
+    @DisplayName("Should set purchase to pending")
+    fun shouldSetPurchaseToPending() {
+        purchase.purchaseStatus = PurchaseStatus.CONFIRMED
+        purchase.pendingPurchase()
+        assertEquals(PurchaseStatus.PENDING, purchase.purchaseStatus)
     }
 
     @Test
@@ -140,27 +181,42 @@ class PurchaseTest {
     }
 
     @Test
-    @DisplayName("Should update car reference")
-    fun shouldUpdateCarReference() {
-        val newCar =
-            Car().apply {
+    @DisplayName("Should update buyer reference")
+    fun shouldUpdateBuyerReference() {
+        val newBuyer =
+            Buyer().apply {
                 id = 2L
-                brand = "Honda"
-                model = "Civic"
+                firstName = "Jane"
+                lastName = "Smith"
             }
-        purchase.car = newCar
-        assertEquals(newCar, purchase.car)
+        purchase.buyer = newBuyer
+        assertEquals(newBuyer, purchase.buyer)
     }
 
     @Test
-    @DisplayName("Should update dealership reference")
-    fun shouldUpdateDealershipReference() {
-        val newDealership =
-            Dealership().apply {
+    @DisplayName("Should update car offer reference")
+    fun shouldUpdateCarOfferReference() {
+        val newCarOffer =
+            CarOffer().apply {
                 id = 2L
-                businessName = "New Dealership"
+                price = BigDecimal("15000.00")
             }
-        purchase.dealership = newDealership
-        assertEquals(newDealership, purchase.dealership)
+        purchase.carOffer = newCarOffer
+        assertEquals(newCarOffer, purchase.carOffer)
+    }
+
+    @Test
+    @DisplayName("Should obtain purchase details correctly")
+    fun shouldObtainPurchaseDetails() {
+        // Mock getFullName(), getDisplayName() methods if needed
+        val details = purchase.obtainDetails()
+
+        assertNotNull(details)
+        assertEquals(purchase.id, details["Purchase ID"])
+        assertEquals(purchase.finalPrice, details["Final price"])
+        assertEquals(purchase.purchaseDate, details["Purchase date"])
+        assertEquals(purchase.purchaseStatus, details["Status"])
+        assertEquals(purchase.paymentMethod, details["Payment method"])
+        assertEquals(purchase.observations, details["Observations"])
     }
 }

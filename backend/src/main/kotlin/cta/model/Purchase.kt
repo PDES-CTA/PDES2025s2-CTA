@@ -17,9 +17,9 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "purchase")
 class Purchase : BaseEntity() {
-    // TODO: Replace buyer ID with the right mapping of the Buyer entity
-    @Column(name = "buyer_id", nullable = false)
-    var buyerId: Long = 0
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id", nullable = false, unique = true)
+    lateinit var buyer: Buyer
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_offer_id", nullable = false, unique = true)
@@ -61,11 +61,11 @@ class Purchase : BaseEntity() {
         this.purchaseStatus = PurchaseStatus.PENDING
     }
 
-    // TODO: Once we have all the entities update details obtaining buyer's name, for instance
     fun obtainDetails(): Map<String, Any?> {
         return mapOf(
             "Purchase ID" to this.id,
             "Car" to this.carOffer.car.getFullName(),
+            "Buyer" to this.buyer.firstName + " " + this.buyer.lastName,
             "Dealership" to this.carOffer.dealership.getDisplayName(),
             "Final price" to this.finalPrice,
             "Purchase date" to this.purchaseDate,

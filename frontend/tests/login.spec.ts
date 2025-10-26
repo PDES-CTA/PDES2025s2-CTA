@@ -34,6 +34,19 @@ test.describe('Login Page', () => {
       });
     });
 
+    // Mock getLoggedUser API call
+    await page.route('**/api/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ 
+        id: 1, 
+        email: 'test@example.com',
+        role: 'BUYER'
+      }),
+    });
+  });
+
     // Fill in the form
     await page.getByLabel('Email').fill('test@example.com');
     await page.getByLabel('Password').fill('password123');

@@ -3,10 +3,8 @@ import { Dealership } from './dealership';
 
 export interface CarOffer {
   id: number;
-  dealershipId: number;
-  carId: number;
-  dealership?: Dealership;
   car: Car;
+  dealership: Dealership;
   price: number;
   offerDate: string;
   dealershipNotes?: string;

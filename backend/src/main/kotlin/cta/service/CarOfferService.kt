@@ -24,6 +24,10 @@ class CarOfferService(
         return carOfferRepository.findByAvailableTrue()
     }
 
+    fun findByDealershipId(dealershipId: Long): List<CarOffer> {
+        return carOfferRepository.findByDealershipId(dealershipId)
+    }
+
     @Transactional
     fun createCarOffer(request: CarOfferCreateRequest): CarOffer {
         val carOffer = validateAndCreateCarOffer(request)

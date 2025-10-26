@@ -55,21 +55,27 @@ class FavoriteController(
 
     @GetMapping("/{id}")
     @Operation(summary = "Get favorite car by its ID")
-    fun getFavoriteById(@PathVariable id: Long): ResponseEntity<FavoriteCarResponse> {
+    fun getFavoriteById(
+        @PathVariable id: Long,
+    ): ResponseEntity<FavoriteCarResponse> {
         val favorite = favoriteService.findById(id)
         return ResponseEntity.ok(FavoriteCarResponse.fromEntity(favorite))
     }
 
     @GetMapping("/buyer/{buyerId}")
     @Operation(summary = "Get all favorite cars for a specific buyer")
-    fun getFavoritesByBuyerId(@PathVariable buyerId: Long): ResponseEntity<List<FavoriteCarResponse>> {
+    fun getFavoritesByBuyerId(
+        @PathVariable buyerId: Long,
+    ): ResponseEntity<List<FavoriteCarResponse>> {
         val favorites = favoriteService.findByBuyerId(buyerId)
         return ResponseEntity.ok(favorites.map { FavoriteCarResponse.fromEntity(it) })
     }
 
     @GetMapping("/car/{carId}")
     @Operation(summary = "Get all favorites associated with a specific car")
-    fun getFavoritesByCarId(@PathVariable carId: Long): ResponseEntity<List<FavoriteCarResponse>> {
+    fun getFavoritesByCarId(
+        @PathVariable carId: Long,
+    ): ResponseEntity<List<FavoriteCarResponse>> {
         val favorites = favoriteService.findByCarId(carId)
         return ResponseEntity.ok(favorites.map { FavoriteCarResponse.fromEntity(it) })
     }

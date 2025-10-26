@@ -10,5 +10,8 @@ interface FavoriteCarRepository : JpaRepository<FavoriteCar, Long> {
 
     fun findByCarId(carId: Long): List<FavoriteCar>
 
-    fun findByBuyerIdAndCarId(buyerId: Long, carId: Long): FavoriteCar?
+    fun findByBuyerIdAndCarId(
+        buyerId: Long,
+        carId: Long,
+    ): FavoriteCar?
 }

@@ -2,10 +2,10 @@ package cta.web.controller
 
 import cta.enum.FuelType
 import cta.enum.TransmissionType
-import cta.web.dto.CarSearchFilters
 import cta.service.CarService
 import cta.web.dto.CarCreateRequest
 import cta.web.dto.CarResponse
+import cta.web.dto.CarSearchFilters
 import cta.web.dto.CarUpdateRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -109,7 +109,6 @@ class CarController(
         val updatedCar = carService.updateCar(id, request.toMap())
         return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
     }
-
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an existing car")

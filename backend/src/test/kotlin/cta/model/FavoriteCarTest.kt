@@ -1,11 +1,9 @@
 package cta.model
 
 import cta.enum.FuelType
-import cta.enum.PurchaseStatus
 import cta.enum.TransmissionType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -43,12 +41,9 @@ class FavoriteCarTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2023
-                plate = "ABC123"
-                mileage = 15000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
-                available = true
             }
 
         favoriteCar =

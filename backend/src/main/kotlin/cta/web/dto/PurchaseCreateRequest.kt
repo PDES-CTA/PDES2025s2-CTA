@@ -4,7 +4,6 @@ import cta.enum.PaymentMethod
 import cta.enum.PurchaseStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.DecimalMin
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -24,7 +23,6 @@ data class PurchaseCreateRequest(
     @field:Schema(description = "Purchase creation date")
     @field:NotNull
     val purchaseDate: LocalDateTime = LocalDateTime.now(),
-
     @field:Schema(description = "Status of the purchase")
     @field:NotNull
     val purchaseStatus: PurchaseStatus = PurchaseStatus.PENDING,

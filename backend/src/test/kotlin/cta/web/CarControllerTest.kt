@@ -1,14 +1,15 @@
-package cta.web
+package cta.web.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import cta.enum.FuelType
 import cta.enum.TransmissionType
 import cta.model.Car
 import cta.service.CarService
 import cta.web.dto.CarCreateRequest
 import cta.web.dto.CarUpdateRequest
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -16,21 +17,21 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.mockito.Mockito.verify
 
 @SpringBootTest(
     properties = [
         "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://test-issuer.com",
     ],
 )
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @WithMockUser
 class CarControllerTest {
@@ -47,9 +48,7 @@ class CarControllerTest {
         id: Long = 1L,
         brand: String = "Toyota",
         model: String = "Corolla",
-        plate: String = "ABC123",
         year: Int = 2020,
-        available: Boolean = true,
     ): Car {
         return Car().apply {
             this.id = id
@@ -58,10 +57,7 @@ class CarControllerTest {
             this.year = year
             this.fuelType = FuelType.GASOLINE
             this.transmission = TransmissionType.AUTOMATIC
-            this.mileage = 50000
-            this.plate = plate
             this.color = "White"
-            this.available = available
             this.description = "Test car"
             this.images = mutableListOf("http://example.com/img.png")
         }
@@ -73,9 +69,9 @@ class CarControllerTest {
         val cars =
             listOf(
                 createMockCar(id = 1L, brand = "Toyota"),
-                createMockCar(id = 2L, brand = "Honda", plate = "DEF456"),
+                createMockCar(id = 2L, brand = "Honda"),
             )
-        whenever(carService.findAllAvailable()).thenReturn(cars)
+        whenever(carService.findAll()).thenReturn(cars)
 
         // When & Then
         mockMvc.perform(get("/api/cars"))
@@ -84,7 +80,7 @@ class CarControllerTest {
             .andExpect(jsonPath("$[0].brand").value("Toyota"))
             .andExpect(jsonPath("$[1].brand").value("Honda"))
 
-        verify(carService).findAllAvailable()
+        verify(carService).findAll()
     }
 
     @Test
@@ -100,7 +96,6 @@ class CarControllerTest {
             .andExpect(jsonPath("$.brand").value("Toyota"))
             .andExpect(jsonPath("$.model").value("Corolla"))
             .andExpect(jsonPath("$.year").value(2020))
-            .andExpect(jsonPath("$.plate").value("ABC123"))
 
         verify(carService).findById(1L)
     }
@@ -207,7 +202,27 @@ class CarControllerTest {
     }
 
     @Test
-    fun `should create car and return 200 OK`() {
+    fun `should return 400 BAD REQUEST when searching with invalid fuel type`() {
+        // When & Then
+        mockMvc.perform(
+            get("/api/cars/search")
+                .param("fuelType", "INVALID"),
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `should return 400 BAD REQUEST when searching with invalid transmission type`() {
+        // When & Then
+        mockMvc.perform(
+            get("/api/cars/search")
+                .param("transmission", "INVALID"),
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `should create car and return 201 CREATED`() {
         // Given
         val request =
             CarCreateRequest(
@@ -216,11 +231,9 @@ class CarControllerTest {
                 year = 2020,
                 fuelType = FuelType.GASOLINE,
                 transmission = TransmissionType.AUTOMATIC,
-                mileage = 50000,
                 color = "White",
-                plate = "ABC123",
                 description = "Test",
-                images = listOf("http://img.com/1.png")
+                images = listOf("http://img.com/1.png"),
             )
 
         val savedCar = createMockCar(id = 1L)
@@ -237,7 +250,6 @@ class CarControllerTest {
             .andExpect(jsonPath("$.brand").value("Toyota"))
             .andExpect(jsonPath("$.model").value("Corolla"))
             .andExpect(jsonPath("$.year").value(2020))
-            .andExpect(jsonPath("$.plate").value("ABC123"))
 
         verify(carService).createCar(any())
     }
@@ -247,14 +259,12 @@ class CarControllerTest {
         // Given
         val request =
             CarCreateRequest(
-                brand = "", // Invalid
+                brand = "",
                 model = "Corolla",
                 year = 2020,
                 fuelType = FuelType.GASOLINE,
                 transmission = TransmissionType.AUTOMATIC,
-                mileage = 50000,
                 color = "White",
-                plate = "ABC123"
             )
 
         // When & Then
@@ -277,10 +287,8 @@ class CarControllerTest {
                 year = 2021,
                 fuelType = FuelType.HYBRID,
                 transmission = TransmissionType.AUTOMATIC,
-                mileage = 30000,
                 color = "Black",
-                available = true,
-                description = "Updated desc"
+                description = "Updated desc",
             )
 
         val updatedCar =
@@ -319,40 +327,6 @@ class CarControllerTest {
                 .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should mark car as sold and return 200 OK`() {
-        // Given
-        val carId = 1L
-        val updatedCar = createMockCar(id = carId, available = false)
-
-        whenever(carService.markAsSold(carId)).thenReturn(updatedCar)
-
-        // When & Then
-        mockMvc.perform(patch("/api/cars/{id}/sold", carId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(carId))
-            .andExpect(jsonPath("$.available").value(false))
-
-        verify(carService).markAsSold(carId)
-    }
-
-    @Test
-    fun `should mark car as available and return 200 OK`() {
-        // Given
-        val carId = 1L
-        val updatedCar = createMockCar(id = carId, available = true)
-
-        whenever(carService.markAsAvailable(carId)).thenReturn(updatedCar)
-
-        // When & Then
-        mockMvc.perform(patch("/api/cars/{id}/available", carId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(carId))
-            .andExpect(jsonPath("$.available").value(true))
-
-        verify(carService).markAsAvailable(carId)
     }
 
     @Test

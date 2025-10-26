@@ -9,10 +9,10 @@ import java.time.LocalDateTime
 class CarOfferResponse(
     @field:Schema(description = "Unique identifier for the car offer")
     val id: Long?,
-    @field:Schema(description = "Unique identifier for the dealership offering the car")
-    val dealershipId: Long?,
-    @field:Schema(description = "Unique identifier for the car offered")
-    val carId: Long?,
+    @field:Schema(description = "Dealership offering the car")
+    val dealership: DealershipResponse,
+    @field:Schema(description = "Car offered")
+    val car: CarResponse,
     @field:Schema(description = "Car price in the offer")
     val price: BigDecimal,
     @field:Schema(description = "Date in which the car was published by the dealership")
@@ -26,8 +26,8 @@ class CarOfferResponse(
         fun fromEntity(carOffer: CarOffer): CarOfferResponse {
             return CarOfferResponse(
                 id = carOffer.id,
-                dealershipId = carOffer.dealership.id,
-                carId = carOffer.car.id,
+                dealership = DealershipResponse.fromEntity(carOffer.dealership),
+                car = CarResponse.fromEntity(carOffer.car),
                 price = carOffer.price,
                 offerDate = carOffer.offerDate,
                 dealershipNotes = carOffer.dealershipNotes,

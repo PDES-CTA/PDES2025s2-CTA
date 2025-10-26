@@ -133,7 +133,7 @@ class PurchaseService(
 
         val purchase =
             Purchase().apply {
-                this.buyerId = request.buyerId
+                this.buyer = buyer
                 this.carOffer = carOffer
                 this.finalPrice = request.finalPrice
                 this.paymentMethod = request.paymentMethod

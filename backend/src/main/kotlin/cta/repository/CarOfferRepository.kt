@@ -13,5 +13,7 @@ interface CarOfferRepository : JpaRepository<CarOffer, Long> {
         dealershipId: Long,
     ): CarOffer?
 
+    fun findByDealershipId(dealershipId: Long): List<CarOffer>
+
     fun findByAvailableTrue(): List<CarOffer>
 }

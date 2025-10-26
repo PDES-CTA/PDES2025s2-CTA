@@ -54,7 +54,7 @@ class Car : BaseEntity() {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "car_image", joinColumns = [JoinColumn(name = "car_id")])
-    @Column(name = "image_url")
+    @Column(name = "image_url", columnDefinition = "VARCHAR(350)")
     var images: MutableList<String> = mutableListOf()
 
     fun getFullName(): String = "$brand $model $year"

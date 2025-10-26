@@ -50,7 +50,7 @@
 }
 
 .primaryButton {
-  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
   color: white;
   box-shadow: 0 4px 14px rgba(30, 20, 179, 0.25);
 }
@@ -84,28 +84,21 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  background-color: var(--color-secondary);
+  background-color: var(--color-primary);
   color: white;
-  box-shadow: 0 4px 14px rgba(62, 58, 111, 0.25);
+  box-shadow: 0 4px 14px rgba(30, 20, 179, 0.25);
   text-decoration: none;
 }
 
 .redirectButton:hover {
-  background-color: var(--color-secondary-dark);
+  background-color: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(82, 82, 94, 0.3);
+  box-shadow: 0 6px 18px rgba(30, 20, 179, 0.3);
 }
 
 .redirectButton:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
-}
-
-@media (max-width: 768px) {
-  .redirectButton {
-    width: 100%;
-    justify-content: center;
-  }
+  box-shadow: 0 2px 8px rgba(30, 20, 179, 0.2);
 }
 
 /* Stats */
@@ -124,7 +117,7 @@
 .statNumber {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-secondary);
   margin-bottom: var(--spacing-xs);
 }
 
@@ -150,7 +143,8 @@
   }
 
   .primaryButton,
-  .secondaryButton {
+  .secondaryButton,
+  .redirectButton {
     width: 100%;
     justify-content: center;
   }

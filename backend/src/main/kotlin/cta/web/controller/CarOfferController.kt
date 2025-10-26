@@ -33,9 +33,20 @@ class CarOfferController(
         return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
     }
 
+    @GetMapping("/dealership/{dealershipId}")
+    @Operation(summary = "Get all offers by dealership")
+    fun getAllCarOffersPerDealership(
+        @PathVariable dealershipId: Long,
+    ): ResponseEntity<List<CarOfferResponse>> {
+        val carOffers = carOfferService.findByDealershipId(dealershipId)
+        return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a specific car offer by its ID")
-    fun getCarOfferById(@PathVariable id: Long): ResponseEntity<CarOfferResponse> {
+    fun getCarOfferById(
+        @PathVariable id: Long,
+    ): ResponseEntity<CarOfferResponse> {
         val carOffer = carOfferService.findById(id)
         return ResponseEntity.ok(CarOfferResponse.fromEntity(carOffer))
     }

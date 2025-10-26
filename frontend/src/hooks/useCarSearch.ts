@@ -7,7 +7,7 @@ import { SearchFiltersState } from '../components/organisms/SearchFilters';
 
 export interface DisplayCar {
   car: Car;
-  offers: (CarOffer & { dealership?: Dealership })[];
+  offers: CarOffer[];
 }
 
 interface UseCarSearchReturn {
@@ -48,20 +48,30 @@ export const useCarSearch = (): UseCarSearchReturn => {
     cars: Car[],
     offers: CarOffer[],
   ): Promise<DisplayCar[]> => {
-    const offersMap = new Map<number, CarOffer[]>();
+    const offersMap = new Map<number | string, CarOffer[]>();
     const dealershipIds = new Set<number>();
 
-   for (const offer of offers) {
-      let offersList = offersMap.get(offer.carId);
+    for (const offer of offers) {
+      const carId = offer.car?.id;
+      const dealershipId = offer.dealership?.id;
+
+      if (!carId) continue;
+
+      let offersList = offersMap.get(carId);
 
       if (!offersList) {
         offersList = [];
-        offersMap.set(offer.carId, offersList);
+        offersMap.set(carId, offersList);
       }
 
       offersList.push(offer);
-      dealershipIds.add(offer.dealershipId);
+      
+      if (dealershipId) {
+        dealershipIds.add(dealershipId);
+      }
     }
+
+    // Fetch additional dealership details if needed
     const dealershipMap = new Map<number, Dealership>();
     try {
       const dealershipPromises = Array.from(dealershipIds).map(id =>
@@ -81,14 +91,20 @@ export const useCarSearch = (): UseCarSearchReturn => {
     return cars.map(car => {
       const carOffers = offersMap.get(Number(car.id)) || [];
       
-      const populatedOffers = carOffers.map(offer => ({
-        ...offer,
-        dealership: dealershipMap.get(offer.dealershipId),
-      }));
+      // Enrich offers with full dealership data if available
+      const enrichedOffers = carOffers.map(offer => {
+        if (offer.dealership?.id && dealershipMap.has(offer.dealership.id)) {
+          return {
+            ...offer,
+            dealership: dealershipMap.get(offer.dealership.id)!,
+          };
+        }
+        return offer;
+      });
 
       return {
         car: car,
-        offers: populatedOffers,
+        offers: enrichedOffers,
       };
     });
   };
@@ -136,16 +152,16 @@ export const useCarSearch = (): UseCarSearchReturn => {
           const priceFilterActive = !!filters.minPrice || !!filters.maxPrice;
           
           const matchesPrice =
-          !priceFilterActive ||
-          offers.some(
-            offer =>
-              (!filters.minPrice || offer.price >= Number(filters.minPrice)) &&
-              (!filters.maxPrice || offer.price <= Number(filters.maxPrice)),
-          );
+            !priceFilterActive ||
+            offers.some(
+              offer =>
+                (!filters.minPrice || offer.price >= Number(filters.minPrice)) &&
+                (!filters.maxPrice || offer.price <= Number(filters.maxPrice)),
+            );
 
-        if (priceFilterActive && offers.length === 0) {
-          return false;
-        }
+          if (priceFilterActive && offers.length === 0) {
+            return false;
+          }
 
           const matchesMinYear = !filters.minYear || car.year >= Number(filters.minYear);
           const matchesMaxYear = !filters.maxYear || car.year <= Number(filters.maxYear);
@@ -167,7 +183,7 @@ export const useCarSearch = (): UseCarSearchReturn => {
 
         setDisplayCars(filtered);
         return filtered;
-      } catch (err: any) {
+      } catch (err: unknown | any) {
         const message = err.message || 'Failed to search cars/offers';
         setError(message);
         console.error('Search Error:', err);
@@ -195,14 +211,17 @@ export const useCarSearch = (): UseCarSearchReturn => {
       // TODO: change to something similar to const allOffersForCar = await carOfferService.getOffersByCarId(numericCarId);
       const allOffers = await carOfferService.getAll();
       
-      const specificOffersData = allOffers.filter(o => o.carId === numericCarId);
+      const specificOffersData = allOffers.filter(o => o.car?.id === numericCarId);
 
-      let populatedOffers: (CarOffer & { dealership?: Dealership })[] = [];
+      // Enrich with full dealership data if needed
+      const dealershipIds = new Set(
+        specificOffersData
+          .map(o => o.dealership?.id)
+          .filter((id): id is number => id !== undefined)
+      );
 
-      if (specificOffersData.length > 0) {
-        const dealershipIds = new Set(specificOffersData.map(o => o.dealershipId));
-        const dealershipMap = new Map<number, Dealership>();
-
+      const dealershipMap = new Map<number, Dealership>();
+      if (dealershipIds.size > 0) {
         try {
           const dealershipPromises = Array.from(dealershipIds).map(id =>
             dealershipService.getDealershipById(id).catch(err => {
@@ -217,17 +236,23 @@ export const useCarSearch = (): UseCarSearchReturn => {
         } catch (dealershipError) {
           console.error(`Error fetching dealerships`, dealershipError);
         }
-
-        populatedOffers = specificOffersData.map(offer => ({
-          ...offer,
-          dealership: dealershipMap.get(offer.dealershipId),
-        }));
       }
+
+      const enrichedOffers = specificOffersData.map(offer => {
+        if (offer.dealership?.id && dealershipMap.has(offer.dealership.id)) {
+          return {
+            ...offer,
+            dealership: dealershipMap.get(offer.dealership.id)!,
+          };
+        }
+        return offer;
+      });
+      
       return {
         car: car,
-        offers: populatedOffers,
+        offers: enrichedOffers,
       };
-    } catch (err: any) {
+    } catch (err: unknown | any) {
       const message = err.message || `Failed to get car data for ID ${carId}`;
       setError(message);
       console.error('Get Car Data By ID Error:', err);

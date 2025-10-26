@@ -19,13 +19,10 @@ class CarTest {
                 brand = "Toyota"
                 model = "Corolla"
                 year = 2023
-                plate = "ABC123"
-                mileage = 15000
                 color = "Blue"
                 fuelType = FuelType.GASOLINE
                 transmission = TransmissionType.AUTOMATIC
                 description = "Well maintained car"
-                available = true
                 images = mutableListOf("http://example.com/img.png")
             }
     }
@@ -38,38 +35,11 @@ class CarTest {
         Assertions.assertEquals("", newCar.brand)
         Assertions.assertEquals("", newCar.model)
         Assertions.assertEquals(0, newCar.year)
-        Assertions.assertEquals("", newCar.plate)
-        Assertions.assertEquals(0, newCar.mileage)
         Assertions.assertEquals("", newCar.color)
         Assertions.assertEquals(FuelType.GASOLINE, newCar.fuelType)
         Assertions.assertEquals(TransmissionType.MANUAL, newCar.transmission)
         Assertions.assertNull(newCar.description)
-        Assertions.assertTrue(newCar.available)
         Assertions.assertTrue(newCar.images.isEmpty())
-    }
-
-    @Test
-    @DisplayName("Should be available by default")
-    fun shouldBeAvailable() {
-        Assertions.assertTrue(car.isAvailable())
-    }
-
-    @Test
-    @DisplayName("Should mark as sold correctly")
-    fun shouldMarkAsSold() {
-        car.markAsSold()
-
-        Assertions.assertFalse(car.isAvailable())
-    }
-
-    @Test
-    @DisplayName("Should mark as available correctly")
-    fun shouldMarkAsAvailable() {
-        car.markAsSold() // Mark as sold first
-        Assertions.assertFalse(car.isAvailable())
-
-        car.markAsAvailable() // Mark as available again
-        Assertions.assertTrue(car.isAvailable())
     }
 
     @Test

@@ -3,9 +3,9 @@ import cta.enum.FuelType
 import cta.enum.TransmissionType
 import cta.model.Car
 import cta.repository.CarRepository
-import org.springframework.stereotype.Service
-import java.time.LocalDate
 import cta.web.dto.CarSearchFilters
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CarService(
@@ -21,11 +21,13 @@ class CarService(
         return carRepository.findAll()
     }
 
+    @Transactional
     fun createCar(car: Car): Car {
         validateCar(car)
         return carRepository.save(car)
     }
 
+    @Transactional
     fun updateCar(
         id: Long,
         updates: Map<String, Any>,
@@ -48,6 +50,7 @@ class CarService(
         return carRepository.save(car)
     }
 
+    @Transactional
     fun deleteCar(id: Long) {
         val car = findById(id)
         carRepository.delete(car)
@@ -60,13 +63,13 @@ class CarService(
             val keywordMatch =
                 filters.keyword?.let {
                     car.brand.contains(it, ignoreCase = true) ||
-                            car.model.contains(it, ignoreCase = true) ||
-                            car.description?.contains(it, ignoreCase = true) ?: false
+                        car.model.contains(it, ignoreCase = true) ||
+                        car.description?.contains(it, ignoreCase = true) ?: false
                 } ?: true
 
             val yearMatch =
                 (filters.minYear?.let { car.year >= it } ?: true) &&
-                        (filters.maxYear?.let { car.year <= it } ?: true)
+                    (filters.maxYear?.let { car.year <= it } ?: true)
 
             val brandMatch =
                 filters.brand?.let {

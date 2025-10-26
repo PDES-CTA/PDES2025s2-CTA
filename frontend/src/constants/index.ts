@@ -81,6 +81,8 @@ export const REPORT_TYPE_LABELS = {
 // Application routes
 export const ROUTES = {
   HOME: '/',
+  DEALERSHIP_HOME: '/dealerships',
+  DEALERSHIP_OFFERS: '/offers',
   LOGIN: '/login',
   REGISTER: '/register',
   CARS: '/cars',
