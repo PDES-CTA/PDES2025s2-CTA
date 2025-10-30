@@ -124,7 +124,6 @@ class PurchaseTest {
     fun shouldConfirmPurchase() {
         purchase.confirmPurchase()
         assertEquals(PurchaseStatus.CONFIRMED, purchase.purchaseStatus)
-        // Note: You may need to mock carOffer to verify markAsSold() was called
     }
 
     @Test
@@ -132,7 +131,6 @@ class PurchaseTest {
     fun shouldCancelPurchase() {
         purchase.cancelPurchase()
         assertEquals(PurchaseStatus.CANCELLED, purchase.purchaseStatus)
-        // Note: You may need to mock carOffer to verify markAsAvailable() was called
     }
 
     @Test
