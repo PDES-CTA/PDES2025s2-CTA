@@ -19,12 +19,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.Optional
@@ -39,13 +38,7 @@ class PurchaseServiceTest {
     private lateinit var carOfferService: CarOfferService
 
     @Mock
-    private lateinit var carService: CarService
-
-    @Mock
     private lateinit var buyerService: BuyerService
-
-    @Mock
-    private lateinit var dealershipService: DealershipService
 
     @InjectMocks
     private lateinit var purchaseService: PurchaseService
@@ -62,18 +55,23 @@ class PurchaseServiceTest {
             Car().apply {
                 id = 1L
                 brand = "Toyota"
-                available = true
+                model = "Corolla"
             }
 
         validBuyer =
             Buyer().apply {
                 id = 1L
+                firstName = "John"
+                lastName = "Doe"
+                email = "john@example.com"
+                phone = "123456789"
                 active = true
             }
 
         validDealership =
             Dealership().apply {
                 id = 1L
+                businessName = "Test Dealership"
                 active = true
             }
 
@@ -82,14 +80,15 @@ class PurchaseServiceTest {
                 id = 1L
                 car = validCar
                 dealership = validDealership
+                price = BigDecimal("25000.00")
+                available = true
             }
 
         validPurchase =
             Purchase().apply {
                 id = 1L
-                buyerId = 1L
-                car = validCar
-                dealership = validDealership
+                buyer = validBuyer
+                carOffer = validCarOffer
                 finalPrice = BigDecimal("25000.00")
                 paymentMethod = PaymentMethod.CASH
                 purchaseDate = LocalDateTime.now().minusDays(1)
@@ -104,7 +103,7 @@ class PurchaseServiceTest {
     @DisplayName("Should find purchase by id successfully")
     fun shouldFindPurchaseById() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
 
         // When
         val result = purchaseService.findById(1L)
@@ -120,7 +119,7 @@ class PurchaseServiceTest {
     @DisplayName("Should throw exception when purchase not found")
     fun shouldThrowExceptionWhenPurchaseNotFound() {
         // Given
-        `when`(purchaseRepository.findById(999L)).thenReturn(Optional.empty())
+        whenever(purchaseRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
         val exception =
@@ -138,7 +137,7 @@ class PurchaseServiceTest {
     fun shouldFindAllPurchases() {
         // Given
         val purchases = listOf(validPurchase, validPurchase)
-        `when`(purchaseRepository.findAll()).thenReturn(purchases)
+        whenever(purchaseRepository.findAll()).thenReturn(purchases)
 
         // When
         val result = purchaseService.findAll()
@@ -152,7 +151,7 @@ class PurchaseServiceTest {
     @DisplayName("Should return empty list when no purchases exist")
     fun shouldReturnEmptyListWhenNoPurchasesExist() {
         // Given
-        `when`(purchaseRepository.findAll()).thenReturn(emptyList())
+        whenever(purchaseRepository.findAll()).thenReturn(emptyList())
 
         // When
         val result = purchaseService.findAll()
@@ -169,7 +168,7 @@ class PurchaseServiceTest {
     fun shouldFindPurchasesByBuyerId() {
         // Given
         val purchases = listOf(validPurchase)
-        `when`(purchaseRepository.findByBuyerId(1L)).thenReturn(purchases)
+        whenever(purchaseRepository.findByBuyerId(1L)).thenReturn(purchases)
 
         // When
         val result = purchaseService.findByBuyerId(1L)
@@ -182,18 +181,19 @@ class PurchaseServiceTest {
     // ========== findByCarId Tests ==========
 
     @Test
-    @DisplayName("Should find purchase by car id")
-    fun shouldFindPurchaseByCarId() {
+    @DisplayName("Should find purchases by car id")
+    fun shouldFindPurchasesByCarId() {
         // Given
-        `when`(purchaseRepository.findByCarId(1L)).thenReturn(validPurchase)
+        val purchases = listOf(validPurchase)
+        whenever(purchaseRepository.findByCarOfferCarId(1L)).thenReturn(purchases)
 
         // When
         val result = purchaseService.findByCarId(1L)
 
         // Then
-        assertNotNull(result)
-        assertEquals(1L, result.car.id)
-        verify(purchaseRepository).findByCarId(1L)
+        assertEquals(1, result.size)
+        assertEquals(1L, result[0].carOffer.car.id)
+        verify(purchaseRepository).findByCarOfferCarId(1L)
     }
 
     // ========== findByDealershipId Tests ==========
@@ -203,14 +203,14 @@ class PurchaseServiceTest {
     fun shouldFindPurchasesByDealershipId() {
         // Given
         val purchases = listOf(validPurchase)
-        `when`(purchaseRepository.findByDealershipId(1L)).thenReturn(purchases)
+        whenever(purchaseRepository.findByCarOfferDealershipId(1L)).thenReturn(purchases)
 
         // When
         val result = purchaseService.findByDealershipId(1L)
 
         // Then
         assertEquals(1, result.size)
-        verify(purchaseRepository).findByDealershipId(1L)
+        verify(purchaseRepository).findByCarOfferDealershipId(1L)
     }
 
     // ========== createPurchase Tests ==========
@@ -221,9 +221,8 @@ class PurchaseServiceTest {
         // Given
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -231,11 +230,9 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.createPurchase(request)
@@ -243,22 +240,20 @@ class PurchaseServiceTest {
         // Then
         assertNotNull(result)
         assertEquals(1L, result.id)
-        verify(carService).findById(1L)
+        verify(carOfferService).findById(1L)
         verify(buyerService).findById(1L)
-        verify(dealershipService).findById(1L)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(purchaseRepository).save(any<Purchase>())
     }
 
     @Test
-    @DisplayName("Should throw exception when car is not available")
-    fun shouldThrowExceptionWhenCarNotAvailable() {
+    @DisplayName("Should throw exception when car offer is not available")
+    fun shouldThrowExceptionWhenCarOfferNotAvailable() {
         // Given
-        val unavailableCar = validCar.apply { available = false }
+        val unavailableCarOffer = validCarOffer.apply { available = false }
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -266,10 +261,8 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(unavailableCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
+        whenever(carOfferService.findById(1L)).thenReturn(unavailableCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
 
         // When & Then
         val exception =
@@ -277,7 +270,7 @@ class PurchaseServiceTest {
                 purchaseService.createPurchase(request)
             }
         assertTrue(exception.message!!.contains("is not available for purchase"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     @Test
@@ -287,9 +280,8 @@ class PurchaseServiceTest {
         val inactiveBuyer = validBuyer.apply { active = false }
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -297,10 +289,8 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(inactiveBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(inactiveBuyer)
 
         // When & Then
         val exception =
@@ -308,18 +298,19 @@ class PurchaseServiceTest {
                 purchaseService.createPurchase(request)
             }
         assertTrue(exception.message!!.contains("is not active"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     @Test
-    @DisplayName("Should throw exception when car not offered by dealership")
-    fun shouldThrowExceptionWhenCarNotOffered() {
+    @DisplayName("Should throw exception when dealership is not active")
+    fun shouldThrowExceptionWhenDealershipNotActive() {
         // Given
+        val inactiveDealership = validDealership.apply { active = false }
+        val carOfferWithInactiveDealership = validCarOffer.apply { dealership = inactiveDealership }
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -327,16 +318,16 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(null)
+        whenever(carOfferService.findById(1L)).thenReturn(carOfferWithInactiveDealership)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
 
         // When & Then
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
                 purchaseService.createPurchase(request)
             }
-        assertTrue(exception.message!!.contains("was not offered by dealership"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        assertTrue(exception.message!!.contains("is not active"))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     @Test
@@ -345,9 +336,8 @@ class PurchaseServiceTest {
         // Given
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal.ZERO,
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -355,10 +345,8 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
 
         // When & Then
         val exception =
@@ -366,7 +354,88 @@ class PurchaseServiceTest {
                 purchaseService.createPurchase(request)
             }
         assertTrue(exception.message!!.contains("Final price must be greater than zero"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should throw exception when final price is negative")
+    fun shouldThrowExceptionWhenPriceIsNegative() {
+        // Given
+        val request =
+            PurchaseCreateRequest(
+                carOfferId = 1L,
+                buyerId = 1L,
+                finalPrice = BigDecimal("-100.00"),
+                paymentMethod = PaymentMethod.CASH,
+                purchaseDate = LocalDateTime.now().minusDays(1),
+                purchaseStatus = PurchaseStatus.PENDING,
+                observations = "Test",
+            )
+
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                purchaseService.createPurchase(request)
+            }
+        assertTrue(exception.message!!.contains("Final price must be greater than zero"))
+        verify(purchaseRepository, never()).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should throw exception when final price exceeds maximum")
+    fun shouldThrowExceptionWhenPriceExceedsMaximum() {
+        // Given
+        val request =
+            PurchaseCreateRequest(
+                carOfferId = 1L,
+                buyerId = 1L,
+                finalPrice = BigDecimal("100000000000000.00"),
+                paymentMethod = PaymentMethod.CASH,
+                purchaseDate = LocalDateTime.now().minusDays(1),
+                purchaseStatus = PurchaseStatus.PENDING,
+                observations = "Test",
+            )
+
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                purchaseService.createPurchase(request)
+            }
+        assertTrue(exception.message!!.contains("exceeds maximum allowed value"))
+        verify(purchaseRepository, never()).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should throw exception when final price has more than 2 decimal places")
+    fun shouldThrowExceptionWhenPriceHasTooManyDecimals() {
+        // Given
+        val request =
+            PurchaseCreateRequest(
+                carOfferId = 1L,
+                buyerId = 1L,
+                finalPrice = BigDecimal("25000.123"),
+                paymentMethod = PaymentMethod.CASH,
+                purchaseDate = LocalDateTime.now().minusDays(1),
+                purchaseStatus = PurchaseStatus.PENDING,
+                observations = "Test",
+            )
+
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                purchaseService.createPurchase(request)
+            }
+        assertTrue(exception.message!!.contains("cannot have more than 2 decimal places"))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     @Test
@@ -375,9 +444,8 @@ class PurchaseServiceTest {
         // Given
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().plusDays(1),
@@ -385,10 +453,8 @@ class PurchaseServiceTest {
                 observations = "Test",
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
 
         // When & Then
         val exception =
@@ -396,7 +462,34 @@ class PurchaseServiceTest {
                 purchaseService.createPurchase(request)
             }
         assertTrue(exception.message!!.contains("Purchase date has to be in the past"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should throw exception when purchase date is before year 2000")
+    fun shouldThrowExceptionWhenDateBeforeYear2000() {
+        // Given
+        val request =
+            PurchaseCreateRequest(
+                carOfferId = 1L,
+                buyerId = 1L,
+                finalPrice = BigDecimal("25000.00"),
+                paymentMethod = PaymentMethod.CASH,
+                purchaseDate = LocalDateTime.of(1999, 12, 31, 23, 59),
+                purchaseStatus = PurchaseStatus.PENDING,
+                observations = "Test",
+            )
+
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
+
+        // When & Then
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                purchaseService.createPurchase(request)
+            }
+        assertTrue(exception.message!!.contains("must be after January 1, 2000"))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     @Test
@@ -405,9 +498,8 @@ class PurchaseServiceTest {
         // Given
         val request =
             PurchaseCreateRequest(
-                carId = 1L,
+                carOfferId = 1L,
                 buyerId = 1L,
-                dealershipId = 1L,
                 finalPrice = BigDecimal("25000.00"),
                 paymentMethod = PaymentMethod.CASH,
                 purchaseDate = LocalDateTime.now().minusDays(1),
@@ -415,10 +507,8 @@ class PurchaseServiceTest {
                 observations = "a".repeat(1001),
             )
 
-        `when`(carService.findById(1L)).thenReturn(validCar)
-        `when`(carOfferService.findByCarIdAndDealershipId(1L, 1L)).thenReturn(validCarOffer)
-        `when`(buyerService.findById(1L)).thenReturn(validBuyer)
-        `when`(dealershipService.findById(1L)).thenReturn(validDealership)
+        whenever(carOfferService.findById(1L)).thenReturn(validCarOffer)
+        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
 
         // When & Then
         val exception =
@@ -426,7 +516,7 @@ class PurchaseServiceTest {
                 purchaseService.createPurchase(request)
             }
         assertTrue(exception.message!!.contains("cannot exceed 1000 characters"))
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     // ========== updatePurchase Tests ==========
@@ -436,15 +526,36 @@ class PurchaseServiceTest {
     fun shouldUpdatePurchase() {
         // Given
         val updateData = mapOf("finalPrice" to "30000.00")
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.updatePurchase(1L, updateData)
 
         // Then
         assertNotNull(result)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(purchaseRepository).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should update multiple fields successfully")
+    fun shouldUpdateMultipleFields() {
+        // Given
+        val updateData =
+            mapOf(
+                "finalPrice" to "30000.00",
+                "paymentMethod" to "CREDIT_CARD",
+                "observations" to "Updated observations",
+            )
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
+
+        // When
+        val result = purchaseService.updatePurchase(1L, updateData)
+
+        // Then
+        assertNotNull(result)
+        verify(purchaseRepository).save(any<Purchase>())
     }
 
     @Test
@@ -452,13 +563,27 @@ class PurchaseServiceTest {
     fun shouldThrowExceptionWhenUpdatingNonExistentPurchase() {
         // Given
         val updateData = mapOf("finalPrice" to "30000.00")
-        `when`(purchaseRepository.findById(999L)).thenReturn(Optional.empty())
+        whenever(purchaseRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When & Then
         assertThrows(NoSuchElementException::class.java) {
             purchaseService.updatePurchase(999L, updateData)
         }
-        verify(purchaseRepository, never()).save(any(Purchase::class.java))
+        verify(purchaseRepository, never()).save(any<Purchase>())
+    }
+
+    @Test
+    @DisplayName("Should throw validation exception during update")
+    fun shouldThrowValidationExceptionDuringUpdate() {
+        // Given
+        val updateData = mapOf("finalPrice" to "0")
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+
+        // When & Then
+        assertThrows(IllegalArgumentException::class.java) {
+            purchaseService.updatePurchase(1L, updateData)
+        }
+        verify(purchaseRepository, never()).save(any<Purchase>())
     }
 
     // ========== deletePurchase Tests ==========
@@ -467,14 +592,27 @@ class PurchaseServiceTest {
     @DisplayName("Should delete purchase successfully")
     fun shouldDeletePurchase() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        doNothing().`when`(purchaseRepository).delete(validPurchase)
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
 
         // When
         purchaseService.deletePurchase(1L)
 
         // Then
+        verify(carOfferService).save(validCarOffer)
         verify(purchaseRepository).delete(validPurchase)
+    }
+
+    @Test
+    @DisplayName("Should throw exception when deleting non-existent purchase")
+    fun shouldThrowExceptionWhenDeletingNonExistentPurchase() {
+        // Given
+        whenever(purchaseRepository.findById(999L)).thenReturn(Optional.empty())
+
+        // When & Then
+        assertThrows(NoSuchElementException::class.java) {
+            purchaseService.deletePurchase(999L)
+        }
+        verify(purchaseRepository, never()).delete(any<Purchase>())
     }
 
     // ========== markAsConfirmed Tests ==========
@@ -483,15 +621,16 @@ class PurchaseServiceTest {
     @DisplayName("Should mark purchase as confirmed")
     fun shouldMarkAsConfirmed() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.markAsConfirmed(1L)
 
         // Then
         assertNotNull(result)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(carOfferService).save(validCarOffer)
+        verify(purchaseRepository).save(any<Purchase>())
     }
 
     // ========== markAsPending Tests ==========
@@ -500,15 +639,17 @@ class PurchaseServiceTest {
     @DisplayName("Should mark purchase as pending")
     fun shouldMarkAsPending() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        validCarOffer.available = false
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.markAsPending(1L)
 
         // Then
         assertNotNull(result)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(carOfferService).save(validCarOffer)
+        verify(purchaseRepository).save(any<Purchase>())
     }
 
     // ========== markAsCanceled Tests ==========
@@ -517,15 +658,16 @@ class PurchaseServiceTest {
     @DisplayName("Should mark purchase as canceled")
     fun shouldMarkAsCanceled() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.markAsCanceled(1L)
 
         // Then
         assertNotNull(result)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(carOfferService).save(validCarOffer)
+        verify(purchaseRepository).save(any<Purchase>())
     }
 
     // ========== markAsDelivered Tests ==========
@@ -534,14 +676,14 @@ class PurchaseServiceTest {
     @DisplayName("Should mark purchase as delivered")
     fun shouldMarkAsDelivered() {
         // Given
-        `when`(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
-        `when`(purchaseRepository.save(any(Purchase::class.java))).thenReturn(validPurchase)
+        whenever(purchaseRepository.findById(1L)).thenReturn(Optional.of(validPurchase))
+        whenever(purchaseRepository.save(any<Purchase>())).thenReturn(validPurchase)
 
         // When
         val result = purchaseService.markAsDelivered(1L)
 
         // Then
         assertNotNull(result)
-        verify(purchaseRepository).save(any(Purchase::class.java))
+        verify(purchaseRepository).save(any<Purchase>())
     }
 }

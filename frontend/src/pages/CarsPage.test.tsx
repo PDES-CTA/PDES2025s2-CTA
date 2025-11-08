@@ -7,6 +7,8 @@ import * as useCarSearchHook from '../hooks/useCarSearch';
 import * as authServiceModule from '../services/api';
 import { CarOffer } from '../types/carOffer';
 import { Car } from '../types/car';
+import { Dealership } from '../types/dealership';
+import { DisplayCar } from '../hooks/useCarSearch';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -21,74 +23,96 @@ const renderWithRouter = (component: ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
+const mockDealership: Dealership = {
+  id: 1,
+  businessName: 'Test Dealership',
+  cuit: '30-12345678-9',
+  email: 'contact@dealership.com',
+  phone: '1234567890',
+  address: '123 Main St',
+  city: 'Buenos Aires',
+  province: 'Buenos Aires',
+  description: 'Test dealership',
+  active: true,
+  registrationDate: '2024-01-01T00:00:00',
+};
+
 const mockCars: Car[] = [
   {
     id: 1,
     brand: 'Toyota',
     model: 'Corolla',
     year: 2020,
-    plate: 'ABC123',
-    mileage: 30000,
     fuelType: 'NAFTA',
     transmission: 'MANUAL',
     color: 'White',
-    available: true,
     publicationDate: '2024-01-15',
+    images: ['https://example.com/car1.jpg'],
   },
   {
     id: 2,
     brand: 'Honda',
     model: 'Civic',
     year: 2021,
-    plate: 'XYZ789',
-    mileage: 15000,
     fuelType: 'NAFTA',
     transmission: 'AUTOMATICA',
     color: 'Black',
-    available: true,
     publicationDate: '2024-01-20',
+    images: ['https://example.com/car2.jpg'],
   },
 ];
 
 const mockCarOffers: CarOffer[] = [
   {
     id: 1,
-    carId: 1,
-    dealershipId: 1,
     price: 20000,
-    offerDate: '2024-01-15',
+    offerDate: '2024-01-15T00:00:00',
     dealershipNotes: 'Excellent condition',
-    images: ['https://example.com/car1.jpg'],
+    available: true,
     car: mockCars[0],
+    dealership: mockDealership,
   },
   {
     id: 2,
-    carId: 2,
-    dealershipId: 1,
     price: 25000,
-    offerDate: '2024-01-20',
+    offerDate: '2024-01-20T00:00:00',
     dealershipNotes: 'Like new',
-    images: ['https://example.com/car2.jpg'],
+    available: true,
     car: mockCars[1],
+    dealership: mockDealership,
+  },
+];
+
+const mockDisplayCars: DisplayCar[] = [
+  {
+    car: mockCars[0],
+    offers: [mockCarOffers[0]],
+  },
+  {
+    car: mockCars[1],
+    offers: [mockCarOffers[1]],
   },
 ];
 
 describe('CarsPage', () => {
-  const mockFetchAllCarOffers = vi.fn();
-  const mockSearchCarOffers = vi.fn();
+  const mockFetchAllCarsAndOffers = vi.fn();
+  const mockSearchCarsAndOffers = vi.fn();
+  const mockGetDisplayCarById = vi.fn();
+  const mockSetDisplayCars = vi.fn();
+  const mockSetError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      carOffers: mockCarOffers,
+      displayCars: mockDisplayCars,
       loading: false,
       error: null,
-      fetchAllCarOffers: mockFetchAllCarOffers,
-      searchCarOffers: mockSearchCarOffers,
-      getCarOfferById: vi.fn(),
-      setCarOffers: vi.fn(),
-      setError: vi.fn(),
+      fetchAllCarsAndOffers: mockFetchAllCarsAndOffers,
+      searchCarsAndOffers: mockSearchCarsAndOffers,
+      getDisplayCarById: mockGetDisplayCarById,
+      setDisplayCars: mockSetDisplayCars,
+      setError: mockSetError,
     });
 
     vi.spyOn(authServiceModule.authService, 'logout').mockImplementation(() => {});
@@ -105,12 +129,12 @@ describe('CarsPage', () => {
     expect(screen.getByRole('button', { name: /Log Out/i })).toBeInTheDocument();
   });
 
-  it('should call fetchAllCarOffers on mount', () => {
+  it('should call fetchAllCarsAndOffers on mount', () => {
     renderWithRouter(<CarsPage />);
-    expect(mockFetchAllCarOffers).toHaveBeenCalledTimes(1);
+    expect(mockFetchAllCarsAndOffers).toHaveBeenCalledTimes(1);
   });
 
-  it('should render car list when car offers are loaded', () => {
+  it('should render car list when cars are loaded', () => {
     renderWithRouter(<CarsPage />);
     expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
     expect(screen.getByText('Honda Civic')).toBeInTheDocument();
@@ -118,45 +142,45 @@ describe('CarsPage', () => {
 
   it('should show loading spinner when loading', () => {
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      carOffers: [],
+      displayCars: [],
       loading: true,
       error: null,
-      fetchAllCarOffers: mockFetchAllCarOffers,
-      searchCarOffers: mockSearchCarOffers,
-      getCarOfferById: vi.fn(),
-      setCarOffers: vi.fn(),
-      setError: vi.fn(),
+      fetchAllCarsAndOffers: mockFetchAllCarsAndOffers,
+      searchCarsAndOffers: mockSearchCarsAndOffers,
+      getDisplayCarById: mockGetDisplayCarById,
+      setDisplayCars: mockSetDisplayCars,
+      setError: mockSetError,
     });
 
     renderWithRouter(<CarsPage />);
-    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('should show error message when there is an error', () => {
-    const errorMessage = 'Failed to load car offers';
+    const errorMessage = 'Failed to load cars';
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      carOffers: [],
+      displayCars: [],
       loading: false,
       error: errorMessage,
-      fetchAllCarOffers: mockFetchAllCarOffers,
-      searchCarOffers: mockSearchCarOffers,
-      getCarOfferById: vi.fn(),
-      setCarOffers: vi.fn(),
-      setError: vi.fn(),
+      fetchAllCarsAndOffers: mockFetchAllCarsAndOffers,
+      searchCarsAndOffers: mockSearchCarsAndOffers,
+      getDisplayCarById: mockGetDisplayCarById,
+      setDisplayCars: mockSetDisplayCars,
+      setError: mockSetError,
     });
 
     renderWithRouter(<CarsPage />);
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('should call searchCarOffers when search button is clicked', async () => {
+  it('should call searchCarsAndOffers when search button is clicked', async () => {
     renderWithRouter(<CarsPage />);
 
     const searchButton = screen.getByRole('button', { name: /Search/i });
     fireEvent.click(searchButton);
 
     await waitFor(() => {
-      expect(mockSearchCarOffers).toHaveBeenCalled();
+      expect(mockSearchCarsAndOffers).toHaveBeenCalled();
     });
   });
 
@@ -200,7 +224,7 @@ describe('CarsPage', () => {
     fireEvent.click(clearButton);
 
     await waitFor(() => {
-      expect(mockFetchAllCarOffers).toHaveBeenCalledTimes(2); // Once on mount, once on clear
+      expect(mockFetchAllCarsAndOffers).toHaveBeenCalledTimes(2); // Once on mount, once on clear
     });
 
     // Keyword should be cleared
@@ -235,16 +259,16 @@ describe('CarsPage', () => {
   });
 
   it('should show retry button in error state', () => {
-    const errorMessage = 'Failed to load car offers';
+    const errorMessage = 'Failed to load cars';
     vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
-      carOffers: [],
+      displayCars: [],
       loading: false,
       error: errorMessage,
-      fetchAllCarOffers: mockFetchAllCarOffers,
-      searchCarOffers: mockSearchCarOffers,
-      getCarOfferById: vi.fn(),
-      setCarOffers: vi.fn(),
-      setError: vi.fn(),
+      fetchAllCarsAndOffers: mockFetchAllCarsAndOffers,
+      searchCarsAndOffers: mockSearchCarsAndOffers,
+      getDisplayCarById: mockGetDisplayCarById,
+      setDisplayCars: mockSetDisplayCars,
+      setError: mockSetError,
     });
 
     renderWithRouter(<CarsPage />);
@@ -252,24 +276,85 @@ describe('CarsPage', () => {
     const retryButton = screen.getByRole('button', { name: /Retry/i });
     fireEvent.click(retryButton);
 
-    expect(mockFetchAllCarOffers).toHaveBeenCalled();
+    expect(mockFetchAllCarsAndOffers).toHaveBeenCalled();
   });
 
-  it('should display car offer prices', () => {
+  it('should display car offer prices with "From" prefix', () => {
     renderWithRouter(<CarsPage />);
     
-    // Check that prices from carOffers are displayed
-    expect(screen.getByText(/20,?000|20\.000/)).toBeInTheDocument();
-    expect(screen.getByText(/25,?000|25\.000/)).toBeInTheDocument();
+    expect(screen.getByText(/From.*20,?000|From.*20\.000/i)).toBeInTheDocument();
+    expect(screen.getByText(/From.*25,?000|From.*25\.000/i)).toBeInTheDocument();
   });
 
-  it('should display car details from nested car object', () => {
+  it('should display car details', () => {
     renderWithRouter(<CarsPage />);
     
-    // Check year, mileage from car object
-    expect(screen.getByText(/2020/)).toBeInTheDocument();
-    expect(screen.getByText(/2021/)).toBeInTheDocument();
-    expect(screen.getByText(/30,?000/)).toBeInTheDocument();
-    expect(screen.getByText(/15,?000/)).toBeInTheDocument();
+    expect(screen.getByText(/Year 2020/)).toBeInTheDocument();
+    expect(screen.getByText(/Year 2021/)).toBeInTheDocument();
+  });
+
+  it('should display results count', () => {
+    renderWithRouter(<CarsPage />);
+    
+    expect(screen.getByText('2 cars found')).toBeInTheDocument();
+  });
+
+  it('should show empty state when no cars available', () => {
+    vi.spyOn(useCarSearchHook, 'useCarSearch').mockReturnValue({
+      displayCars: [],
+      loading: false,
+      error: null,
+      fetchAllCarsAndOffers: mockFetchAllCarsAndOffers,
+      searchCarsAndOffers: mockSearchCarsAndOffers,
+      getDisplayCarById: mockGetDisplayCarById,
+      setDisplayCars: mockSetDisplayCars,
+      setError: mockSetError,
+    });
+
+    renderWithRouter(<CarsPage />);
+    
+    expect(screen.getByText('No cars found')).toBeInTheDocument();
+  });
+
+  it('should render fuel types', () => {
+    renderWithRouter(<CarsPage />);
+    
+    const naftaBadges = screen.getAllByText('NAFTA');
+    expect(naftaBadges.length).toBeGreaterThan(0);
+  });
+
+  it('should render transmission types', () => {
+    renderWithRouter(<CarsPage />);
+    
+    expect(screen.getByText('MANUAL')).toBeInTheDocument();
+    expect(screen.getByText('AUTOMATICA')).toBeInTheDocument();
+  });
+
+  it('should render car colors', () => {
+    renderWithRouter(<CarsPage />);
+    
+    expect(screen.getByText('White')).toBeInTheDocument();
+    expect(screen.getByText('Black')).toBeInTheDocument();
+  });
+
+  it('should render offer available badges', () => {
+    renderWithRouter(<CarsPage />);
+    
+    const availableBadges = screen.getAllByText('Offer Available');
+    expect(availableBadges.length).toBe(2);
+  });
+
+  it('should render dealership notes', () => {
+    renderWithRouter(<CarsPage />);
+    
+    expect(screen.getByText('Excellent condition')).toBeInTheDocument();
+    expect(screen.getByText('Like new')).toBeInTheDocument();
+  });
+
+  it('should render publication dates', () => {
+    renderWithRouter(<CarsPage />);
+    
+    const publishedLabels = screen.getAllByText(/Published:/);
+    expect(publishedLabels.length).toBe(2);
   });
 });

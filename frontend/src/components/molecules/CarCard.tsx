@@ -5,20 +5,35 @@ import { Badge, Button } from '../atoms';
 import { Car } from '../../types/car';
 import { CarOffer } from '../../types/carOffer';
 import styles from './CarCard.module.css';
+import { Dealership } from '../../types/dealership';
 
 interface CarCardProps {
   readonly car: Car;
-  readonly carOffer: CarOffer;
+  readonly offers: (CarOffer & { dealership?: Dealership })[];
   readonly onViewDetails: () => void;
 }
 
-export default function CarCard({ car, carOffer, onViewDetails }: CarCardProps) {
-  const hasImages = carOffer.images && carOffer.images.length > 0;
+export default function CarCard({ car, offers, onViewDetails }: CarCardProps) {
+  const hasImages = car.images && car.images.length > 0;
+
+  const availableOffers = (offers ?? []).filter(o => o.available);
+  const hasAvailableOffer = availableOffers.length > 0;
+
+  let lowestPrice: number | null = null;
+  let highestPrice: number | null = null;
+
+  if (hasAvailableOffer) {
+    const prices = availableOffers.map(o => o.price);
+    lowestPrice = Math.min(...prices);
+    highestPrice = Math.max(...prices);
+  }
+
+  const description = availableOffers[0]?.dealershipNotes || car.description;
 
   const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
     const placeholder = target.nextSibling as HTMLElement;
-    
+
     target.style.display = 'none';
     if (placeholder) {
       placeholder.style.display = 'flex';
@@ -28,9 +43,9 @@ export default function CarCard({ car, carOffer, onViewDetails }: CarCardProps) 
   return (
     <article className={styles.card}>
       <div className={styles.imageContainer}>
-        {hasImages && carOffer.images && (
+         {hasImages && car.images && (
           <img
-            src={carOffer.images[0]}
+            src={car.images[0]}
             alt={`${car.brand} ${car.model}`}
             className={styles.image}
             onError={handleImageError}
@@ -47,28 +62,35 @@ export default function CarCard({ car, carOffer, onViewDetails }: CarCardProps) 
             {car.brand} {car.model}
           </h3>
           <Badge
-            variant={car.available ? 'success' : 'danger'}
-            text={car.available ? 'Available' : 'Sold'}
+            variant={hasAvailableOffer ? 'success' : 'danger'}
+            text={hasAvailableOffer ? 'Offer Available' : 'No Offers'}
           />
         </header>
 
         <div className={styles.priceSection}>
-          <div className={styles.price}>{formatPrice(carOffer.price)}</div>
-          
+          {lowestPrice !== null && highestPrice !== null ? (
+            <div className={styles.price}>
+              {lowestPrice === highestPrice ? (
+                `From ${formatPrice(lowestPrice)}`
+              ) : (
+                `${formatPrice(lowestPrice)} - ${formatPrice(highestPrice)}`
+              )}
+            </div>
+          ) : (
+            <div className={styles.pricePlaceholder}>-</div>
+          )}
           <div className={styles.details}>
-            Year {car.year} • {car.mileage.toLocaleString()} km
+            Year {car.year} • 0 km
           </div>
         </div>
 
-        <div className={styles.specs}>
+         <div className={styles.specs}>
           <Badge variant="fuel" text={car.fuelType} />
           <Badge variant="transmission" text={car.transmission} />
           <Badge variant="neutral" text={car.color} />
         </div>
 
-        {carOffer.dealershipNotes && (
-          <p className={styles.description}>{carOffer.dealershipNotes}</p>
-        )}
+        {description && <p className={styles.description}>{description}</p>}
 
         <footer className={styles.footer}>
           <span className={styles.publishDate}>
@@ -76,11 +98,11 @@ export default function CarCard({ car, carOffer, onViewDetails }: CarCardProps) 
           </span>
           <Button
             onClick={onViewDetails}
-            disabled={!car.available}
+            disabled={!hasAvailableOffer}
             variant="primary"
             size="sm"
           >
-            {car.available ? 'View Details' : 'Not available'}
+            View Details
           </Button>
         </footer>
       </div>

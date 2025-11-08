@@ -31,11 +31,27 @@ class FavoriteCar : BaseEntity() {
     @Column(name = "price_notifications")
     var priceNotifications: Boolean = false
 
-    fun enableNotifications() {
+    fun updateRating(newRating: Int?) {
+        this.rating = newRating
+    }
+
+    fun updateComment(newComment: String?) {
+        this.comment = newComment?.ifBlank { null }
+    }
+
+    fun enablePriceNotifications() {
         priceNotifications = true
     }
 
-    fun disableNotifications() {
+    fun disablePriceNotifications() {
         priceNotifications = false
+    }
+
+    fun togglePriceNotifications() {
+        priceNotifications = !priceNotifications
+    }
+
+    fun isReviewed(): Boolean {
+        return rating != null || !comment.isNullOrBlank()
     }
 }

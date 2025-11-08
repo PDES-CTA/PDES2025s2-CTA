@@ -9,12 +9,10 @@ import java.time.LocalDateTime
 data class PurchaseResponse(
     @field:Schema(description = "Unique identifier for the purchase")
     val id: Long?,
-    @field:Schema(description = "Buyer ID of the buyer involved in the purchase")
-    val buyerId: Long?,
-    @field:Schema(description = "Car ID of the car bought")
-    val carId: Long?,
-    @field:Schema(description = "Dealership ID that sold the car")
-    val dealershipId: Long?,
+    @field:Schema(description = "Buyer involved in the purchase")
+    val buyer: BuyerResponse,
+    @field:Schema(description = "Car Offer that was bought")
+    val carOffer: CarOfferResponse,
     @field:Schema(description = "Purchase date creation")
     val purchaseDate: LocalDateTime,
     @field:Schema(description = "Price of the car that was sold")
@@ -30,9 +28,8 @@ data class PurchaseResponse(
         fun fromEntity(purchase: Purchase): PurchaseResponse {
             return PurchaseResponse(
                 id = purchase.id,
-                buyerId = purchase.buyerId,
-                carId = purchase.car.id,
-                dealershipId = purchase.dealership.id,
+                buyer = BuyerResponse.fromEntity(purchase.buyer),
+                carOffer = CarOfferResponse.fromEntity(purchase.carOffer),
                 purchaseDate = purchase.purchaseDate,
                 finalPrice = purchase.finalPrice,
                 purchaseStatus = purchase.purchaseStatus.toString(),

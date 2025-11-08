@@ -4,9 +4,10 @@ import styles from './ErrorMessage.module.css';
 interface ErrorMessageProps {
   readonly error: string;
   readonly onRetry?: () => void;
+  readonly retryLabel?: string;
 }
 
-export default function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
+export default function ErrorMessage({ error, onRetry, retryLabel }: ErrorMessageProps) {
   return (
     <div className={styles.container}>
       <div className={styles.errorBox}>
@@ -14,7 +15,7 @@ export default function ErrorMessage({ error, onRetry }: ErrorMessageProps) {
         <p className={styles.message}>{error}</p>
         {onRetry && (
           <Button onClick={onRetry} variant="danger">
-            Retry
+            {retryLabel || 'Retry'}
           </Button>
         )}
       </div>

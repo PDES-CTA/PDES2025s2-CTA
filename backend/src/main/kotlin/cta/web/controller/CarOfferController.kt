@@ -7,6 +7,7 @@ import cta.web.dto.CarOfferUpdateRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -26,10 +27,28 @@ class CarOfferController(
     private val carOfferService: CarOfferService,
 ) {
     @GetMapping("/available")
-    @Operation(summary = "Get all available cars")
+    @Operation(summary = "Get all available car offers")
     fun getAllAvailableCarOffers(): ResponseEntity<List<CarOfferResponse>> {
         val carOffers = carOfferService.findAvailableCarOffers()
         return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
+    }
+
+    @GetMapping("/dealership/{dealershipId}")
+    @Operation(summary = "Get all offers by dealership")
+    fun getAllCarOffersPerDealership(
+        @PathVariable dealershipId: Long,
+    ): ResponseEntity<List<CarOfferResponse>> {
+        val carOffers = carOfferService.findByDealershipId(dealershipId)
+        return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a specific car offer by its ID")
+    fun getCarOfferById(
+        @PathVariable id: Long,
+    ): ResponseEntity<CarOfferResponse> {
+        val carOffer = carOfferService.findById(id)
+        return ResponseEntity.ok(CarOfferResponse.fromEntity(carOffer))
     }
 
     @PostMapping
@@ -38,12 +57,12 @@ class CarOfferController(
         @Valid @RequestBody request: CarOfferCreateRequest,
     ): ResponseEntity<CarOfferResponse> {
         val carOffer = carOfferService.createCarOffer(request)
-        return ResponseEntity.ok(CarOfferResponse.fromEntity(carOffer))
+        return ResponseEntity.status(HttpStatus.CREATED).body(CarOfferResponse.fromEntity(carOffer))
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a car offering in a dealership")
-    fun deleteFavorite(
+    fun deleteCarOffer(
         @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         carOfferService.deleteCarOffer(id)
@@ -55,7 +74,7 @@ class CarOfferController(
     fun updateCarOffer(
         @PathVariable id: Long,
         @Valid @RequestBody request: CarOfferUpdateRequest,
-    ): ResponseEntity<CarOfferResponse?> {
+    ): ResponseEntity<CarOfferResponse> {
         val updatedCarOffer = carOfferService.updateCarOffer(id, request.toMap())
         return ResponseEntity.ok(CarOfferResponse.fromEntity(updatedCarOffer))
     }

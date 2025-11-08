@@ -5,6 +5,7 @@ import { authService, User } from './services/api';
 import { ROUTES } from './constants';
 
 import HomePage from './pages/HomePage';
+import DealershipHomePage from './pages/DealershipHomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CarsPage from './pages/CarsPage';
@@ -16,6 +17,7 @@ import CarDetailPage from './pages/CarDetailPage';
 // import AdminPage from './pages/AdminPage';
 
 import styles from './App.module.css';
+import DealershipOffersPage from './pages/DealershipOffersPage';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -80,6 +82,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path={ROUTES.DEALERSHIP_OFFERS} element={<DealershipOffersPage />} />
+        <Route path={ROUTES.DEALERSHIP_HOME} element={<DealershipHomePage />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage onLogin={checkAuth} />} />
         <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
         <Route path={ROUTES.CARS} element={<CarsPage />} />

@@ -2,10 +2,10 @@ package cta.web.controller
 
 import cta.enum.FuelType
 import cta.enum.TransmissionType
-import cta.service.CarSearchFilters
 import cta.service.CarService
 import cta.web.dto.CarCreateRequest
 import cta.web.dto.CarResponse
+import cta.web.dto.CarSearchFilters
 import cta.web.dto.CarUpdateRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -32,9 +31,9 @@ class CarController(
     private val carService: CarService,
 ) {
     @GetMapping
-    @Operation(summary = "Get all available cars")
+    @Operation(summary = "Get all cars")
     fun getAllCars(): ResponseEntity<List<CarResponse>> {
-        val cars = carService.findAvailableCars()
+        val cars = carService.findAll()
         return ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
     }
 
@@ -108,24 +107,6 @@ class CarController(
         @Valid @RequestBody request: CarUpdateRequest,
     ): ResponseEntity<CarResponse> {
         val updatedCar = carService.updateCar(id, request.toMap())
-        return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
-    }
-
-    @PatchMapping("/{id}/sold")
-    @Operation(summary = "Mark an existing car as sold")
-    fun markAsSold(
-        @PathVariable id: Long,
-    ): ResponseEntity<CarResponse> {
-        val updatedCar = carService.markAsSold(id)
-        return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
-    }
-
-    @PatchMapping("/{id}/available")
-    @Operation(summary = "Mark an existing car as available")
-    fun markAsAvailable(
-        @PathVariable id: Long,
-    ): ResponseEntity<CarResponse> {
-        val updatedCar = carService.markAsAvailable(id)
         return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
     }
 

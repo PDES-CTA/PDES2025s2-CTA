@@ -22,7 +22,14 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
     await authService.login(credentials);
     if (onLogin) await onLogin();
-    navigate(ROUTES.CARS);
+
+    const user = await authService.getLoggedUser();
+
+    if (user.role === 'DEALERSHIP') {
+      navigate(ROUTES.DEALERSHIP_OFFERS);
+    } else {
+      navigate(ROUTES.CARS);
+    }
   };
 
   return (

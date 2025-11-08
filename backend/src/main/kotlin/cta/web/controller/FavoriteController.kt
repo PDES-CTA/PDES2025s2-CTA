@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -35,7 +36,7 @@ class FavoriteController(
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an existing favorite car marked by a buyer")
-    fun deleteFavorite(
+    fun deleteFavoriteCar(
         @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         favoriteService.deleteFavoriteCar(id)
@@ -48,7 +49,34 @@ class FavoriteController(
         @PathVariable id: Long,
         @Valid @RequestBody request: FavoriteCarUpdateReviewRequest,
     ): ResponseEntity<FavoriteCarResponse?> {
-        val updatedFavoriteCarReview = favoriteService.updateReview(id, request.toMap())
+        val updatedFavoriteCarReview = favoriteService.updateReview(id, request.rating, request.comment)
         return ResponseEntity.ok(FavoriteCarResponse.fromEntity(updatedFavoriteCarReview))
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get favorite car by its ID")
+    fun getFavoriteById(
+        @PathVariable id: Long,
+    ): ResponseEntity<FavoriteCarResponse> {
+        val favorite = favoriteService.findById(id)
+        return ResponseEntity.ok(FavoriteCarResponse.fromEntity(favorite))
+    }
+
+    @GetMapping("/buyer/{buyerId}")
+    @Operation(summary = "Get all favorite cars for a specific buyer")
+    fun getFavoritesByBuyerId(
+        @PathVariable buyerId: Long,
+    ): ResponseEntity<List<FavoriteCarResponse>> {
+        val favorites = favoriteService.findByBuyerId(buyerId)
+        return ResponseEntity.ok(favorites.map { FavoriteCarResponse.fromEntity(it) })
+    }
+
+    @GetMapping("/car/{carId}")
+    @Operation(summary = "Get all favorites associated with a specific car")
+    fun getFavoritesByCarId(
+        @PathVariable carId: Long,
+    ): ResponseEntity<List<FavoriteCarResponse>> {
+        val favorites = favoriteService.findByCarId(carId)
+        return ResponseEntity.ok(favorites.map { FavoriteCarResponse.fromEntity(it) })
     }
 }

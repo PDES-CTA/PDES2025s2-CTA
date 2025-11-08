@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { Car } from "../types/car";
 import { CarOffer } from "../types/carOffer";
- 
+
 // Centralized configuration
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
@@ -72,16 +72,16 @@ interface LoginResponse {
   user: User;
 }
 
-interface SearchFilters {
-  keyword?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minYear?: number;
-  maxYear?: number;
-  brand?: string;
-  fuelType?: string;
-  transmission?: string;
-}
+//interface SearchFilters {
+//  keyword?: string;
+//  minPrice?: number;
+//  maxPrice?: number;
+//  minYear?: number;
+//  maxYear?: number;
+//  brand?: string;
+//  fuelType?: string;
+//  transmission?: string;
+//}
 
 interface Favorite {
   id: number;
@@ -189,29 +189,69 @@ export const carOfferService = {
     return response.data;
   },
   getById: async (id: string | number): Promise<CarOffer> => {
-    const response = await apiClient.get<CarOffer>(`/car-offers/${id}`);
+    const response = await apiClient.get<CarOffer>(`/offer/${id}`);
+    return response.data;
+  },
+  getByDealershipId: async (dealershipId: string | number): Promise<CarOffer[]> => {
+    const response = await apiClient.get<CarOffer[]>(`/offer/dealership/${dealershipId}`);
+    return response.data;
+  },
+  deleteCarOffer: async (id: string | number): Promise<void> => {
+    await apiClient.delete(`/offer/${id}`);
+  },
+  updateCarOffer: async (id: string | number, data: unknown): Promise<CarOffer> => {
+    const response = await apiClient.put<CarOffer>(`/offer/${id}`, data);
+    return response.data;
+  },
+  createCarOffer: async (data: unknown): Promise<CarOffer> => {
+    const response = await apiClient.post<CarOffer>('/offer', data);
     return response.data;
   },
 };
 
 // ==================== CAR SERVICE ====================
+export interface CarSearchQuery {
+    keyword?: string;
+    minYear?: number | string;
+    maxYear?: number | string;
+    brand?: string;
+    fuelType?: string;
+    transmission?: string;
+}
+
 export const carService = {
   async getAllCars(): Promise<Car[]> {
-    const response = await apiClient.get<Car[]>("/cars");
-    return response.data;
+    try {
+      const response = await apiClient.get<Car[]>('/cars');
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching cars:", error);
+      throw error;
+    }
   },
 
-  async getCarById(carId: string | number): Promise<Car> {
-    const response = await apiClient.get<Car>(`/cars/${carId}`);
-    return response.data;
+  async getCarById(id: string | number): Promise<Car> {
+    try {
+      const response = await apiClient.get<Car>(`/cars/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching car with id ${id}:`, error);
+      throw error;
+    }
   },
 
-  async searchCars(filters: SearchFilters): Promise<Car[]> {
-    const response = await apiClient.get<Car[]>("/cars/search", {
-      params: filters
-    });
-    return response.data;
-  },
+  async searchCars(filters: CarSearchQuery): Promise<Car[]> {
+     try {
+       const params = Object.fromEntries(
+         Object.entries(filters).filter(([, value]) => value != null && value !== '')
+       );
+       const response = await apiClient.get<Car[]>('/cars/search', { params });
+       return response.data;
+     } catch (error) {
+       console.error("Error searching cars:", error);
+       throw error;
+     }
+   },
 
   async getCarsByDealership(dealershipId: string | number): Promise<Car[]> {
     const response = await apiClient.get<Car[]>(`/cars/dealership/${dealershipId}`);
@@ -357,5 +397,6 @@ export default {
   buyer: buyerService,
   purchase: purchaseService,
   dealership: dealershipService,
-  admin: adminService
+  admin: adminService,
+  carOffer: carOfferService
 };

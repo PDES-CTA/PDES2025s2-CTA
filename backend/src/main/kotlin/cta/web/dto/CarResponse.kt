@@ -3,6 +3,7 @@ package cta.web.dto
 import cta.enum.FuelType
 import cta.enum.TransmissionType
 import cta.model.Car
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
@@ -16,10 +17,6 @@ data class CarResponse(
     val model: String,
     @field:Schema(description = "Car year")
     val year: Int,
-    @field:Schema(description = "Car mileage")
-    val mileage: Int,
-    @field:Schema(description = "Car plate")
-    val plate: String,
     @field:Schema(description = "Car color")
     val color: String,
     @field:Schema(description = "Car fuel type")
@@ -28,8 +25,13 @@ data class CarResponse(
     val transmission: TransmissionType,
     @field:Schema(description = "Date of publication of the car in the app")
     val publicationDate: LocalDateTime,
-    @field:Schema(description = "Boolean that indicates is the car is still available")
-    val available: Boolean,
+    @field:Schema(description = "Description of the car")
+    val description: String?,
+    @field:ArraySchema(
+        schema = Schema(description = "Link to an image of the car"),
+        arraySchema = Schema(description = "List of links of images of the car"),
+    )
+    val images: List<String>,
 ) {
     companion object {
         fun fromEntity(car: Car): CarResponse {
@@ -38,13 +40,12 @@ data class CarResponse(
                 brand = car.brand,
                 model = car.model,
                 year = car.year,
-                mileage = car.mileage,
                 color = car.color,
                 fuelType = car.fuelType,
                 transmission = car.transmission,
                 publicationDate = car.publicationDate,
-                plate = car.plate,
-                available = car.available,
+                description = car.description,
+                images = car.images.toList(),
             )
         }
     }

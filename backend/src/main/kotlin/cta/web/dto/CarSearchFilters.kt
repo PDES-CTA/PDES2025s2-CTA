@@ -1,4 +1,4 @@
-package cta.service
+package cta.web.dto
 
 import cta.enum.FuelType
 import cta.enum.TransmissionType

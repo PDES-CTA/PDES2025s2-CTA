@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, LogIn } from 'lucide-react';
+import { Search, LogIn, CircleDashed } from 'lucide-react';
 import { ROUTES } from '../constants';
 import styles from './HomePage.module.css';
 
@@ -25,6 +25,18 @@ export default function HomePage() {
             <button className={styles.secondaryButton}>
               <LogIn size={18} />
               Log In
+            </button>
+          </Link>
+        </div>
+
+        <p className={styles.subtitle}>
+            Do you own a dealership? Try CTA For Dealerships.
+        </p>
+        <div className={styles.actions}>
+          <Link to={ROUTES.DEALERSHIP_HOME}>
+            <button className={styles.redirectButton}>
+              <CircleDashed size={18} />
+              CTA For Dealerships
             </button>
           </Link>
         </div>

@@ -21,6 +21,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -29,6 +30,9 @@ import java.util.Optional
 class DealershipServiceTest {
     @Mock
     private lateinit var dealershipRepository: DealershipRepository
+
+    @Mock
+    private lateinit var passwordEncoder: PasswordEncoder
 
     @InjectMocks
     private lateinit var dealershipService: DealershipService
@@ -411,7 +415,7 @@ class DealershipServiceTest {
                 businessName = "NewAuto S.A.",
                 cuit = "20111222333",
                 email = "contact@newauto.com",
-                password = "example",
+                password = "PasswordExample",
                 phone = "1122334455",
                 address = "Calle Falsa 123",
                 city = "Córdoba",
@@ -440,6 +444,7 @@ class DealershipServiceTest {
 
         `when`(dealershipRepository.findByCuit("20111222333")).thenReturn(null)
         `when`(dealershipRepository.findByEmail("contact@newauto.com")).thenReturn(null)
+        `when`(passwordEncoder.encode(any())).thenReturn("encodedPassword123")
         `when`(dealershipRepository.save(any(Dealership::class.java))).thenReturn(savedDealership)
 
         // When

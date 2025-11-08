@@ -1,30 +1,30 @@
 import CarCard from '../molecules/CarCard';
 import { EmptyState } from '../molecules';
-import { CarOffer } from '../../types/carOffer';
+import { DisplayCar } from '../../hooks/useCarSearch';
 import styles from './CarList.module.css';
 
 interface CarListProps {
-  readonly carOffers: CarOffer[];
+  readonly displayCars: DisplayCar[];
   readonly onViewDetails: (carId: string | number) => void;
 }
 
-export default function CarList({ carOffers, onViewDetails }: CarListProps) {
-  if (carOffers.length === 0) {
+export default function CarList({ displayCars, onViewDetails }: CarListProps) {
+  if (!displayCars || displayCars.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.resultsCount}>
-        {carOffers.length} car{carOffers.length === 1 ? '' : 's'} found
+        {displayCars.length} car{displayCars.length === 1 ? '' : 's'} found
       </div>
       <div className={styles.grid}>
-        {carOffers.map((carOffer) => (
+        {displayCars.map(({ car, offers }) => (
           <CarCard
-            key={carOffer.id}
-            car={carOffer.car}
-            carOffer={carOffer}
-            onViewDetails={() => onViewDetails(carOffer.car.id)}
+            key={car.id}
+            car={car}
+            offers={offers ?? []}
+            onViewDetails={() => onViewDetails(car.id)}
           />
         ))}
       </div>

@@ -1,8 +1,6 @@
 package cta.model
 
-import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
-import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
@@ -33,12 +31,18 @@ class CarOffer : BaseEntity() {
     @Column(name = "dealership_notes", length = 500, columnDefinition = "TEXT")
     var dealershipNotes: String? = null
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "car_offer_image", joinColumns = [JoinColumn(name = "offer_id")])
-    @Column(name = "image_url")
-    var images: MutableList<String>? = mutableListOf()
+    @Column(nullable = false)
+    var available: Boolean = true
 
     fun updatePrice(newPrice: BigDecimal) {
         this.price = newPrice
+    }
+
+    fun markAsSold() {
+        this.available = false
+    }
+
+    fun markAsAvailable() {
+        this.available = true
     }
 }

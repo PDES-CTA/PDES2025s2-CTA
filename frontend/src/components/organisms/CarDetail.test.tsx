@@ -2,241 +2,461 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CarDetail from './CarDetail';
-import { FUEL_TYPES, TRANSMISSION_TYPES } from '../../constants';
-import type { Car } from '../../types/car';
+import { CarOffer } from '../../types/carOffer';
+import { Car } from '../../types/car';
+import { Dealership } from '../../types/dealership';
 
-vi.mock('../atoms', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../atoms')>();
-  return {
-    ...actual,
-    LoadingSpinner: () => <div>Cargando...</div>,
-  };
-});
-
-vi.mock('../../utils/carUtils', () => ({
-  formatPrice: (price: number) => `$ ${price.toLocaleString('es-AR', { minimumFractionDigits: 0 }).replace(/,/g, '.')}`,
-  formatDate: (date: string) => `Published: ${new Date(date).toLocaleDateString('es-AR')}`,
-  getFuelTypeClass: (fuel: string) => `fuel-${fuel.toLowerCase()}`,
-  getTransmissionClass: (transmission: string) => `transmission-${transmission.toLowerCase()}`,
-}));
-
+const mockDealership: Dealership = {
+  id: 1,
+  businessName: 'Premium Auto Dealers',
+  cuit: '30-12345678-9',
+  email: 'contact@premiumauto.com',
+  phone: '1234567890',
+  address: '123 Main St',
+  city: 'Buenos Aires',
+  province: 'Buenos Aires',
+  description: 'Best dealership in town',
+  active: true,
+  registrationDate: '2024-01-01T00:00:00',
+};
 
 const mockCar: Car = {
-  id: 456,
-  brand: 'Honda',
-  model: 'Civic',
-  year: 2021,
-  price: 28000,
-  mileage: 30000,
-  color: 'Red',
-  fuelType: FUEL_TYPES.GASOLINE,
-  transmission: TRANSMISSION_TYPES.MANUAL,
-  description: 'Excellent condition, well maintained',
-  images: ['https://example.com/honda.jpg'],
+  id: 1,
+  brand: 'Toyota',
+  model: 'Corolla',
+  year: 2020,
+  fuelType: 'NAFTA',
+  transmission: 'MANUAL',
+  color: 'White',
+  description: 'Great car in excellent condition',
+  publicationDate: '20-12-2025',
+  images: ['https://example.com/car1.jpg', 'https://example.com/car2.jpg'],
+};
+
+const mockCarOffer: CarOffer = {
+  id: 1,
+  car: mockCar,
+  dealership: mockDealership,
+  price: 20000,
+  offerDate: '2024-01-15T00:00:00',
+  dealershipNotes: 'Recently serviced, one owner',
   available: true,
-  publicationDate: '2024-02-10'
 };
 
 describe('CarDetail', () => {
   const mockOnBack = vi.fn();
-  const mockGetCarById = vi.fn();
+  const mockGetCarOfferById = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render loading spinner initially', () => {
-    mockGetCarById.mockImplementation(() => new Promise(() => {})); // Represents a pending promise
-
+  it('should show loading spinner while fetching data', () => {
+    mockGetCarOfferById.mockReturnValue(new Promise(() => {})); // Never resolves
+    
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
-    expect(screen.getByText(/cargando.../i)).toBeInTheDocument();
-  });
-
-  it('should load and display car details successfully', async () => {
-    mockGetCarById.mockResolvedValue(mockCar);
-
-    render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Honda Civic')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Year 2021')).toBeInTheDocument();
-    expect(screen.getByText('$ 28.000')).toBeInTheDocument();
-    expect(screen.getByText(/30.000\s*km/)).toBeInTheDocument();
-    expect(screen.getByText('Red')).toBeInTheDocument();
-    expect(screen.getByText('Available')).toBeInTheDocument();
-    expect(screen.getByText('Excellent condition, well maintained')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument(); // LoadingSpinner should have role="status"
   });
 
   it('should display error message when fetch fails', async () => {
-    mockGetCarById.mockRejectedValue(new Error('Failed to fetch car'));
+    mockGetCarOfferById.mockRejectedValue(new Error('Failed to fetch'));
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Error: Failed to fetch car/i)).toBeInTheDocument();
+      expect(screen.getByText(/Error: Failed to fetch/i)).toBeInTheDocument();
     });
   });
 
-  it('should display "Car not found" when car is null', async () => {
-    mockGetCarById.mockResolvedValue(null);
+  it('should display "Car offer not found" when no data returned', async () => {
+    mockGetCarOfferById.mockResolvedValue(null);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Car not found')).toBeInTheDocument();
+      expect(screen.getByText('Car offer not found')).toBeInTheDocument();
     });
   });
 
-  it('should call onBack when back button is clicked', async () => {
-    mockGetCarById.mockResolvedValue(mockCar);
-    const user = userEvent.setup();
+  it('should render car details successfully', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
-    await waitFor(() => expect(screen.getByText('Honda Civic')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
+    });
 
-    const backButton = screen.getByRole('button', { name: /back to catalog/i });
-    await user.click(backButton);
-
-    expect(mockOnBack).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Year 2020')).toBeInTheDocument();
   });
 
-
-  it('should display placeholder when car has no images', async () => {
-    const carWithoutImages = { ...mockCar, images: [] };
-    mockGetCarById.mockResolvedValue(carWithoutImages);
+  it('should display price correctly', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
-    await waitFor(() => expect(screen.getByText('Honda Civic')).toBeInTheDocument());
-
-    expect(screen.getByText('No image available')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/20,?000|20\.000/)).toBeInTheDocument();
+    });
   });
 
-  it('should display "Sold" badge and disable button when car is not available', async () => {
-    const unavailableCar = { ...mockCar, available: false };
-    mockGetCarById.mockResolvedValue(unavailableCar);
+  it('should show "Available" badge when car offer is available', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Available')).toBeInTheDocument();
+    });
+  });
+
+  it('should show "Sold" badge when car offer is not available', async () => {
+    const soldCarOffer = { ...mockCarOffer, available: false };
+    mockGetCarOfferById.mockResolvedValue(soldCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText('Sold')).toBeInTheDocument();
     });
-
-    const button = screen.getByRole('button', { name: /not available/i });
-    expect(button).toBeDisabled();
   });
 
-  it('should enable contact dealer button when car is available', async () => {
-    mockGetCarById.mockResolvedValue(mockCar);
+  it('should display fuel type', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
-    await waitFor(() => expect(screen.getByText('Contact Dealer')).toBeInTheDocument());
-
-    const button = screen.getByRole('button', { name: /contact dealer/i });
-    expect(button).not.toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByText('NAFTA')).toBeInTheDocument();
+    });
   });
 
-  it('should not display description section when car has no description', async () => {
-    const carWithoutDescription = { ...mockCar, description: undefined };
-    mockGetCarById.mockResolvedValue(carWithoutDescription);
+  it('should display transmission type', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
-    await waitFor(() => expect(screen.getByText('Honda Civic')).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText('MANUAL')).toBeInTheDocument();
+    });
+  });
+
+  it('should display car color', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('White')).toBeInTheDocument();
+    });
+  });
+
+  it('should display car description when available', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Great car in excellent condition')).toBeInTheDocument();
+    });
+  });
+
+  it('should not render description section when description is null', async () => {
+    const carOfferWithoutDescription = {
+      ...mockCarOffer,
+      car: { ...mockCar, description: undefined },
+    };
+    mockGetCarOfferById.mockResolvedValue(carOfferWithoutDescription);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
+    });
 
     expect(screen.queryByText('Description')).not.toBeInTheDocument();
   });
 
-  it('should call getCarById with correct carId and refetch when it changes', async () => {
-    mockGetCarById.mockResolvedValue(mockCar);
+  it('should display dealership notes when available', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Recently serviced, one owner')).toBeInTheDocument();
+    });
+  });
+
+  it('should display dealership information', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Premium Auto Dealers')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/Phone: 1234567890/i)).toBeInTheDocument();
+    expect(screen.getByText(/Email: contact@premiumauto.com/i)).toBeInTheDocument();
+    expect(screen.getByText(/Address: 123 Main St, Buenos Aires, Buenos Aires/i)).toBeInTheDocument();
+  });
+
+  it('should display car image when available', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      const image = screen.getByAltText('Toyota Corolla');
+      expect(image).toBeInTheDocument();
+      expect(image).toHaveAttribute('src', 'https://example.com/car1.jpg');
+    });
+  });
+
+  it('should display placeholder when no images available', async () => {
+    const carOfferWithoutImages = {
+      ...mockCarOffer,
+      car: { ...mockCar, images: [] },
+    };
+    mockGetCarOfferById.mockResolvedValue(carOfferWithoutImages);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('No image available')).toBeInTheDocument();
+    });
+  });
+
+  it('should call onBack when back button is clicked', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+    const user = userEvent.setup();
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
+    });
+
+    const backButton = screen.getByText('← Back to catalog');
+    await user.click(backButton);
+
+    expect(mockOnBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enable "Contact Dealer" button when car offer is available', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      const contactButton = screen.getByText('Contact Dealer');
+      expect(contactButton).not.toBeDisabled();
+    });
+  });
+
+  it('should disable "Contact Dealer" button when car offer is not available', async () => {
+    const soldCarOffer = { ...mockCarOffer, available: false };
+    mockGetCarOfferById.mockResolvedValue(soldCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      const contactButton = screen.getByText('Not available');
+      expect(contactButton).toBeDisabled();
+    });
+  });
+
+  it('should display offer date', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Offer Date:/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should display car offer ID', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('ID: #1')).toBeInTheDocument();
+    });
+  });
+
+  it('should call getCarOfferById with correct ID', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
+
+    render(
+      <CarDetail
+        carOfferId={123}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockGetCarOfferById).toHaveBeenCalledWith(123);
+    });
+  });
+
+  it('should refetch when carOfferId changes', async () => {
+    mockGetCarOfferById.mockResolvedValue(mockCarOffer);
 
     const { rerender } = render(
-      <CarDetail 
-        carId="456" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={1}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
     await waitFor(() => {
-      expect(mockGetCarById).toHaveBeenCalledWith('456');
+      expect(mockGetCarOfferById).toHaveBeenCalledWith(1);
     });
 
-    const newCar = { ...mockCar, id: 789, brand: 'Toyota', model: 'Corolla' };
-    mockGetCarById.mockResolvedValue(newCar);
+    const newCarOffer = { ...mockCarOffer, id: 2, carId: 2 };
+    mockGetCarOfferById.mockResolvedValue(newCarOffer);
 
     rerender(
-      <CarDetail 
-        carId="789" 
-        onBack={mockOnBack} 
-        getCarById={mockGetCarById} 
+      <CarDetail
+        carOfferId={2}
+        onBack={mockOnBack}
+        getCarOfferById={mockGetCarOfferById}
       />
     );
 
     await waitFor(() => {
-      expect(mockGetCarById).toHaveBeenCalledWith('789');
+      expect(mockGetCarOfferById).toHaveBeenCalledWith(2);
     });
-
-    expect(screen.getByText('Toyota Corolla')).toBeInTheDocument();
-    expect(mockGetCarById).toHaveBeenCalledTimes(2);
   });
 });

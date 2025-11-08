@@ -15,9 +15,7 @@ import java.time.LocalDateTime
 class PurchaseService(
     private val purchaseRepository: PurchaseRepository,
     private val carOfferService: CarOfferService,
-    private val carService: CarService,
     private val buyerService: BuyerService,
-    private val dealershipService: DealershipService,
 ) {
     fun findById(id: Long): Purchase {
         return purchaseRepository.findByIdOrNull(id)
@@ -32,12 +30,12 @@ class PurchaseService(
         return purchaseRepository.findByBuyerId(buyerId)
     }
 
-    fun findByCarId(carId: Long): Purchase {
-        return purchaseRepository.findByCarId(carId)
+    fun findByCarId(carId: Long): List<Purchase> {
+        return purchaseRepository.findByCarOfferCarId(carId)
     }
 
     fun findByDealershipId(dealershipId: Long): List<Purchase> {
-        return purchaseRepository.findByDealershipId(dealershipId)
+        return purchaseRepository.findByCarOfferDealershipId(dealershipId)
     }
 
     @Transactional
@@ -71,13 +69,15 @@ class PurchaseService(
     @Transactional
     fun deletePurchase(id: Long) {
         val purchase = findById(id)
+        purchase.carOffer.markAsAvailable()
+        carOfferService.save(purchase.carOffer)
         purchaseRepository.delete(purchase)
     }
 
     @Transactional
     fun markAsConfirmed(id: Long): Purchase {
         val purchase = findById(id)
-        purchase.confirmPurchase()
+        carOfferService.save(purchase.carOffer)
         return purchaseRepository.save(purchase)
     }
 
@@ -85,6 +85,10 @@ class PurchaseService(
     fun markAsPending(id: Long): Purchase {
         val purchase = findById(id)
         purchase.pendingPurchase()
+        if (!purchase.carOffer.available) {
+            purchase.carOffer.markAsSold()
+            carOfferService.save(purchase.carOffer)
+        }
         return purchaseRepository.save(purchase)
     }
 
@@ -92,6 +96,7 @@ class PurchaseService(
     fun markAsCanceled(id: Long): Purchase {
         val purchase = findById(id)
         purchase.cancelPurchase()
+        carOfferService.save(purchase.carOffer)
         return purchaseRepository.save(purchase)
     }
 
@@ -119,21 +124,17 @@ class PurchaseService(
     }
 
     private fun validateAndTransformPurchaseCreateRequest(request: PurchaseCreateRequest): Purchase {
-        val car = carService.findById(request.carId)
-        carOfferService.findByCarIdAndDealershipId(request.carId, request.dealershipId)
-            ?: throw IllegalArgumentException("Car ${request.carId} was not offered by dealership ${request.dealershipId}")
+        val carOffer = carOfferService.findById(request.carOfferId)
         val buyer = buyerService.findById(request.buyerId)
-        val dealership = dealershipService.findById(request.dealershipId)
 
-        require(car.available) { "Car ${car.id} is not available for purchase" }
+        require(carOffer.available) { "Car Offer ${carOffer.id} is not available for purchase" }
         require(buyer.isActive()) { "Buyer ${buyer.id} is not active" }
-        require(dealership.isActive()) { "Dealership ${dealership.id} is not active" }
+        require(carOffer.dealership.isActive()) { "Dealership ${carOffer.dealership.id} is not active" }
 
         val purchase =
             Purchase().apply {
-                this.buyerId = request.buyerId
-                this.car = car
-                this.dealership = dealership
+                this.buyer = buyer
+                this.carOffer = carOffer
                 this.finalPrice = request.finalPrice
                 this.paymentMethod = request.paymentMethod
                 this.observations = request.observations
