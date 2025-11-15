@@ -59,24 +59,23 @@ test.describe('Login Page', () => {
     expect(page.url()).toContain('/cars');
   });
 
-    test('should show error message for invalid credentials', async ({ page }) => {
-    await page.goto('/login');
-    await page.route('**/api/auth/login', async (route) => {
-      console.log('API route matched', route.request().url());
-      await route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify('Invalid credentials'),
-      });
+  test('should show error message with invalid credentials', async ({ page }) => {
+    // Listen to API responses
+    page.on('response', async (response) => {
+      if (response.url().includes('/auth/login')) {
+        console.log('Status:', response.status());
+        console.log('Body:', await response.text());
+      }
     });
 
-    await page.getByLabel('Email').fill('wrong@example.com');
-    await page.getByLabel('Password').fill('wrongpassword');
-    await page.getByRole('button', { name: 'Log In' }).click();
+    await page.goto('http://localhost:5173/login');
 
-    // Wait for the error to appear
+    await page.fill('input[name="email"]', 'invalid@example.com');
+    await page.fill('input[name="password"]', 'wrongpassword');
+    await page.click('button[type="submit"]');
+
     await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('alert')).toContainText('Invalid credentials');
+    await expect(page.getByRole('alert')).toContainText('Invalid email or password');
   });
 
   test('should show loading state during submission', async ({ page }) => {

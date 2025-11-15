@@ -10,10 +10,12 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
+import javax.naming.AuthenticationException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -64,6 +66,36 @@ class GlobalExceptionHandler {
                     status = 409,
                     error = "Conflict",
                     message = message,
+                    timestamp = LocalDateTime.now(),
+                    details = null,
+                ),
+            )
+    }
+
+    @ExceptionHandler(BadCredentialsException::class)
+    fun handleBadCredentials(ex: BadCredentialsException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(
+                ErrorResponse(
+                    status = 401,
+                    error = "Unauthorized",
+                    message = "Invalid email or password",
+                    timestamp = LocalDateTime.now(),
+                    details = null,
+                ),
+            )
+    }
+
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(
+                ErrorResponse(
+                    status = 401,
+                    error = "Unauthorized",
+                    message = "Authentication failed",
                     timestamp = LocalDateTime.now(),
                     details = null,
                 ),
