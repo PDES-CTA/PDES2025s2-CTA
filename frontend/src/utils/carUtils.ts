@@ -12,7 +12,7 @@ export const formatPrice = (price: number): string => {
 
 export const formatDate = (dateString: string | Date): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('es-AR', {
+  return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'

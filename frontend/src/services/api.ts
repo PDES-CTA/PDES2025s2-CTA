@@ -30,15 +30,14 @@ apiClient.interceptors.request.use(
 /* v8 ignore next 13 */
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<unknown>) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("authorization_token");
       if (globalThis.location.pathname !== '/login') {
         globalThis.location.href = "/login";
       }
     }
-    const message = error.response?.data || error.message;
-    return Promise.reject(new Error(typeof message === 'string' ? message : 'An error occurred'));
+    return Promise.reject(error);
   }
 );
 
@@ -57,6 +56,10 @@ interface RegisterData {
   phone: string;
   dni?: string;
   cuit?: string;
+  businessName?: string;
+  city?: string;
+  province?: string;
+  description?: string;
   role: 'BUYER' | 'DEALERSHIP';
 }
 
@@ -276,6 +279,11 @@ export const carService = {
 
 // ==================== BUYER SERVICE ====================
 export const buyerService = {
+  async createBuyer(buyerData: RegisterData): Promise<User> {
+    const response = await apiClient.post<User>("/buyer", buyerData);
+    return response.data;
+  },
+
   async getFavorites(): Promise<Favorite[]> {
     const response = await apiClient.get<Favorite[]>("/buyers/favorites");
     return response.data;
@@ -334,6 +342,11 @@ export const purchaseService = {
 
 // ==================== DEALERSHIP SERVICE ====================
 export const dealershipService = {
+  async createDealership(dealershipData: RegisterData): Promise<User[]> {
+    const response = await apiClient.post<User[]>("/dealerships", dealershipData);
+    return response.data;
+  },
+
   async getAllDealerships(): Promise<Dealership[]> {
     const response = await apiClient.get<Dealership[]>("/dealerships");
     return response.data;

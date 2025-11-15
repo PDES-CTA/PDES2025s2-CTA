@@ -3,7 +3,9 @@ package cta.web.controller
 import cta.web.dto.ErrorResponse
 import jakarta.persistence.EntityNotFoundException
 import jakarta.persistence.NoResultException
+import jakarta.validation.ConstraintViolationException
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -44,6 +46,50 @@ class GlobalExceptionHandler {
             )
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrityViolation(ex: DataIntegrityViolationException): ResponseEntity<ErrorResponse> {
+        val message =
+            when {
+                ex.message?.contains("cta_user_email_key") == true -> "duplicate key: this email is already registered"
+                ex.message?.contains("dni") == true -> "duplicate key: this dni is already registered"
+                else -> "duplicate key: a record with this information already exists"
+            }
+
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(
+                ErrorResponse(
+                    status = 409,
+                    error = "Conflict",
+                    message = message,
+                    timestamp = LocalDateTime.now(),
+                    details = null,
+                ),
+            )
+    }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolation(ex: ConstraintViolationException): ResponseEntity<ErrorResponse> {
+        val message =
+            when {
+                ex.message?.contains("cta_user_email_key") == true -> "duplicate key: this email is already registered"
+                ex.message?.contains("cuit") == true -> "duplicate key: this cuit is already registered"
+                else -> "duplicate key: a record with this information already exists"
+            }
+
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(
+                ErrorResponse(
+                    status = 409,
+                    error = "Conflict",
+                    message = message,
+                    timestamp = LocalDateTime.now(),
+                    details = null,
+                ),
+            )
     }
 
     // Bean validation errors

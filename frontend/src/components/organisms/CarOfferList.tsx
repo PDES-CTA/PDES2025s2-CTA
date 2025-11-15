@@ -31,7 +31,7 @@ export default function CarOfferList({
         <CarOfferCard
           key={offer.id}
           offer={offer}
-          onViewDetails={() => onViewDetails(offer.id)}
+          onViewDetails={() => onViewDetails(offer.car.id)}
           onEdit={onEdit ? () => onEdit(offer.id) : undefined}
           onDelete={onDelete ? () => onDelete(offer.id) : undefined}
         />

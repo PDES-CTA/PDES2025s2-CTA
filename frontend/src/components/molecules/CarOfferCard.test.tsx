@@ -140,7 +140,7 @@ describe('CarOfferCard', () => {
   it('should render offer date', () => {
     render(<CarOfferCard offer={mockOffer} onViewDetails={vi.fn()} />);
     expect(screen.getByText(/Offered date:/)).toBeInTheDocument();
-    expect(screen.getByText('2024-01-15T00:00:00')).toBeInTheDocument();
+    expect(screen.getByText('Jan 15, 2024')).toBeInTheDocument();
   });
 
   it('should render publication date', () => {

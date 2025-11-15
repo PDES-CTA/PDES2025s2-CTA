@@ -574,4 +574,743 @@ describe('useCarSearch', () => {
       expect(api.carService.getCarById).not.toHaveBeenCalled();
     });
   });
+
+    describe('Error handling', () => {
+    it('should handle error when fetching offers fails', async () => {
+      const errorMessage = 'Failed to fetch offers';
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockRejectedValue(new Error(errorMessage));
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers().catch(() => {});
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBe(errorMessage);
+        expect(result.current.displayCars).toEqual([]);
+      });
+    });
+
+    it('should handle error with axios response structure', async () => {
+      const errorMessage = 'Backend error message';
+      const axiosError = {
+        response: {
+          data: {
+            message: errorMessage,
+          },
+        },
+      };
+      vi.mocked(api.carService.getAllCars).mockRejectedValue(axiosError);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers().catch(() => {});
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(errorMessage);
+      });
+    });
+
+    it('should handle error without message', async () => {
+      vi.mocked(api.carService.getAllCars).mockRejectedValue({});
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers().catch(() => {});
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe('An unexpected error occurred');
+      });
+    });
+
+    it('should handle dealership fetch errors gracefully', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockRejectedValue(
+        new Error('Dealership not found')
+      );
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        // Should still succeed even if dealership fetch fails
+        expect(result.current.loading).toBe(false);
+        expect(result.current.displayCars).toHaveLength(3);
+        expect(result.current.error).toBe(null);
+      });
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle empty cars array', async () => {
+      vi.mocked(api.carService.getAllCars).mockResolvedValue([]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toEqual([]);
+        expect(result.current.loading).toBe(false);
+      });
+    });
+
+    it('should handle empty offers array', async () => {
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(3);
+        expect(result.current.displayCars.every(dc => dc.offers.length === 0)).toBe(true);
+      });
+    });
+
+    it('should handle offers without car reference', async () => {
+      const invalidOffer: CarOffer = {
+        id: 99,
+        price: 10000,
+        offerDate: '2024-01-01T00:00:00',
+        available: true,
+        car: undefined!,
+        dealership: mockDealership,
+      };
+
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([...mockCarOffers, invalidOffer]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(3);
+        expect(result.current.loading).toBe(false);
+      });
+    });
+
+    it('should handle offers without dealership reference', async () => {
+      const offerWithoutDealership: CarOffer = {
+        id: 99,
+        price: 10000,
+        offerDate: '2024-01-01T00:00:00',
+        available: true,
+        car: mockCars[0],
+        dealership: undefined!,
+      };
+
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([offerWithoutDealership]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(3);
+        expect(result.current.displayCars[0].offers).toHaveLength(1);
+      });
+    });
+
+    it('should handle car with multiple offers', async () => {
+      const extraOffer: CarOffer = {
+        id: 99,
+        price: 22000,
+        offerDate: '2024-01-16T00:00:00',
+        dealershipNotes: 'Second offer',
+        available: true,
+        car: mockCars[0],
+        dealership: mockDealership,
+      };
+
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([...mockCarOffers, extraOffer]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        const toyotaCar = result.current.displayCars.find(dc => dc.car.brand === 'Toyota');
+        expect(toyotaCar?.offers).toHaveLength(2);
+      });
+    });
+
+    it('should handle car without any fields except id', async () => {
+      const minimalCar: Car = {
+        id: 99,
+        brand: '',
+        model: '',
+        year: 2020,
+        fuelType: 'NAFTA',
+        transmission: 'MANUAL',
+        color: '',
+        publicationDate: '2024-01-01',
+      };
+
+      vi.mocked(api.carService.getAllCars).mockResolvedValue([minimalCar]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].car.id).toBe(99);
+      });
+    });
+  });
+
+  describe('Search functionality edge cases', () => {
+    it('should handle search with empty string filters', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(3);
+      });
+    });
+
+    it('should search by keyword in description', async () => {
+      const carWithDescription: Car = {
+        ...mockCars[0],
+        description: 'Excellent family vehicle',
+      };
+
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue([carWithDescription, ...mockCars.slice(1)]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'family',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].car.description).toContain('family');
+      });
+    });
+
+    it('should search by keyword in dealership notes', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'excellent',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].offers[0].dealershipNotes).toContain('Excellent');
+      });
+    });
+
+    it('should search by keyword in dealership business name', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'test dealership',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(3);
+      });
+    });
+
+    it('should be case insensitive for keyword search', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'TOYOTA',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].car.brand).toBe('Toyota');
+      });
+    });
+
+    it('should be case insensitive for brand search', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: 'toyota',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].car.brand).toBe('Toyota');
+      });
+    });
+
+    it('should filter by only minPrice', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '20000',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(2);
+        expect(result.current.displayCars.every(dc => dc.offers[0].price >= 20000)).toBe(true);
+      });
+    });
+
+    it('should filter by only maxPrice', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '',
+          maxPrice: '20000',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(2);
+        expect(result.current.displayCars.every(dc => dc.offers[0].price <= 20000)).toBe(true);
+      });
+    });
+
+    it('should filter by only minYear', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '2020',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(2);
+        expect(result.current.displayCars.every(dc => dc.car.year >= 2020)).toBe(true);
+      });
+    });
+
+    it('should filter by only maxYear', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: '',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '2020',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(2);
+        expect(result.current.displayCars.every(dc => dc.car.year <= 2020)).toBe(true);
+      });
+    });
+  });
+
+  describe('getDisplayCarById', () => {
+    it('should fetch car when not in cache', async () => {
+      // Create a fresh hook instance with empty cache
+      const { result } = renderHook(() => useCarSearch());
+      
+      // Clear the cache by setting empty display cars
+      act(() => {
+        result.current.setDisplayCars([]);
+      });
+    
+      vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([mockCarOffers[0]]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+    
+      let displayCar: DisplayCar | undefined;
+      await act(async () => {
+        displayCar = await result.current.getDisplayCarById(1);
+      });
+    
+      await waitFor(() => {
+        expect(displayCar).toBeDefined();
+        expect(displayCar?.car.id).toBe(1);
+        expect(api.carService.getCarById).toHaveBeenCalledWith(1);
+      });
+    });
+  
+    it('should handle string car id', async () => {
+      const { result } = renderHook(() => useCarSearch());
+      
+      // Clear the cache
+      act(() => {
+        result.current.setDisplayCars([]);
+      });
+    
+      vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([mockCarOffers[0]]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+    
+      let displayCar: DisplayCar | undefined;
+      await act(async () => {
+        displayCar = await result.current.getDisplayCarById('1');
+      });
+    
+      await waitFor(() => {
+        expect(displayCar).toBeDefined();
+        expect(displayCar?.car.id).toBe(1);
+      });
+    });
+  
+    it('should enrich offers with full dealership data', async () => {
+      const { result } = renderHook(() => useCarSearch());
+      
+      // Clear the cache
+      act(() => {
+        result.current.setDisplayCars([]);
+      });
+    
+      vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([mockCarOffers[0]]);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+    
+      let displayCar: DisplayCar | undefined;
+      await act(async () => {
+        displayCar = await result.current.getDisplayCarById(1);
+      });
+    
+      await waitFor(() => {
+        expect(displayCar?.offers[0].dealership).toEqual(mockDealership);
+      });
+    });
+  
+    it('should handle car with no offers', async () => {
+      const { result } = renderHook(() => useCarSearch());
+      
+      // Clear the cache
+      act(() => {
+        result.current.setDisplayCars([]);
+      });
+    
+      vi.mocked(api.carService.getCarById).mockResolvedValue(mockCars[0]);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue([]); // Empty array - no offers
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+    
+      let displayCar: DisplayCar | undefined;
+      await act(async () => {
+        displayCar = await result.current.getDisplayCarById(1);
+      });
+    
+      await waitFor(() => {
+        expect(displayCar).toBeDefined();
+        expect(displayCar?.offers).toHaveLength(0);
+      });
+    });
+  });
+
+  describe('State management', () => {
+    it('should clear error when making new request', async () => {
+      vi.mocked(api.carService.getAllCars).mockRejectedValueOnce(new Error('First error'));
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers().catch(() => {});
+      });
+
+      expect(result.current.error).toBe('First error');
+
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(null);
+      });
+    });
+
+    it('should update display cars when using setDisplayCars', () => {
+      const { result } = renderHook(() => useCarSearch());
+      
+      const customDisplayCars: DisplayCar[] = [
+        { car: mockCars[0], offers: [] },
+      ];
+
+      act(() => {
+        result.current.setDisplayCars(customDisplayCars);
+      });
+
+      expect(result.current.displayCars).toEqual(customDisplayCars);
+    });
+
+    it('should update cache when using setDisplayCars', async () => {
+      const { result } = renderHook(() => useCarSearch());
+      
+      const customDisplayCars: DisplayCar[] = [
+        { car: mockCars[0], offers: [mockCarOffers[0]] },
+      ];
+
+      act(() => {
+        result.current.setDisplayCars(customDisplayCars);
+      });
+
+      // Search should use the cached data
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'Toyota',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('Concurrent requests', () => {
+    it('should handle multiple search requests in sequence', async () => {
+      vi.mocked(api.carOfferService.getAll).mockResolvedValue(mockCarOffers);
+      vi.mocked(api.carService.getAllCars).mockResolvedValue(mockCars);
+      vi.mocked(api.dealershipService.getDealershipById).mockResolvedValue(mockDealership);
+
+      const { result } = renderHook(() => useCarSearch());
+
+      await act(async () => {
+        await result.current.fetchAllCarsAndOffers();
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'Toyota',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.searchCarsAndOffers({
+          keyword: 'Honda',
+          minPrice: '',
+          maxPrice: '',
+          minYear: '',
+          maxYear: '',
+          brand: '',
+          fuelType: '',
+          transmission: '',
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.displayCars).toHaveLength(1);
+        expect(result.current.displayCars[0].car.brand).toBe('Honda');
+      });
+    });
+  });
 });

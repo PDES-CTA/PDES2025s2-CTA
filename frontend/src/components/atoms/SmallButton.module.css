@@ -1,0 +1,71 @@
+.smallButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.smallButton:hover:not(.disabled) {
+  transform: translateY(-1px);
+}
+
+.smallButton:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.primary:hover:not(.disabled) {
+  background-color: var(--color-primary-dark, #2563eb);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.secondary {
+  background-color: white;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.secondary:hover:not(.disabled) {
+  background-color: var(--color-gray-50, #eff6ff);
+}
+
+.ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary, #6b7280);
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.ghost:hover:not(.disabled) {
+  background-color: var(--color-gray-50, #f9fafb);
+  border-color: var(--color-text-secondary, #9ca3af);
+}
+
+.danger {
+  background-color: #ff5151;
+  color: var(--color-text-secondary, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.danger:hover:not(.disabled) {
+  background-color: #e44242;
+  border-color: var(--color-text-secondary, #9ca3af);
+}
+
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
