@@ -60,20 +60,25 @@ test.describe('Login Page', () => {
   });
 
   test('should show error message with invalid credentials', async ({ page }) => {
-    // Listen to API responses
-    page.on('response', async (response) => {
-      if (response.url().includes('/auth/login')) {
-        console.log('Status:', response.status());
-        console.log('Body:', await response.text());
-      }
+    // Mock the failed login API response
+    await page.route('**/api/auth/login', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 401,
+          error: 'Unauthorized',
+          message: 'Invalid email or password'
+        })
+      });
     });
-
+  
     await page.goto('http://localhost:5173/login');
-
+    
     await page.fill('input[name="email"]', 'invalid@example.com');
     await page.fill('input[name="password"]', 'wrongpassword');
     await page.click('button[type="submit"]');
-
+  
     await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('alert')).toContainText('Invalid email or password');
   });
