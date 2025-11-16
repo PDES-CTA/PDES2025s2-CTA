@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { AxiosError } from 'axios';
 
 export const useAuthForm = () => {
   const [error, setError] = useState('');
@@ -21,7 +22,18 @@ export const useAuthForm = () => {
       setError('');
       await onSubmit(formData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      if (err instanceof AxiosError) {
+        // Try to get the error message from the response data
+        const errorMessage = err.response?.data?.message || 
+                            err.response?.data?.error ||
+                            err.message ||
+                            'An error occurred';
+        setError(errorMessage);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An error occurred');
+      }
     } finally {
       setLoading(false);
     }

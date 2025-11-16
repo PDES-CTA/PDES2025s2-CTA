@@ -105,14 +105,8 @@ class DataInitializer(
                 description = "New Corolla hybrid, designed to last longer"
                 images =
                     mutableListOf(
-                        "https://imgs.search.brave.com/h4Y7geBuDSmAKnjpJTjLwPPP_n2zup1wBBaLd_wkbYE/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90b3lv" +
-                            "dGFjYW5hZGEuc2Nl/bmU3LmNvbS9pcy9p" +
-                            "bWFnZS90b3lvdGFj/YW5hZGEvdG95b3Rh/LTIwMjUtZmVhdHVy" +
-                            "ZXMtY29yb2xsYS1o/eWJyaWQtd2hpdGUt/cEAyeA",
-                        "https://imgs.search.brave.com/yyBtU3fCRd3GHM2XrvGl-Jm1xlP3v3JiX0MMDSCWBA4/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zMy5h" +
-                            "bWF6b25hd3MuY29t/L2NrYS1kYXNoLzEx/MC0wNzI1LVRPTTIz/ODgzL21haW5pbWFn/ZS53ZWJw",
+                        "https://as1.ftcdn.net/v2/jpg/04/26/87/98/1000" +
+                            "_F_426879820_KNVE8ww5STlp4mQ6FpPbvQB1463mtFm4.jpg",
                     )
             }
 
@@ -128,9 +122,8 @@ class DataInitializer(
                     "Golf FTI, sport version, excellent performance and power delivery"
                 images =
                     mutableListOf(
-                        "https://imgs.search.brave.com/A5HFwsB9LnuqjHE2RgqF_Z6K9BEfYZp4I4D9lr7IBFg/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zMy5h" +
-                            "bWF6b25hd3MuY29t/L2NrYS1kYXNoLzA4/Ni0wNzI0LVZPUzI0/MDI5L3NsaWRlcjIu/d2VicA",
+                        "https://as1.ftcdn.net/v2/jpg/05/24/89/70/1000" +
+                            "_F_524897085_NtLPXHm2JJ7DzeY9Hivr0BIDvWgbyK3D.jpg",
                     )
             }
 
@@ -146,20 +139,8 @@ class DataInitializer(
                     "Our new 4WD off road for those drivers that love adventure"
                 images =
                     mutableListOf(
-                        "https://imgs.search.brave.com/u551AOvI4E0x1REDKLl4jfeUJj7TPf2kz3ohmCeUld4/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90b3Jx" +
-                            "dWVjYWZlLmItY2Ru/Lm5ldC93cC1jb250/ZW50L3VwbG9hZHMv/MjAyNS8wOC8yMDI2" +
-                            "LWZvcmQtcmFuZ2Vy/LWJsYWNrLWVkaXRp/b24tMy5qcGc",
-                        "https://imgs.search.brave.com/E2AD84FCjMUWIg8TkqunsDp4GNssHrlNr4xD9s47oEQ/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90b3Jx" +
-                            "dWVjYWZlLmItY2Ru/Lm5ldC93cC1jb250/ZW50L3VwbG9hZHMv/MjAyNS8wOC8yMDI2" +
-                            "LWZvcmQtcmFuZ2Vy/LWJsYWNrLWVkaXRp/b24tOC5qcGc",
-                        "https://imgs.search.brave.com/KzbyXUo23wy6VJb-Bcid_OEQJx_AkMb4E5IN6wrGbVY/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9mb3Jk" +
-                            "YXV0aG9yaXR5LmNv/bS93cC1jb250ZW50/L3VwbG9hZHMvMjAy" +
-                            "NC8xMi8yMDI1LUZv/cmQtUmFuZ2VyLWNv/bG9ycy1jb25maWd1" +
-                            "cmF0b3ItZXh0ZXJp/b3ItMDAyLWZyb250/LXRocmVlLXF1YXJ0" +
-                            "ZXJzLVNoYWRvdy1C/bGFjay03MjB4Mzk5/LmpwZw",
+                        "https://as1.ftcdn.net/v2/jpg/17/68/20/00/1000" +
+                            "_F_1768200084_OOMVcyW0ei2LiC85Jfh746e7nvLQ6TGV.jpg",
                     )
             }
 
@@ -187,13 +168,31 @@ class DataInitializer(
                     "Feel luxury and comfort with the last version of the classic Audi A3"
                 images =
                     mutableListOf(
-                        "https://imgs.search.brave.com/LQh36uMgigh-jvIopVDdzrLf9ZvGrlx_RE7uU4lpkCM/" +
-                            "rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zMy5h" +
-                            "bWF6b25hd3MuY29t/L2NrYS1kYXNoLzA0/NC0wODI0LUNBMTQ4/L21haW5pbWFnZS53/ZWJw",
+                        "https://as2.ftcdn.net/v2/jpg/03/66/35/39/1000" +
+                            "_F_366353937_jqUL1pi5OyOkQbXR6z49V8zRQMMU213c.jpg",
                     )
             }
 
-        carRepository.saveAll(listOf(car1, car2, car3, car4, car5))
+        val car6 =
+            Car().apply {
+                brand = "Nissan"
+                model = "Sentra"
+                year = 2025
+                color = "Grey"
+                fuelType = FuelType.GASOLINE
+                transmission = TransmissionType.AUTOMATIC
+                description =
+                    "Designed for adventure, choose your path"
+                images =
+                    mutableListOf(
+                        "https://as1.ftcdn.net/v2/jpg/05/25/72/40/1000" +
+                            "_F_525724063_Aa0er7MnuOryVn2BH1UAHyoLSK0Kfozq.jpg",
+                        "https://as1.ftcdn.net/v2/jpg/04/36/23/48/1000" +
+                            "_F_436234860_K9cTT8M9svBJsp8RWRAwQ0hBQCPNXiEh.jpg",
+                    )
+            }
+
+        carRepository.saveAll(listOf(car1, car2, car3, car4, car5, car6))
     }
 
     private fun initCarOffers() {

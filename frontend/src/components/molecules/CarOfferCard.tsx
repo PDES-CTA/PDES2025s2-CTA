@@ -1,7 +1,7 @@
 import { Image, Edit, Trash2 } from 'lucide-react';
 import { SyntheticEvent } from 'react';
 import { formatPrice, formatDate } from '../../utils/carUtils';
-import { Badge, Button } from '../atoms';
+import { Badge, SmallButton } from '../atoms';
 import { CarOffer } from '../../types/carOffer';
 import styles from './CarOfferCard.module.css';
 
@@ -73,7 +73,7 @@ export default function CarOfferCard({
 
         <div className={styles.stockInfo}>
           <span className={styles.stockLabel}>Offered date:</span>
-          <span className={styles.stockValue}>{offer.offerDate}</span>
+          <span className={styles.stockValue}>{formatDate(offer.offerDate)}</span>
         </div>
 
         {offer.dealershipNotes && (
@@ -85,32 +85,29 @@ export default function CarOfferCard({
             Published: {formatDate(car.publicationDate)}
           </span>
           <div className={styles.actions}>
-            <Button
+            <SmallButton
               onClick={onViewDetails}
               variant="primary"
-              size="sm"
             >
               View Details
-            </Button>
+            </SmallButton>
             {onEdit && (
-              <Button
+              <SmallButton
                 onClick={onEdit}
                 variant="secondary"
-                size="sm"
               >
                 <Edit size={16} />
                 Edit
-              </Button>
+              </SmallButton>
             )}
             {onDelete && (
-              <Button
+              <SmallButton
                 onClick={onDelete}
                 variant="danger"
-                size="sm"
               >
                 <Trash2 size={16} />
                 Delete
-              </Button>
+              </SmallButton>
             )}
           </div>
         </footer>

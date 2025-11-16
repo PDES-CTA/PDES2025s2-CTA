@@ -18,6 +18,7 @@ import CarDetailPage from './pages/CarDetailPage';
 
 import styles from './App.module.css';
 import DealershipOffersPage from './pages/DealershipOffersPage';
+import CarPoolPage from './pages/CarPoolPage';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path={ROUTES.CAR_POOL} element={<CarPoolPage/>} />
         <Route path={ROUTES.DEALERSHIP_OFFERS} element={<DealershipOffersPage />} />
         <Route path={ROUTES.DEALERSHIP_HOME} element={<DealershipHomePage />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage onLogin={checkAuth} />} />

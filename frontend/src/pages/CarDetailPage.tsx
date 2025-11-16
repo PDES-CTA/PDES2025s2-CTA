@@ -35,8 +35,12 @@ export default function CarDetailPage() {
         } else {
           setError(`Car with ID ${id} not found.`);
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load car details.');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Failed to load car details.');
+        }
       } finally {
         setLoading(false);
       }

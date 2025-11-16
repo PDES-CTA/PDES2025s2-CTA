@@ -83,6 +83,7 @@ export const ROUTES = {
   HOME: '/',
   DEALERSHIP_HOME: '/dealerships',
   DEALERSHIP_OFFERS: '/offers',
+  CAR_POOL: '/cars/pool',
   LOGIN: '/login',
   REGISTER: '/register',
   CARS: '/cars',
