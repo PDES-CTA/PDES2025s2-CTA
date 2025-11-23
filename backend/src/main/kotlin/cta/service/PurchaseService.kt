@@ -61,15 +61,22 @@ class PurchaseService(
 
     @Transactional
     fun createPurchase(purchaseCreateRequest: PurchaseCreateRequest): Purchase {
-        logger.info("Starting creation of Purchase - Buyer ID: {}, Car Offer ID: {}",
-            purchaseCreateRequest.buyerId, purchaseCreateRequest.carOfferId)
+        logger.info(
+            "Starting creation of Purchase - Buyer ID: {}, Car Offer ID: {}",
+            purchaseCreateRequest.buyerId,
+            purchaseCreateRequest.carOfferId,
+        )
 
         return try {
             val purchase = validateAndTransformPurchaseCreateRequest(purchaseCreateRequest)
             validatePurchase(purchase)
             val savedPurchase = purchaseRepository.save(purchase)
-            logger.info("Purchase created successfully with ID: {} - Buyer: {}, Car Offer: {}",
-                savedPurchase.id, purchaseCreateRequest.buyerId, purchaseCreateRequest.carOfferId)
+            logger.info(
+                "Purchase created successfully with ID: {} - Buyer: {}, Car Offer: {}",
+                savedPurchase.id,
+                purchaseCreateRequest.buyerId,
+                purchaseCreateRequest.carOfferId,
+            )
             savedPurchase
         } catch (ex: IllegalArgumentException) {
             logger.warn("Validation error when creating Purchase: {}", ex.message)

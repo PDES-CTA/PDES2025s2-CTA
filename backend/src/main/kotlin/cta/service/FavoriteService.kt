@@ -45,14 +45,21 @@ class FavoriteService(
 
     @Transactional
     fun saveFavorite(favoriteCarCreateRequest: FavoriteCarCreateRequest): FavoriteCar {
-        logger.info("Starting save of favorite car - Buyer ID: {}, Car ID: {}",
-            favoriteCarCreateRequest.buyerId, favoriteCarCreateRequest.carId)
+        logger.info(
+            "Starting save of favorite car - Buyer ID: {}, Car ID: {}",
+            favoriteCarCreateRequest.buyerId,
+            favoriteCarCreateRequest.carId,
+        )
 
         return try {
             val favoriteCar = validateAndTransformFavoriteRequest(favoriteCarCreateRequest)
             val savedFavorite = favoriteCarRepository.save(favoriteCar)
-            logger.info("Favorite car saved successfully with ID: {} - Buyer: {}, Car: {}",
-                savedFavorite.id, favoriteCarCreateRequest.buyerId, favoriteCarCreateRequest.carId)
+            logger.info(
+                "Favorite car saved successfully with ID: {} - Buyer: {}, Car: {}",
+                savedFavorite.id,
+                favoriteCarCreateRequest.buyerId,
+                favoriteCarCreateRequest.carId,
+            )
             savedFavorite
         } catch (ex: IllegalArgumentException) {
             logger.warn("Validation error when saving favorite car: {}", ex.message)

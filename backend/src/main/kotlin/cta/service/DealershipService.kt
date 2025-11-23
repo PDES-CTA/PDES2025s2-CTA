@@ -103,8 +103,12 @@ class DealershipService(
     }
 
     fun searchDealerships(filters: DealershipSearchFilters): List<Dealership> {
-        logger.info("Starting search for dealerships with filters - businessName: {}, city: {}, province: {}",
-            filters.businessName, filters.city, filters.province)
+        logger.info(
+            "Starting search for dealerships with filters - businessName: {}, city: {}, province: {}",
+            filters.businessName,
+            filters.city,
+            filters.province,
+        )
 
         return try {
             var dealerships = dealershipRepository.findByActiveTrue()

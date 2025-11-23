@@ -49,11 +49,12 @@ class BuyerService(
     ): Buyer {
         logger.info("Starting update of Buyer with ID: {}", id)
 
-        val buyer = buyerRepository.findByIdOrNull(id)
-            ?: run {
-                logger.warn("Attempt to update non-existent Buyer with ID: {}", id)
-                throw Exception("Buyer with ID $id not found")
-            }
+        val buyer =
+            buyerRepository.findByIdOrNull(id)
+                ?: run {
+                    logger.warn("Attempt to update non-existent Buyer with ID: {}", id)
+                    throw Exception("Buyer with ID $id not found")
+                }
 
         try {
             updateData["dni"]?.let { buyer.dni = it.toString().toInt() }
@@ -81,11 +82,12 @@ class BuyerService(
     fun deleteBuyer(id: Long) {
         logger.info("Starting deletion of Buyer with ID: {}", id)
 
-        val buyer = buyerRepository.findByIdOrNull(id)
-            ?: run {
-                logger.warn("Attempt to delete non-existent Buyer with ID: {}", id)
-                throw Exception("Buyer with ID $id not found")
-            }
+        val buyer =
+            buyerRepository.findByIdOrNull(id)
+                ?: run {
+                    logger.warn("Attempt to delete non-existent Buyer with ID: {}", id)
+                    throw Exception("Buyer with ID $id not found")
+                }
 
         try {
             buyerRepository.delete(buyer)

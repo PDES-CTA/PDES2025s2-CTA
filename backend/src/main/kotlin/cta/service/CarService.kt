@@ -100,33 +100,38 @@ class CarService(
     }
 
     fun searchCars(filters: CarSearchFilters): List<Car> {
-        logger.info("Starting search for Cars with filters - keyword: {}, brand: {}, fuelType: {}",
-            filters.keyword, filters.brand, filters.fuelType)
+        logger.info(
+            "Starting search for Cars with filters - keyword: {}, brand: {}, fuelType: {}",
+            filters.keyword,
+            filters.brand,
+            filters.fuelType,
+        )
 
         val allCars = carRepository.findAll()
 
-        val filteredCars = allCars.filter { car ->
-            val keywordMatch =
-                filters.keyword?.let {
-                    car.brand.contains(it, ignoreCase = true) ||
+        val filteredCars =
+            allCars.filter { car ->
+                val keywordMatch =
+                    filters.keyword?.let {
+                        car.brand.contains(it, ignoreCase = true) ||
                             car.model.contains(it, ignoreCase = true) ||
                             car.description?.contains(it, ignoreCase = true) ?: false
-                } ?: true
+                    } ?: true
 
-            val yearMatch =
-                (filters.minYear?.let { car.year >= it } ?: true) &&
+                val yearMatch =
+                    (filters.minYear?.let { car.year >= it } ?: true) &&
                         (filters.maxYear?.let { car.year <= it } ?: true)
 
-            val brandMatch =
-                filters.brand?.let {
-                    car.brand.equals(it, ignoreCase = true)
-                } ?: true
+                val brandMatch =
+                    filters.brand?.let {
+                        car.brand.equals(it, ignoreCase = true)
+                    } ?: true
 
-            val fuelMatch = filters.fuelType?.let { it == car.fuelType } ?: true
-            val transMatch = filters.transmission?.let { it == car.transmission } ?: true
+                val fuelMatch = filters.fuelType?.let { it == car.fuelType } ?: true
+                val transMatch = filters.transmission?.let { it == car.transmission } ?: true
 
-            keywordMatch && yearMatch && brandMatch && fuelMatch && transMatch
-        }
+                keywordMatch && yearMatch && brandMatch && fuelMatch && transMatch
+            }
 
         logger.info("Car search completed. Found {} cars matching filters", filteredCars.size)
         return filteredCars

@@ -34,8 +34,11 @@ class FavoriteController(
     fun saveFavorite(
         @Valid @RequestBody request: FavoriteCarCreateRequest,
     ): ResponseEntity<FavoriteCarResponse> {
-        logger.info("POST /api/favorite - Save favorite car request - Buyer ID: {}, Car ID: {}",
-            request.buyerId, request.carId)
+        logger.info(
+            "POST /api/favorite - Save favorite car request - Buyer ID: {}, Car ID: {}",
+            request.buyerId,
+            request.carId,
+        )
 
         return try {
             val favorite = favoriteService.saveFavorite(request)
