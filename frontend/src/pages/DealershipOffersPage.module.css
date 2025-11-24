@@ -1,0 +1,121 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--color-background, #f9fafb);
+  padding: 32px 24px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dealershipInfo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dealershipIcon {
+  color: var(--color-primary, #3b82f6);
+  flex-shrink: 0;
+}
+
+.dealershipText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dealershipName {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.dealershipDescription {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 500px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.emptyStateContent {
+  text-align: center;
+  max-width: 400px;
+  padding: 40px;
+}
+
+.emptyStateIcon {
+  color: var(--color-text-tertiary, #d1d5db);
+  margin-bottom: 24px;
+}
+
+.emptyStateTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0 0 12px 0;
+}
+
+.emptyStateText {
+  font-size: 15px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0 0 28px 0;
+  line-height: 1.6;
+}
+
+.content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+}
+
+.contentHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.contentTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin: 0 0 4px 0;
+}
+
+.contentSubtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+}

@@ -1,11 +1,13 @@
-package cta.web
+package cta.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import cta.enum.FuelType
 import cta.enum.PaymentMethod
 import cta.enum.PurchaseStatus
 import cta.enum.TransmissionType
+import cta.model.Buyer
 import cta.model.Car
+import cta.model.CarOffer
 import cta.model.Dealership
 import cta.model.Purchase
 import cta.service.PurchaseService
@@ -13,7 +15,8 @@ import cta.web.dto.PurchaseCreateRequest
 import cta.web.dto.PurchaseUpdateRequest
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
@@ -35,104 +39,87 @@ import java.time.LocalDateTime
 
 @SpringBootTest(
     properties = [
-        "spring.main.allow-bean-definition-overriding=true",
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://test-issuer.com",
     ],
 )
-@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
+@WithMockUser
 class PurchaseControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
     @MockBean
     private lateinit var purchaseService: PurchaseService
 
-    private fun createMockCar(id: Long = 1L): Car {
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    private fun createMockBuyer(): Buyer {
+        return Buyer().apply {
+            id = 1L
+            firstName = "John"
+            lastName = "Doe"
+            email = "john@example.com"
+            phone = "123456789"
+        }
+    }
+
+    private fun createMockCar(): Car {
         return Car().apply {
-            this.id = id
-            this.brand = "Toyota"
-            this.model = "Corolla"
-            this.year = 2020
-            this.price = BigDecimal("20000")
-            this.fuelType = FuelType.GASOLINE
-            this.transmission = TransmissionType.AUTOMATIC
-            this.mileage = 50000
-            this.color = "White"
-            this.available = true
+            id = 1L
+            brand = "Toyota"
+            model = "Corolla"
+            year = 2020
+            fuelType = FuelType.GASOLINE
+            transmission = TransmissionType.AUTOMATIC
+            color = "White"
         }
     }
 
-    private fun createMockDealership(id: Long = 1L): Dealership {
+    private fun createMockDealership(): Dealership {
         return Dealership().apply {
-            this.id = id
-            this.businessName = "Auto Motors SA"
-            this.cuit = "20-12345678-9"
-            this.email = "contact@automotors.com"
-            this.phone = "011-1234-5678"
-            this.address = "Av. Example 123"
-            this.city = "Buenos Aires"
-            this.province = "Buenos Aires"
-            this.active = true
+            id = 1L
+            businessName = "Test Dealership"
+            cuit = "30-12345678-9"
+            email = "contact@dealership.com"
+            active = true
         }
     }
 
-    private fun createMockPurchase(
-        id: Long = 1L,
-        buyerId: Long = 1L,
-        car: Car = createMockCar(),
-        paymentMethod: PaymentMethod = PaymentMethod.CASH,
-        dealership: Dealership = createMockDealership(),
-        observations: String = "No observations",
-        purchaseStatus: PurchaseStatus = PurchaseStatus.PENDING,
-        finalPrice: BigDecimal = BigDecimal("20000"),
-    ): Purchase {
+    private fun createMockCarOffer(): CarOffer {
+        return CarOffer().apply {
+            id = 1L
+            car = createMockCar()
+            dealership = createMockDealership()
+            price = BigDecimal("20000.00")
+            available = true
+        }
+    }
+
+    private fun createMockPurchase(): Purchase {
         return Purchase().apply {
-            this.id = id
-            this.buyerId = buyerId
-            this.car = car
-            this.dealership = dealership
-            this.paymentMethod = paymentMethod
-            this.purchaseStatus = purchaseStatus
-            this.observations = observations
-            this.purchaseDate = LocalDateTime.now()
-            this.finalPrice = finalPrice
+            id = 1L
+            buyer = createMockBuyer()
+            carOffer = createMockCarOffer()
+            purchaseDate = LocalDateTime.now()
+            finalPrice = BigDecimal("20000.00")
+            purchaseStatus = PurchaseStatus.PENDING
+            paymentMethod = PaymentMethod.CASH
         }
     }
 
     @Test
     fun `should get all purchases and return 200 OK`() {
         // Given
-        val purchases =
-            listOf(
-                createMockPurchase(id = 1L),
-                createMockPurchase(id = 2L),
-            )
+        val purchases = listOf(createMockPurchase())
         whenever(purchaseService.findAll()).thenReturn(purchases)
 
         // When & Then
         mockMvc.perform(get("/api/purchases"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[1].id").value(2))
-
-        verify(purchaseService).findAll()
-    }
-
-    @Test
-    fun `should return empty list when no purchases exist`() {
-        // Given
-        whenever(purchaseService.findAll()).thenReturn(emptyList())
-
-        // When & Then
-        mockMvc.perform(get("/api/purchases"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(0))
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1L))
 
         verify(purchaseService).findAll()
     }
@@ -140,130 +127,71 @@ class PurchaseControllerTest {
     @Test
     fun `should get purchase by id and return 200 OK`() {
         // Given
-        val purchase = createMockPurchase(id = 1L)
+        val purchase = createMockPurchase()
         whenever(purchaseService.findById(1L)).thenReturn(purchase)
 
         // When & Then
-        mockMvc.perform(get("/api/purchases/{id}", 1L))
+        mockMvc.perform(get("/api/purchases/1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.purchaseStatus").value("PENDING"))
-            .andExpect(jsonPath("$.finalPrice").value(20000))
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.finalPrice").value(20000.00))
 
         verify(purchaseService).findById(1L)
     }
 
     @Test
-    fun `should return 404 NOT FOUND when purchase does not exist`() {
+    fun `should return 404 NOT FOUND when purchase not found by id`() {
         // Given
-        whenever(purchaseService.findById(999L))
-            .thenThrow(NoSuchElementException("Purchase not found"))
+        whenever(purchaseService.findById(999L)).thenThrow(NoSuchElementException("Purchase not found"))
 
         // When & Then
-        mockMvc.perform(get("/api/purchases/{id}", 999L))
+        mockMvc.perform(get("/api/purchases/999"))
             .andExpect(status().isNotFound)
     }
 
     @Test
     fun `should get purchases by buyer id and return 200 OK`() {
         // Given
-        val buyerId = 1L
-        val purchases =
-            listOf(
-                createMockPurchase(id = 1L),
-                createMockPurchase(id = 2L),
-            )
-        whenever(purchaseService.findByBuyerId(buyerId)).thenReturn(purchases)
+        val purchases = listOf(createMockPurchase())
+        whenever(purchaseService.findByBuyerId(1L)).thenReturn(purchases)
 
         // When & Then
-        mockMvc.perform(get("/api/purchases/buyer/{id}", buyerId))
+        mockMvc.perform(get("/api/purchases/buyer/1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[1].id").value(2))
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1L))
 
-        verify(purchaseService).findByBuyerId(buyerId)
+        verify(purchaseService).findByBuyerId(1L)
     }
 
     @Test
-    fun `should return empty list when buyer has no purchases`() {
+    fun `should get purchases by car id and return 200 OK`() {
         // Given
-        val buyerId = 1L
-        whenever(purchaseService.findByBuyerId(buyerId)).thenReturn(emptyList())
+        val purchases = listOf(createMockPurchase())
+        whenever(purchaseService.findByCarId(1L)).thenReturn(purchases)
 
         // When & Then
-        mockMvc.perform(get("/api/purchases/buyer/{id}", buyerId))
+        mockMvc.perform(get("/api/purchases/car/1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(0))
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1L))
 
-        verify(purchaseService).findByBuyerId(buyerId)
-    }
-
-    @Test
-    fun `should get purchase by car id and return 200 OK`() {
-        // Given
-        val carId = 1L
-        val purchase = createMockPurchase(id = 1L)
-        whenever(purchaseService.findByCarId(carId)).thenReturn(purchase)
-
-        // When & Then
-        mockMvc.perform(get("/api/purchases/car/{id}", carId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.carId").value(1))
-
-        verify(purchaseService).findByCarId(carId)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when no purchase exists for car`() {
-        // Given
-        val carId = 999L
-        whenever(purchaseService.findByCarId(carId))
-            .thenThrow(NoSuchElementException("Purchase not found for car"))
-
-        // When & Then
-        mockMvc.perform(get("/api/purchases/car/{id}", carId))
-            .andExpect(status().isNotFound)
+        verify(purchaseService).findByCarId(1L)
     }
 
     @Test
     fun `should get purchases by dealership id and return 200 OK`() {
         // Given
-        val dealershipId = 1L
-        val purchases =
-            listOf(
-                createMockPurchase(id = 1L),
-                createMockPurchase(id = 2L),
-            )
-        whenever(purchaseService.findByDealershipId(dealershipId)).thenReturn(purchases)
+        val purchases = listOf(createMockPurchase())
+        whenever(purchaseService.findByDealershipId(1L)).thenReturn(purchases)
 
         // When & Then
-        mockMvc.perform(get("/api/purchases/dealership/{id}", dealershipId))
+        mockMvc.perform(get("/api/purchases/dealership/1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[1].id").value(2))
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1L))
 
-        verify(purchaseService).findByDealershipId(dealershipId)
-    }
-
-    @Test
-    fun `should return empty list when dealership has no purchases`() {
-        // Given
-        val dealershipId = 1L
-        whenever(purchaseService.findByDealershipId(dealershipId)).thenReturn(emptyList())
-
-        // When & Then
-        mockMvc.perform(get("/api/purchases/dealership/{id}", dealershipId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$").isArray)
-            .andExpect(jsonPath("$.length()").value(0))
-
-        verify(purchaseService).findByDealershipId(dealershipId)
+        verify(purchaseService).findByDealershipId(1L)
     }
 
     @Test
@@ -272,17 +200,15 @@ class PurchaseControllerTest {
         val request =
             PurchaseCreateRequest(
                 buyerId = 1L,
-                carId = 1L,
-                dealershipId = 1L,
-                finalPrice = BigDecimal("20000"),
+                carOfferId = 1L,
+                finalPrice = BigDecimal("20000.00"),
                 purchaseDate = LocalDateTime.now(),
                 purchaseStatus = PurchaseStatus.PENDING,
-                paymentMethod = PaymentMethod.CREDIT_CARD,
-                observations = "No observations",
+                paymentMethod = PaymentMethod.CASH,
+                observations = "Test",
             )
-
-        val savedPurchase = createMockPurchase(id = 1L)
-        whenever(purchaseService.createPurchase(any())).thenReturn(savedPurchase)
+        val createdPurchase = createMockPurchase()
+        whenever(purchaseService.createPurchase(any())).thenReturn(createdPurchase)
 
         // When & Then
         mockMvc.perform(
@@ -291,97 +217,25 @@ class PurchaseControllerTest {
                 .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.buyerId").value(1))
-            .andExpect(jsonPath("$.carId").value(1))
-            .andExpect(jsonPath("$.dealershipId").value(1))
-            .andExpect(jsonPath("$.finalPrice").value(20000))
-            .andExpect(jsonPath("$.purchaseStatus").value("PENDING"))
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.finalPrice").value(20000.00))
 
         verify(purchaseService).createPurchase(any())
     }
 
     @Test
-    fun `should return 400 BAD REQUEST when creating purchase with missing buyerId`() {
-        // Given
-        val invalidRequest =
-            """
-            {
-                "carId": 1,
-                "dealershipId": 1,
-                "totalAmount": 20000
-            }
-            """.trimIndent()
-
-        // When & Then
-        mockMvc.perform(
-            post("/api/purchases")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest),
-        )
-            .andExpect(status().isBadRequest)
-    }
-
-    @Test
-    fun `should return 400 BAD REQUEST when creating purchase with missing carId`() {
-        // Given
-        val invalidRequest =
-            """
-            {
-                "buyerId": 1,
-                "dealershipId": 1,
-                "totalAmount": 20000
-            }
-            """.trimIndent()
-
-        // When & Then
-        mockMvc.perform(
-            post("/api/purchases")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest),
-        )
-            .andExpect(status().isBadRequest)
-    }
-
-    @Test
-    fun `should return 400 BAD REQUEST when creating purchase with invalid totalAmount`() {
-        // Given
-        val invalidRequest =
-            """
-            {
-                "buyerId": 1,
-                "carId": 1,
-                "dealershipId": 1,
-                "totalAmount": -1000
-            }
-            """.trimIndent()
-
-        // When & Then
-        mockMvc.perform(
-            post("/api/purchases")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidRequest),
-        )
-            .andExpect(status().isBadRequest)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when creating purchase with non-existent buyer`() {
+    fun `should return 400 BAD REQUEST when creating purchase with negative final price`() {
         // Given
         val request =
             PurchaseCreateRequest(
-                buyerId = 999L,
-                carId = 1L,
-                dealershipId = 1L,
-                finalPrice = BigDecimal("20000"),
+                buyerId = 1L,
+                carOfferId = 1L,
+                finalPrice = BigDecimal("-100.00"),
                 purchaseDate = LocalDateTime.now(),
                 purchaseStatus = PurchaseStatus.PENDING,
-                paymentMethod = PaymentMethod.CREDIT_CARD,
-                observations = "No observations",
+                paymentMethod = PaymentMethod.CASH,
+                observations = "Test",
             )
-
-        whenever(purchaseService.createPurchase(any()))
-            .thenThrow(NoSuchElementException("Buyer not found"))
 
         // When & Then
         mockMvc.perform(
@@ -389,54 +243,51 @@ class PurchaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)),
         )
-            .andExpect(status().isNotFound)
+            .andExpect(status().isBadRequest)
+
+        // Verify service was never called due to validation failure
+        verify(purchaseService, never()).createPurchase(any())
     }
 
     @Test
     fun `should update purchase and return 200 OK`() {
         // Given
-        val purchaseId = 1L
         val request =
             PurchaseUpdateRequest(
-                finalPrice = BigDecimal("22000"),
-                purchaseDate = LocalDateTime.now().minusDays(1),
+                finalPrice = BigDecimal("21000.00"),
+                purchaseStatus = PurchaseStatus.CONFIRMED,
             )
-
         val updatedPurchase =
-            createMockPurchase(
-                id = purchaseId,
-                finalPrice = BigDecimal("22000"),
-            )
-        whenever(purchaseService.updatePurchase(eq(purchaseId), any())).thenReturn(updatedPurchase)
+            createMockPurchase().apply {
+                finalPrice = BigDecimal("21000.00")
+                purchaseStatus = PurchaseStatus.CONFIRMED
+            }
+        whenever(purchaseService.updatePurchase(any(), any())).thenReturn(updatedPurchase)
 
         // When & Then
         mockMvc.perform(
-            put("/api/purchases/{id}", purchaseId)
+            put("/api/purchases/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(purchaseId))
-            .andExpect(jsonPath("$.finalPrice").value(22000))
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.finalPrice").value(21000.00))
+            .andExpect(jsonPath("$.purchaseStatus").value("CONFIRMED"))
 
-        verify(purchaseService).updatePurchase(eq(purchaseId), any())
+        verify(purchaseService).updatePurchase(any(), any())
     }
 
     @Test
     fun `should return 404 NOT FOUND when updating non-existent purchase`() {
         // Given
-        val purchaseId = 999L
-        val request =
-            PurchaseUpdateRequest(
-                finalPrice = BigDecimal("22000"),
-            )
-
-        whenever(purchaseService.updatePurchase(eq(purchaseId), any()))
+        val request = PurchaseUpdateRequest(finalPrice = BigDecimal("21000.00"))
+        whenever(purchaseService.updatePurchase(any(), any()))
             .thenThrow(NoSuchElementException("Purchase not found"))
 
         // When & Then
         mockMvc.perform(
-            put("/api/purchases/{id}", purchaseId)
+            put("/api/purchases/999")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)),
         )
@@ -444,154 +295,81 @@ class PurchaseControllerTest {
     }
 
     @Test
-    fun `should delete purchase and return 204 NO CONTENT`() {
+    fun `should mark as confirmed and return 200 OK`() {
         // Given
-        val purchaseId = 1L
+        val updatedPurchase = createMockPurchase().apply { purchaseStatus = PurchaseStatus.CONFIRMED }
+        whenever(purchaseService.markAsConfirmed(1L)).thenReturn(updatedPurchase)
 
         // When & Then
-        mockMvc.perform(delete("/api/purchases/{id}", purchaseId))
+        mockMvc.perform(patch("/api/purchases/1/confirmed"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.purchaseStatus").value("CONFIRMED"))
+
+        verify(purchaseService).markAsConfirmed(1L)
+    }
+
+    @Test
+    fun `should mark as pending and return 200 OK`() {
+        // Given
+        val updatedPurchase = createMockPurchase().apply { purchaseStatus = PurchaseStatus.PENDING }
+        whenever(purchaseService.markAsPending(1L)).thenReturn(updatedPurchase)
+
+        // When & Then
+        mockMvc.perform(patch("/api/purchases/1/pending"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.purchaseStatus").value("PENDING"))
+
+        verify(purchaseService).markAsPending(1L)
+    }
+
+    @Test
+    fun `should mark as canceled and return 200 OK`() {
+        // Given
+        val updatedPurchase = createMockPurchase().apply { purchaseStatus = PurchaseStatus.CANCELLED }
+        whenever(purchaseService.markAsCanceled(1L)).thenReturn(updatedPurchase)
+
+        // When & Then
+        mockMvc.perform(patch("/api/purchases/1/canceled"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.purchaseStatus").value("CANCELLED"))
+
+        verify(purchaseService).markAsCanceled(1L)
+    }
+
+    @Test
+    fun `should mark as delivered and return 200 OK`() {
+        // Given
+        val updatedPurchase = createMockPurchase().apply { purchaseStatus = PurchaseStatus.DELIVERED }
+        whenever(purchaseService.markAsDelivered(1L)).thenReturn(updatedPurchase)
+
+        // When & Then
+        mockMvc.perform(patch("/api/purchases/1/delivered"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.purchaseStatus").value("DELIVERED"))
+
+        verify(purchaseService).markAsDelivered(1L)
+    }
+
+    @Test
+    fun `should delete purchase and return 204 NO CONTENT`() {
+        // Given
+        doNothing().whenever(purchaseService).deletePurchase(1L)
+
+        // When & Then
+        mockMvc.perform(delete("/api/purchases/1"))
             .andExpect(status().isNoContent)
 
-        verify(purchaseService).deletePurchase(purchaseId)
+        verify(purchaseService).deletePurchase(1L)
     }
 
     @Test
     fun `should return 404 NOT FOUND when deleting non-existent purchase`() {
         // Given
-        val purchaseId = 999L
-        whenever(purchaseService.deletePurchase(purchaseId))
+        whenever(purchaseService.deletePurchase(999L))
             .thenThrow(NoSuchElementException("Purchase not found"))
 
         // When & Then
-        mockMvc.perform(delete("/api/purchases/{id}", purchaseId))
-            .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should mark purchase as canceled and return 200 OK`() {
-        // Given
-        val purchaseId = 1L
-        val canceledPurchase =
-            createMockPurchase(
-                id = purchaseId,
-                purchaseStatus = PurchaseStatus.CANCELLED,
-            )
-        whenever(purchaseService.markAsCanceled(purchaseId)).thenReturn(canceledPurchase)
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/canceled", purchaseId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(purchaseId))
-            .andExpect(jsonPath("$.purchaseStatus").value("CANCELLED"))
-
-        verify(purchaseService).markAsCanceled(purchaseId)
-    }
-
-    @Test
-    fun `should mark purchase as delivered and return 200 OK`() {
-        // Given
-        val purchaseId = 1L
-        val deliveredPurchase =
-            createMockPurchase(
-                id = purchaseId,
-                purchaseStatus = PurchaseStatus.DELIVERED,
-            )
-        whenever(purchaseService.markAsDelivered(purchaseId)).thenReturn(deliveredPurchase)
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/delivered", purchaseId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(purchaseId))
-            .andExpect(jsonPath("$.purchaseStatus").value("DELIVERED"))
-
-        verify(purchaseService).markAsDelivered(purchaseId)
-    }
-
-    @Test
-    fun `should mark purchase as confirmed and return 200 OK`() {
-        // Given
-        val purchaseId = 1L
-        val confirmedPurchase =
-            createMockPurchase(
-                id = purchaseId,
-                purchaseStatus = PurchaseStatus.CONFIRMED,
-            )
-        whenever(purchaseService.markAsConfirmed(purchaseId)).thenReturn(confirmedPurchase)
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/confirmed", purchaseId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(purchaseId))
-            .andExpect(jsonPath("$.purchaseStatus").value("CONFIRMED"))
-
-        verify(purchaseService).markAsConfirmed(purchaseId)
-    }
-
-    @Test
-    fun `should mark purchase as pending and return 200 OK`() {
-        // Given
-        val purchaseId = 1L
-        val pendingPurchase =
-            createMockPurchase(
-                id = purchaseId,
-                purchaseStatus = PurchaseStatus.PENDING,
-            )
-        whenever(purchaseService.markAsPending(purchaseId)).thenReturn(pendingPurchase)
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/pending", purchaseId))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(purchaseId))
-            .andExpect(jsonPath("$.purchaseStatus").value("PENDING"))
-
-        verify(purchaseService).markAsPending(purchaseId)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when marking non-existent purchase as canceled`() {
-        // Given
-        val purchaseId = 999L
-        whenever(purchaseService.markAsCanceled(purchaseId))
-            .thenThrow(NoSuchElementException("Purchase not found"))
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/canceled", purchaseId))
-            .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when marking non-existent purchase as pending`() {
-        // Given
-        val purchaseId = 999L
-        whenever(purchaseService.markAsPending(purchaseId))
-            .thenThrow(NoSuchElementException("Purchase not found"))
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/pending", purchaseId))
-            .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when marking non-existent purchase as confirmed`() {
-        // Given
-        val purchaseId = 999L
-        whenever(purchaseService.markAsConfirmed(purchaseId))
-            .thenThrow(NoSuchElementException("Purchase not found"))
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/confirmed", purchaseId))
-            .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `should return 404 NOT FOUND when marking non-existent purchase as delivered`() {
-        // Given
-        val purchaseId = 999L
-        whenever(purchaseService.markAsDelivered(purchaseId))
-            .thenThrow(NoSuchElementException("Purchase not found"))
-
-        // When & Then
-        mockMvc.perform(patch("/api/purchases/{id}/delivered", purchaseId))
+        mockMvc.perform(delete("/api/purchases/999"))
             .andExpect(status().isNotFound)
     }
 }

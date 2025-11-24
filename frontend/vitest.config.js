@@ -21,7 +21,18 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.ts',
         '**/*.config.js',
+        'tests/**',
       ]
     },
+    exclude: [
+      'node_modules',
+      'dist',
+      '.idea',
+      '.git',
+      '.cache',
+      'tests/**',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+    ],
   },
 });

@@ -53,12 +53,12 @@ class PurchaseController(
     }
 
     @GetMapping("/car/{id}")
-    @Operation(summary = "Get a purchase by car id")
+    @Operation(summary = "Get purchases by car id")
     fun getPurchaseByCarId(
         @PathVariable id: Long,
-    ): ResponseEntity<PurchaseResponse> {
-        val purchase = purchaseService.findByCarId(id)
-        return ResponseEntity.ok(PurchaseResponse.fromEntity(purchase))
+    ): ResponseEntity<List<PurchaseResponse>> {
+        val purchases = purchaseService.findByCarId(id)
+        return ResponseEntity.ok(purchases.map { PurchaseResponse.fromEntity(it) })
     }
 
     @GetMapping("/dealership/{id}")

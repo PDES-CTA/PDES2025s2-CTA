@@ -327,7 +327,7 @@ class BuyerServiceTest {
             assertThrows(Exception::class.java) {
                 buyerService.updateBuyer(999L, updates)
             }
-        assertEquals("Favorite car with ID 999 not found", exception.message)
+        assertEquals("Buyer with ID 999 not found", exception.message)
         verify(buyerRepository, never()).save(any(Buyer::class.java))
     }
 
@@ -393,7 +393,7 @@ class BuyerServiceTest {
             assertThrows(Exception::class.java) {
                 buyerService.deleteBuyer(999L)
             }
-        assertEquals("Favorite car with ID 999 not found", exception.message)
+        assertEquals("Buyer with ID 999 not found", exception.message)
         verify(buyerRepository, never()).delete(any(Buyer::class.java))
     }
 

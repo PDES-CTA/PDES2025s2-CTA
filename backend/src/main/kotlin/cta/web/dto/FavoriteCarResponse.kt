@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 data class FavoriteCarResponse(
     @field:Schema(description = "Unique identifier for the favorite car")
     val id: Long?,
-    @field:Schema(description = "Car ID that was selected as favorite")
-    val carId: Long?,
-    @field:Schema(description = "Buyer ID that selected the favorite car")
-    val buyerId: Long?,
+    @field:Schema(description = "Car that was selected as favorite")
+    val car: CarResponse,
+    @field:Schema(description = "Buyer that selected the favorite car")
+    val buyer: BuyerResponse,
     @field:Schema(description = "Date of favorite car creation")
     val dateAdded: LocalDateTime,
     @field:Schema(description = "Rating of the car provided by the buyer")
@@ -25,8 +25,8 @@ data class FavoriteCarResponse(
         fun fromEntity(favorite: FavoriteCar): FavoriteCarResponse {
             return FavoriteCarResponse(
                 id = favorite.id,
-                carId = favorite.car.id,
-                buyerId = favorite.buyer.id,
+                car = CarResponse.fromEntity(favorite.car),
+                buyer = BuyerResponse.fromEntity(favorite.buyer),
                 dateAdded = favorite.dateAdded,
                 rating = favorite.rating,
                 comment = favorite.comment,

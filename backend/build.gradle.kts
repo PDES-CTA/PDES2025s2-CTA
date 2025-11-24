@@ -49,6 +49,13 @@ dependencies {
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
     implementation("org.hibernate.validator:hibernate-validator:$hibernateValidatorVersion")
 
+    implementation("ch.qos.logback:logback-classic")
+    implementation("ch.qos.logback:logback-core")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
+    // Metrics and Monitoring
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     runtimeOnly("org.postgresql:postgresql")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")

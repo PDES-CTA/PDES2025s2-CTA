@@ -55,12 +55,16 @@ class SecurityConfig(
                     .requestMatchers(
                         "/api/auth/**",
                         "/api/auth/login",
+                        "/api/buyer",
+                        "/api/dealerships",
                         "/api/auth/register",
                         "/actuator/health",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/webjars/**",
+                        "/api/offer/available",
+                        "/api/cars",
                     ).permitAll()
                     // Routes that require authentication
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
