@@ -59,6 +59,7 @@ class SecurityConfig(
                         "/api/dealerships",
                         "/api/auth/register",
                         "/actuator/health",
+                        "/actuator/prometheus",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
