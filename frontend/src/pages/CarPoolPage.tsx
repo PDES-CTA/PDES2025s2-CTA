@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, LogOut } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { authService, carService, carOfferService } from '../services/api';
 import { ErrorMessage } from '../components/molecules';
 import { LoadingSpinner } from '../components/atoms';
@@ -116,10 +116,6 @@ export default function CarPoolPage() {
         : 'Failed to create offer';
       setError(errorMessage);
     }
-  };
-
-  const handleLogout = () => {
-    authService.logout();
   };
 
   if (loading) {

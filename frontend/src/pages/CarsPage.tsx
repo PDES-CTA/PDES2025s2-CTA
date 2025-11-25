@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
 import { authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
 import { SearchFiltersState } from '../components/organisms/SearchFilters';
@@ -24,11 +23,11 @@ export default function CarsPage() {
   });
 
   const {
-      displayCars,
-      loading,
-      error,
-      fetchAllCarsAndOffers,
-      searchCarsAndOffers
+    displayCars,
+    loading,
+    error,
+    fetchAllCarsAndOffers,
+    searchCarsAndOffers
   } = useCarSearch();
 
   useEffect(() => {
@@ -74,7 +73,6 @@ export default function CarsPage() {
             <p className={styles.subtitle}>Find the perfect car for you</p>
           </div>
         </div>
-
         <SearchFilters
           filters={filters}
           onFiltersChange={setFilters}
@@ -83,7 +81,6 @@ export default function CarsPage() {
           showFilters={showFilters}
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
-
         <CarList displayCars={displayCars} onViewDetails={handleViewDetails} />
       </div>
     </div>

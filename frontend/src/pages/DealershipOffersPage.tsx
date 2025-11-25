@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Building2 } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
 import { authService, carOfferService, dealershipService } from '../services/api';
 import CarOfferList from '../components/organisms/CarOfferList';
 import EditOfferModal from '../components/organisms/EditOfferModal';
@@ -123,10 +123,6 @@ export default function DealershipOffersPage() {
 
   const handleAddNewOffer = () => {
     navigate('/cars/pool');
-  };
-
-  const handleLogout = () => {
-    authService.logout();
   };
 
   if (loading) {

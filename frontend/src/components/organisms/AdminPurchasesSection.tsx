@@ -23,6 +23,17 @@ interface Purchase {
   purchaseDate: string;
 }
 
+interface PurchaseResponse {
+  id: number;
+  buyerId: number;
+  buyerName: string;
+  carId: number;
+  carName: string;
+  dealershipName: string;
+  finalPrice: string | number;
+  purchaseDate: string;
+}
+
 const AdminPurchasesSection = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [filteredPurchases, setFilteredPurchases] = useState<Purchase[]>([]);
@@ -48,21 +59,18 @@ const AdminPurchasesSection = () => {
     try {
       setLoading(true);
       const response = await adminService.getAllPurchases();
-      
-      const purchasesData = response.map((p: any) => ({
+      const purchasesData = response.map((p: PurchaseResponse) => ({
         id: p.id,
         buyerId: p.buyerId,
         buyerName: p.buyerName,
         carId: p.carId,
         carName: p.carName,
         dealershipName: p.dealershipName,
-        finalPrice: Number.parseFloat(p.finalPrice),
+        finalPrice: Number.parseFloat(String(p.finalPrice)),
         purchaseDate: p.purchaseDate,
       }));
-      
       setPurchases(purchasesData);
       setFilteredPurchases(purchasesData);
-      
       const revenue = purchasesData.reduce((sum: number, p: Purchase) => sum + p.finalPrice, 0);
       setTotalRevenue(revenue);
       setError(null);
@@ -103,17 +111,14 @@ const AdminPurchasesSection = () => {
         title="Purchases"
         subtitle="Track all car purchases and transactions"
       />
-
       <div className={styles.content}>
         {statsData.length > 0 && <StatsBar stats={statsData} />}
-
         <SearchBar
           placeholder="Search by car name, buyer, or dealership..."
           value={searchTerm}
           onChange={setSearchTerm}
           resultCount={filteredPurchases.length}
         />
-
         {purchases.length === 0 ? (
           <EmptyState message="No purchases found" />
         ) : (
