@@ -2,6 +2,8 @@ package cta.config.init
 
 import cta.enum.FuelType
 import cta.enum.TransmissionType
+import cta.enum.UserRole
+import cta.model.Admin
 import cta.model.Buyer
 import cta.model.Car
 import cta.model.CarOffer
@@ -32,6 +34,14 @@ class DataInitializer(
 
     private fun initUsers() {
         if (userRepository.count() > 0L) return
+
+        val admin = Admin.create(
+            email = "admin@gmail.com",
+            password = passwordEncoder.encode("admin"),
+            firstName = "Admin",
+            lastName = "User",
+            phone = "1100000000",
+        )
 
         val buyer1 =
             Buyer.create(
@@ -88,7 +98,7 @@ class DataInitializer(
                 active = true
             }
 
-        userRepository.saveAll(listOf(buyer1, buyer2, dealership1, dealership2))
+        userRepository.saveAll(listOf(admin, buyer1, buyer2, dealership1, dealership2))
     }
 
     private fun initCars() {
@@ -106,7 +116,7 @@ class DataInitializer(
                 images =
                     mutableListOf(
                         "https://as1.ftcdn.net/v2/jpg/04/26/87/98/1000" +
-                            "_F_426879820_KNVE8ww5STlp4mQ6FpPbvQB1463mtFm4.jpg",
+                                "_F_426879820_KNVE8ww5STlp4mQ6FpPbvQB1463mtFm4.jpg",
                     )
             }
 
@@ -123,7 +133,7 @@ class DataInitializer(
                 images =
                     mutableListOf(
                         "https://as1.ftcdn.net/v2/jpg/05/24/89/70/1000" +
-                            "_F_524897085_NtLPXHm2JJ7DzeY9Hivr0BIDvWgbyK3D.jpg",
+                                "_F_524897085_NtLPXHm2JJ7DzeY9Hivr0BIDvWgbyK3D.jpg",
                     )
             }
 
@@ -140,7 +150,7 @@ class DataInitializer(
                 images =
                     mutableListOf(
                         "https://as1.ftcdn.net/v2/jpg/17/68/20/00/1000" +
-                            "_F_1768200084_OOMVcyW0ei2LiC85Jfh746e7nvLQ6TGV.jpg",
+                                "_F_1768200084_OOMVcyW0ei2LiC85Jfh746e7nvLQ6TGV.jpg",
                     )
             }
 
@@ -169,7 +179,7 @@ class DataInitializer(
                 images =
                     mutableListOf(
                         "https://as2.ftcdn.net/v2/jpg/03/66/35/39/1000" +
-                            "_F_366353937_jqUL1pi5OyOkQbXR6z49V8zRQMMU213c.jpg",
+                                "_F_366353937_jqUL1pi5OyOkQbXR6z49V8zRQMMU213c.jpg",
                     )
             }
 
@@ -186,9 +196,9 @@ class DataInitializer(
                 images =
                     mutableListOf(
                         "https://as1.ftcdn.net/v2/jpg/05/25/72/40/1000" +
-                            "_F_525724063_Aa0er7MnuOryVn2BH1UAHyoLSK0Kfozq.jpg",
+                                "_F_525724063_Aa0er7MnuOryVn2BH1UAHyoLSK0Kfozq.jpg",
                         "https://as1.ftcdn.net/v2/jpg/04/36/23/48/1000" +
-                            "_F_436234860_K9cTT8M9svBJsp8RWRAwQ0hBQCPNXiEh.jpg",
+                                "_F_436234860_K9cTT8M9svBJsp8RWRAwQ0hBQCPNXiEh.jpg",
                     )
             }
 
@@ -223,7 +233,7 @@ class DataInitializer(
                     price = BigDecimal("28000.00")
                     dealershipNotes =
                         "Brand new hybrid model, immediate delivery available. " +
-                        "Financing options."
+                                "Financing options."
                     available = true
                 },
             )
@@ -263,7 +273,7 @@ class DataInitializer(
                     price = BigDecimal("48000.00")
                     dealershipNotes =
                         "Luxury and comfort in the classic Audi A3. " +
-                        "Premium dealership service."
+                                "Premium dealership service."
                     available = true
                 },
             )

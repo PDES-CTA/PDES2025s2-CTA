@@ -1,0 +1,42 @@
+.statsBar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.stat {
+  text-align: center;
+}
+
+.statLabel {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  margin: 8px 0 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff9800;
+}
+
+@media (max-width: 768px) {
+  .statsBar {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+}

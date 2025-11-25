@@ -60,7 +60,7 @@ interface RegisterData {
   city?: string;
   province?: string;
   description?: string;
-  role: 'BUYER' | 'DEALERSHIP';
+  role: 'BUYER' | 'DEALERSHIP' | 'ADMINISTRATOR';
 }
 
 export interface User {
@@ -400,6 +400,76 @@ export const adminService = {
     const response = await apiClient.get<TopDealership[]>("/admin/reports/top-dealerships", {
       params: { limit }
     });
+    return response.data;
+  },
+
+  async getDashboardOverview() {
+    const response = await apiClient.get('/admin/dashboard');
+    return response.data;
+  },
+
+  async getAllBuyers() {
+    const response = await apiClient.get('/admin/buyers');
+    return response.data;
+  },
+
+  async getAllDealerships() {
+    const response = await apiClient.get('/admin/dealerships');
+    return response.data;
+  },
+
+  async getUserFavorites(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/favorites`);
+    return response.data;
+  },
+
+  async getCarFavoriteCount(carId: number) {
+    const response = await apiClient.get(`/admin/cars/${carId}/favorite-count`);
+    return response.data;
+  },
+
+  async getAllFavoritesWithReviews() {
+    const response = await apiClient.get('/admin/favorites-with-reviews');
+    return response.data;
+  },
+
+  async getCarReviews(carId: number) {
+    const response = await apiClient.get(`/admin/cars/${carId}/reviews`);
+    return response.data;
+  },
+
+  async getUserReviews(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/reviews`);
+    return response.data;
+  },
+
+  async getTopRatedCars() {
+    const response = await apiClient.get('/admin/top-rated-cars');
+    return response.data;
+  },
+
+  async getAllPurchases() {
+    const response = await apiClient.get('/admin/purchases');
+    return response.data;
+  },
+
+  async getUserPurchases(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/purchases`);
+    return response.data;
+  },
+
+  async getDealershipPurchases(dealershipId: number) {
+    const response = await apiClient.get(`/admin/dealerships/${dealershipId}/purchases`);
+    return response.data;
+  },
+
+  async getDealershipRevenue(dealershipId: number) {
+    const response = await apiClient.get(`/admin/dealerships/${dealershipId}/revenue`);
+    return response.data;
+  },
+
+  async getTotalSystemRevenue() {
+    const response = await apiClient.get('/admin/revenue');
     return response.data;
   }
 };

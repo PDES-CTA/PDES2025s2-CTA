@@ -73,10 +73,6 @@ export default function CarsPage() {
             <h1 className={styles.title}>Available Cars</h1>
             <p className={styles.subtitle}>Find the perfect car for you</p>
           </div>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            <LogOut size={20} />
-            Log Out
-          </button>
         </div>
 
         <SearchFilters

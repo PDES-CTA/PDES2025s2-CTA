@@ -162,10 +162,6 @@ export default function DealershipOffersPage() {
               <Plus size={18} />
               Add New Offer
             </SmallButton>
-            <SmallButton onClick={handleLogout} variant="secondary">
-              <LogOut size={18} />
-              Log Out
-            </SmallButton>
           </div>
         </div>
 

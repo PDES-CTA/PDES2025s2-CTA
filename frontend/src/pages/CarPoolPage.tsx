@@ -148,12 +148,6 @@ export default function CarPoolPage() {
               Browse {filteredCars.length} available {filteredCars.length === 1 ? 'car' : 'cars'}
             </p>
           </div>
-          <div className={styles.headerActions}>
-            <SmallButton onClick={handleLogout} variant="ghost">
-              <LogOut size={18} />
-              Log Out
-            </SmallButton>
-          </div>
         </div>
 
         <div className={styles.searchBar}>
