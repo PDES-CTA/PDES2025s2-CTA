@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { authService, carService, carOfferService, buyerService, purchaseService, dealershipService, adminService } from './api';
 
 // Create a mock localStorage implementation
 const createMockLocalStorage = () => {
