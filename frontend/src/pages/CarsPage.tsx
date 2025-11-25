@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
 import { SearchFiltersState } from '../components/organisms/SearchFilters';
 import { ErrorMessage } from '../components/molecules';
@@ -54,11 +53,6 @@ export default function CarsPage() {
 
   const handleViewDetails = (carId: string | number) => {
     navigate(`/cars/${carId}`);
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
   };
 
   if (loading) return <LoadingSpinner />;
