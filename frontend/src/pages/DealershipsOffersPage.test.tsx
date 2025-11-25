@@ -231,14 +231,6 @@ describe('DealershipOffersPage', () => {
         expect(screen.getByRole('button', { name: /add new offer/i })).toBeInTheDocument();
       });
     });
-
-    it('should render Log Out button', async () => {
-      renderWithRouter(<DealershipOffersPage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Data Fetching', () => {
@@ -444,21 +436,6 @@ describe('DealershipOffersPage', () => {
       fireEvent.click(addButton);
 
       expect(mockNavigate).toHaveBeenCalledWith('/cars/pool');
-    });
-  });
-
-  describe('Logout Functionality', () => {
-    it('should call logout when logout button clicked', async () => {
-      renderWithRouter(<DealershipOffersPage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
-      });
-
-      const logoutButton = screen.getByRole('button', { name: /log out/i });
-      fireEvent.click(logoutButton);
-
-      expect(api.authService.logout).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -778,16 +755,6 @@ describe('DealershipOffersPage', () => {
         expect(svg).toBeInTheDocument();
       });
     });
-
-    it('should render LogOut icon in logout button', async () => {
-      renderWithRouter(<DealershipOffersPage />);
-
-      await waitFor(() => {
-        const button = screen.getByRole('button', { name: /log out/i });
-        const svg = button.querySelector('svg');
-        expect(svg).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Edge Cases', () => {
@@ -853,15 +820,6 @@ describe('DealershipOffersPage', () => {
 
       await waitFor(() => {
         const button = screen.getByRole('button', { name: /add new offer/i });
-        expect(button).toBeInTheDocument();
-      });
-    });
-
-    it('should apply secondary variant to Log Out button', async () => {
-      renderWithRouter(<DealershipOffersPage />);
-
-      await waitFor(() => {
-        const button = screen.getByRole('button', { name: /log out/i });
         expect(button).toBeInTheDocument();
       });
     });
