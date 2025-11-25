@@ -118,23 +118,23 @@ class AdminService(
         logger.debug("Fetching top {} highest rated cars", limit)
         val allFavorites: List<FavoriteCar?> = favoriteCarRepository.findAll()
 
-        val carRatings = allFavorites
-            .groupBy { it?.car?.id }
-            .mapNotNull { (carId, favorites) ->
-                val ratings = favorites.mapNotNull { it?.rating }
-                if (carId != null && ratings.isNotEmpty()) {
-                    carId to ratings.average()
-                } else {
-                    null
+        val carRatings =
+            allFavorites
+                .groupBy { it?.car?.id }
+                .mapNotNull { (carId, favorites) ->
+                    val ratings = favorites.mapNotNull { it?.rating }
+                    if (carId != null && ratings.isNotEmpty()) {
+                        carId to ratings.average()
+                    } else {
+                        null
+                    }
                 }
-            }
-            .sortedByDescending { it.second }
-            .take(limit)
+                .sortedByDescending { it.second }
+                .take(limit)
 
         logger.info("Found {} cars with ratings", carRatings.size)
         return carRatings
     }
-
 
     // ===== PURCHASES =====
 
@@ -169,9 +169,10 @@ class AdminService(
     fun getDealershipRevenue(dealershipId: Long): BigDecimal {
         logger.debug("Calculating revenue for dealership ID: {}", dealershipId)
         val purchases = getDealershipPurchases(dealershipId)
-        val revenue = purchases.fold(BigDecimal.ZERO) { acc, purchase ->
-            acc.plus(purchase.finalPrice)
-        }
+        val revenue =
+            purchases.fold(BigDecimal.ZERO) { acc, purchase ->
+                acc.plus(purchase.finalPrice)
+            }
         logger.info("Dealership {} revenue: {}", dealershipId, revenue)
         return revenue
     }
@@ -179,9 +180,10 @@ class AdminService(
     fun getTotalSystemRevenue(): BigDecimal {
         logger.debug("Calculating total system revenue")
         val allPurchases = getAllPurchases()
-        val revenue = allPurchases.fold(BigDecimal.ZERO) { acc, purchase ->
-            acc.plus(purchase.finalPrice)
-        }
+        val revenue =
+            allPurchases.fold(BigDecimal.ZERO) { acc, purchase ->
+                acc.plus(purchase.finalPrice)
+            }
         logger.info("Total system revenue: {}", revenue)
         return revenue
     }

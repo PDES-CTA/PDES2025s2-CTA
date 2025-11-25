@@ -18,13 +18,19 @@ interface FavoriteCarRepository : JpaRepository<FavoriteCar, Long> {
     ): FavoriteCar?
 
     @Query("SELECT COUNT(f) FROM FavoriteCar f WHERE f.buyer.id = :buyerId")
-    fun countByBuyerId(@Param("buyerId") buyerId: Long): Int
+    fun countByBuyerId(
+        @Param("buyerId") buyerId: Long,
+    ): Int
 
     @Query("SELECT f FROM FavoriteCar f WHERE f.car.id = :carId AND (f.rating IS NOT NULL OR f.comment IS NOT NULL)")
-    fun findByCarIdAndReviewExists(@Param("carId") carId: Long): List<FavoriteCar>
+    fun findByCarIdAndReviewExists(
+        @Param("carId") carId: Long,
+    ): List<FavoriteCar>
 
     @Query("SELECT f FROM FavoriteCar f WHERE f.buyer.id = :buyerId AND (f.rating IS NOT NULL OR f.comment IS NOT NULL)")
-    fun findByBuyerIdAndReviewExists(@Param("buyerId") buyerId: Long): List<FavoriteCar>
+    fun findByBuyerIdAndReviewExists(
+        @Param("buyerId") buyerId: Long,
+    ): List<FavoriteCar>
 
     fun countByCarId(carId: Long): Long
 }

@@ -7,13 +7,10 @@ import java.math.BigDecimal
 data class AdminDashboardResponse(
     @field:Schema(description = "Total number of registered buyers")
     val totalBuyers: Long,
-
     @field:Schema(description = "Total number of registered dealerships")
     val totalDealerships: Long,
-
     @field:Schema(description = "Total number of purchases in the system")
     val totalPurchases: Long,
-
     @field:Schema(description = "Total revenue from all purchases")
     val totalRevenue: BigDecimal,
 )

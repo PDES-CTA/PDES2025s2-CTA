@@ -15,4 +15,3 @@ data class AdminPurchaseResponse(
     val paymentMethod: String,
     val observations: String?,
 )
-

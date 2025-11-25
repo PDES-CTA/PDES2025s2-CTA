@@ -20,5 +20,7 @@ interface CarOfferRepository : JpaRepository<CarOffer, Long> {
     fun findByAvailableTrue(): List<CarOffer>
 
     @Query("SELECT COUNT(c) FROM CarOffer c WHERE c.dealership.id = :dealershipId")
-    fun countByDealershipId(@Param("dealershipId") dealershipId: Long): Int
+    fun countByDealershipId(
+        @Param("dealershipId") dealershipId: Long,
+    ): Int
 }

@@ -15,8 +15,12 @@ interface PurchaseRepository : JpaRepository<Purchase, Long> {
     fun findByCarOfferDealershipId(dealershipId: Long): List<Purchase>
 
     @Query("SELECT COUNT(p) FROM Purchase p WHERE p.buyer.id = :buyerId")
-    fun countByBuyerId(@Param("buyerId") buyerId: Long): Int
+    fun countByBuyerId(
+        @Param("buyerId") buyerId: Long,
+    ): Int
 
     @Query("SELECT COUNT(p) FROM Purchase p WHERE p.carOffer.dealership.id = :dealershipId")
-    fun countByCarOfferDealershipId(@Param("dealershipId") dealershipId: Long): Int
+    fun countByCarOfferDealershipId(
+        @Param("dealershipId") dealershipId: Long,
+    ): Int
 }
