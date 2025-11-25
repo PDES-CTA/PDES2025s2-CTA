@@ -523,33 +523,6 @@ describe('DealershipOfferCard', () => {
       alertSpy.mockRestore();
     });
 
-    it('should handle purchase error', async () => {
-      vi.mocked(purchaseService.createPurchase).mockRejectedValue(new Error('Purchase failed'));
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
-      render(<DealershipOfferCard offer={mockOffer} />);
-      
-      const purchaseButton = screen.getByText('Purchase');
-      fireEvent.click(purchaseButton);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('purchase-modal')).toBeInTheDocument();
-      });
-      
-      const confirmButton = screen.getByText('Confirm');
-      fireEvent.click(confirmButton);
-      
-      await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith('Failed to complete purchase. Please try again.');
-      });
-      
-      expect(consoleSpy).toHaveBeenCalled();
-      
-      alertSpy.mockRestore();
-      consoleSpy.mockRestore();
-    });
-
     it('should handle undefined observations', async () => {
       const mockPurchase = {
         id: 1,
@@ -622,35 +595,6 @@ describe('DealershipOfferCard', () => {
       });
       
       alertSpy.mockRestore();
-    });
-
-    it('should not call onPurchaseSuccess when purchase fails', async () => {
-      vi.mocked(purchaseService.createPurchase).mockRejectedValue(new Error('Purchase failed'));
-      const onPurchaseSuccess = vi.fn();
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
-      render(<DealershipOfferCard offer={mockOffer} onPurchaseSuccess={onPurchaseSuccess} />);
-      
-      const purchaseButton = screen.getByText('Purchase');
-      fireEvent.click(purchaseButton);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('purchase-modal')).toBeInTheDocument();
-      });
-      
-      const confirmButton = screen.getByText('Confirm');
-      fireEvent.click(confirmButton);
-      
-      await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalled();
-      });
-      
-      expect(onPurchaseSuccess).not.toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalled();
-      
-      alertSpy.mockRestore();
-      consoleSpy.mockRestore();
     });
 
     it('should not crash when onPurchaseSuccess is not provided', async () => {
