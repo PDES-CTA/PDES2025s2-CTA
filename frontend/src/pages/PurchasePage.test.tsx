@@ -126,23 +126,6 @@ const mockPurchases: Purchase[] = [
   },
 ];
 
-() => {
-  return render(
-    <BrowserRouter>
-      <Routes>
-        <Route path="/purchases/:id" element={<PurchasesPage />} />
-      </Routes>
-    </BrowserRouter>,
-    { wrapper: ({ children }) => (
-      <BrowserRouter>
-        <Routes>
-          <Route path="*" element={children} />
-        </Routes>
-      </BrowserRouter>
-    )}
-  );
-};
-
 const renderPageWithRoute = (buyerId: string = '1') => {
   window.history.pushState({}, 'Test', `/purchases/${buyerId}`);
   return render(
@@ -446,15 +429,15 @@ describe('PurchasesPage', () => {
     });
 
     it('should not render purchase card when car is missing', async () => {
-      const purchasesWithMissingCar: Purchase[] = [
+      const purchasesWithMissingCar = [
         {
           ...mockPurchases[0],
           carOffer: {
             ...mockCarOffer,
-            car: null as any,
+            car: null!,
           },
         },
-      ];
+      ] as Purchase[];
       
       vi.mocked(purchaseService.getPurchasesByBuyerId).mockResolvedValue(purchasesWithMissingCar);
       
@@ -492,7 +475,15 @@ describe('PurchasesPage', () => {
 
     it('should show confirmation dialog when clicking Cancel Purchase', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPageWithRoute();
       
@@ -511,7 +502,15 @@ describe('PurchasesPage', () => {
     it('should call cancelPurchase when confirmed', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPageWithRoute();
       
@@ -533,7 +532,15 @@ describe('PurchasesPage', () => {
     it('should show success alert after cancelling', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPageWithRoute();
       
@@ -596,7 +603,15 @@ describe('PurchasesPage', () => {
     it('should refresh purchases list after cancelling', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPageWithRoute();
       
@@ -725,7 +740,7 @@ describe('PurchasesPage', () => {
           ...mockPurchases[0],
           carOffer: {
             ...mockCarOffer,
-            dealership: null as any,
+            dealership: null!,
           },
         },
       ];

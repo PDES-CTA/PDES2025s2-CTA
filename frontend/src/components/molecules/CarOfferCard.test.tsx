@@ -21,17 +21,17 @@ vi.mock('../../utils/carUtils', () => ({
 }));
 
 vi.mock('../organisms/PurchaseConfirmationModal', () => ({
-  default: ({ isOpen, onConfirm, onCancel }: any) => {
+  default: ({ isOpen, onConfirm, onCancel }: {
+    isOpen: boolean;
+    onConfirm: (paymentMethod: string, observations: string) => Promise<void>;
+    onCancel: () => void;
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="purchase-modal">
         <h2>Confirm Purchase</h2>
         <button onClick={async () => {
-          try {
-            await onConfirm('CREDIT_CARD', 'Test observations');
-          } catch (error) {
-            // Catch any errors to prevent unhandled rejections in tests
-          }
+          await onConfirm('CREDIT_CARD', 'Test observations');
         }}>
           Confirm
         </button>

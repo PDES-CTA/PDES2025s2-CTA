@@ -194,7 +194,7 @@ describe('CarCarousel', () => {
       transmission: 'AUTOMATICA',
       publicationDate: '2025-02-15',
       color: 'Red',
-      images: undefined as any,
+      images: undefined,
     }];
 
     render(<CarCarousel cars={carUndefinedImages} onAddOffer={vi.fn()} />);

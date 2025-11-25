@@ -453,7 +453,15 @@ describe('DealershipSalesPage', () => {
 
     it('should show confirmation dialog when clicking Confirm', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CONFIRMED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -472,7 +480,15 @@ describe('DealershipSalesPage', () => {
     it('should call confirmPurchase when confirmed', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CONFIRMED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -494,7 +510,15 @@ describe('DealershipSalesPage', () => {
     it('should show success alert after confirming', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CONFIRMED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -566,7 +590,15 @@ describe('DealershipSalesPage', () => {
 
     it('should show confirmation dialog when clicking Mark as Delivered', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({
+        id: 2,
+        finalPrice: 30000,
+        purchaseDate: '2024-01-18T14:00:00',
+        purchaseStatus: 'DELIVERED',
+        paymentMethod: 'CASH',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -585,7 +617,15 @@ describe('DealershipSalesPage', () => {
     it('should call markPurchaseAsDelivered when confirmed', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({
+        id: 2,
+        finalPrice: 30000,
+        purchaseDate: '2024-01-18T14:00:00',
+        purchaseStatus: 'DELIVERED',
+        paymentMethod: 'CASH',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -607,7 +647,15 @@ describe('DealershipSalesPage', () => {
     it('should show success alert after marking as delivered', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.markPurchaseAsDelivered).mockResolvedValue({
+        id: 2,
+        finalPrice: 30000,
+        purchaseDate: '2024-01-18T14:00:00',
+        purchaseStatus: 'DELIVERED',
+        paymentMethod: 'CASH',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -650,7 +698,15 @@ describe('DealershipSalesPage', () => {
     it('should call cancelPurchase when confirmed', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -672,7 +728,15 @@ describe('DealershipSalesPage', () => {
     it('should show success alert after cancelling', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.cancelPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CANCELLED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       
@@ -710,7 +774,15 @@ describe('DealershipSalesPage', () => {
     it('should refresh sales list after confirming purchase', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({} as any);
+      vi.mocked(purchaseService.confirmPurchase).mockResolvedValue({
+        id: 1,
+        finalPrice: 25000,
+        purchaseDate: '2024-01-20T10:30:00',
+        purchaseStatus: 'CONFIRMED',
+        paymentMethod: 'CREDIT_CARD',
+        carOffer: mockCarOffer,
+        buyer: mockBuyer,
+      });
       
       renderPage();
       

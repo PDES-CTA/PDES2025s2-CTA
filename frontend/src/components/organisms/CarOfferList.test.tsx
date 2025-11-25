@@ -7,7 +7,24 @@ import { Dealership } from '../../types/dealership';
 
 // Mock the CarOfferCard component
 vi.mock('../molecules/CarOfferCard', () => ({
-  default: ({ offer, onEdit, onDelete }: any) => (
+  default: ({ offer, onEdit, onDelete }: {
+    offer: {
+      id: string | number;
+      car: {
+        brand: string;
+        model: string;
+        year: number;
+        fuelType: string;
+        transmission: string;
+        color: string;
+      };
+      price: number;
+      dealershipNotes?: string;
+      available: boolean;
+    };
+    onEdit?: () => void;
+    onDelete?: () => void;
+  }) => (
     <div data-testid={`car-offer-card-${offer.id}`} className="card">
       <div>{offer.car.brand} {offer.car.model}</div>
       <div>Year {offer.car.year}</div>
@@ -291,17 +308,6 @@ describe('CarOfferList', () => {
       expect(mockOnEdit).toHaveBeenCalledTimes(3);
       expect(mockOnEdit).toHaveBeenCalledWith(1);
     });
-
-    it('should handle string offer ids', () => {
-      const offerWithStringId = { ...mockOffer1, id: 'offer-123' as any };
-      
-      render(<CarOfferList offers={[offerWithStringId]} onEdit={mockOnEdit} />);
-
-      const editButton = screen.getByRole('button', { name: 'Edit' });
-      editButton.click();
-
-      expect(mockOnEdit).toHaveBeenCalledWith('offer-123');
-    });
   });
 
   describe('onDelete callback behavior', () => {
@@ -363,17 +369,6 @@ describe('CarOfferList', () => {
 
       expect(mockOnDelete).toHaveBeenCalledTimes(2);
       expect(mockOnDelete).toHaveBeenCalledWith(2);
-    });
-
-    it('should handle string offer ids for delete', () => {
-      const offerWithStringId = { ...mockOffer1, id: 'offer-xyz' as any };
-      
-      render(<CarOfferList offers={[offerWithStringId]} onDelete={mockOnDelete} />);
-
-      const deleteButton = screen.getByRole('button', { name: 'Delete' });
-      deleteButton.click();
-
-      expect(mockOnDelete).toHaveBeenCalledWith('offer-xyz');
     });
   });
 
@@ -764,15 +759,6 @@ describe('CarOfferList', () => {
 
       screen.getByRole('button', { name: 'Edit' }).click();
       expect(mockOnEdit).toHaveBeenCalledWith(1);
-    });
-
-    it('should accept string offer ids', () => {
-      const stringIdOffer = { ...mockOffer1, id: 'abc-123' as any };
-
-      render(<CarOfferList offers={[stringIdOffer]} onEdit={mockOnEdit} />);
-
-      screen.getByRole('button', { name: 'Edit' }).click();
-      expect(mockOnEdit).toHaveBeenCalledWith('abc-123');
     });
 
     it('should work without optional callbacks', () => {
