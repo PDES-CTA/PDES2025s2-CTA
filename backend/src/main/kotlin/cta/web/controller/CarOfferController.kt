@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -33,15 +34,9 @@ class CarOfferController(
     @Operation(summary = "Get all available car offers")
     fun getAllAvailableCarOffers(): ResponseEntity<List<CarOfferResponse>> {
         logger.debug("GET /api/offer/available - Request received")
-
-        return try {
-            val carOffers = carOfferService.findAvailableCarOffers()
-            logger.info("GET /api/offer/available - Retrieved {} available car offers", carOffers.size)
-            ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
-        } catch (ex: Exception) {
-            logger.error("GET /api/offer/available - Unexpected error", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val carOffers = carOfferService.findAvailableCarOffers()
+        logger.info("GET /api/offer/available - Retrieved {} available car offers", carOffers.size)
+        return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
     }
 
     @GetMapping("/dealership/{dealershipId}")
@@ -50,15 +45,20 @@ class CarOfferController(
         @PathVariable dealershipId: Long,
     ): ResponseEntity<List<CarOfferResponse>> {
         logger.debug("GET /api/offer/dealership/{} - Request received", dealershipId)
+        val carOffers = carOfferService.findByDealershipId(dealershipId)
+        logger.info("GET /api/offer/dealership/{} - Retrieved {} car offers", dealershipId, carOffers.size)
+        return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
+    }
 
-        return try {
-            val carOffers = carOfferService.findByDealershipId(dealershipId)
-            logger.info("GET /api/offer/dealership/{} - Retrieved {} car offers", dealershipId, carOffers.size)
-            ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
-        } catch (ex: Exception) {
-            logger.error("GET /api/offer/dealership/{} - Unexpected error", dealershipId, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+    @GetMapping("/dealership/{dealershipId}/available")
+    @Operation(summary = "Get all available offers by dealership")
+    fun getAvailableCarOffersPerDealership(
+        @PathVariable dealershipId: Long,
+    ): ResponseEntity<List<CarOfferResponse>> {
+        logger.debug("GET /api/offer/dealership/{}/available - Request received", dealershipId)
+        val carOffers = carOfferService.findByDealershipIdAndAvailableTrue(dealershipId)
+        logger.info("GET /api/offer/dealership/{}/available - Retrieved {} car offers", dealershipId, carOffers.size)
+        return ResponseEntity.ok(carOffers.map { CarOfferResponse.fromEntity(it) })
     }
 
     @GetMapping("/{id}")
@@ -67,18 +67,9 @@ class CarOfferController(
         @PathVariable id: Long,
     ): ResponseEntity<CarOfferResponse> {
         logger.debug("GET /api/offer/{} - Request received", id)
-
-        return try {
-            val carOffer = carOfferService.findById(id)
-            logger.info("GET /api/offer/{} - Car offer found with price: {}", id, carOffer.price)
-            ResponseEntity.ok(CarOfferResponse.fromEntity(carOffer))
-        } catch (ex: NoSuchElementException) {
-            logger.warn("GET /api/offer/{} - Car offer not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: Exception) {
-            logger.error("GET /api/offer/{} - Unexpected error", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val carOffer = carOfferService.findById(id)
+        logger.info("GET /api/offer/{} - Car offer found with price: {}", id, carOffer.price)
+        return ResponseEntity.ok(CarOfferResponse.fromEntity(carOffer))
     }
 
     @PostMapping
@@ -87,18 +78,9 @@ class CarOfferController(
         @Valid @RequestBody request: CarOfferCreateRequest,
     ): ResponseEntity<CarOfferResponse> {
         logger.info("POST /api/offer - Creation request for car ID: {} and dealership ID: {}", request.carId, request.dealershipId)
-
-        return try {
-            val carOffer = carOfferService.createCarOffer(request)
-            logger.info("POST /api/offer - Car offer created with ID: {}", carOffer.id)
-            ResponseEntity.status(HttpStatus.CREATED).body(CarOfferResponse.fromEntity(carOffer))
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("POST /api/offer - Validation error: {}", ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("POST /api/offer - Error creating car offer", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val carOffer = carOfferService.createCarOffer(request)
+        logger.info("POST /api/offer - Car offer created with ID: {}", carOffer.id)
+        return ResponseEntity.status(HttpStatus.CREATED).body(CarOfferResponse.fromEntity(carOffer))
     }
 
     @DeleteMapping("/{id}")
@@ -107,18 +89,9 @@ class CarOfferController(
         @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         logger.info("DELETE /api/offer/{} - Deletion request received", id)
-
-        return try {
-            carOfferService.deleteCarOffer(id)
-            logger.info("DELETE /api/offer/{} - Car offer deleted", id)
-            ResponseEntity.noContent().build()
-        } catch (ex: NoSuchElementException) {
-            logger.warn("DELETE /api/offer/{} - Car offer not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: Exception) {
-            logger.error("DELETE /api/offer/{} - Error deleting car offer", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        carOfferService.deleteCarOffer(id)
+        logger.info("DELETE /api/offer/{} - Car offer deleted", id)
+        return ResponseEntity.noContent().build()
     }
 
     @PutMapping("/{id}")
@@ -128,20 +101,19 @@ class CarOfferController(
         @Valid @RequestBody request: CarOfferUpdateRequest,
     ): ResponseEntity<CarOfferResponse> {
         logger.info("PUT /api/offer/{} - Update request received", id)
+        val updatedCarOffer = carOfferService.updateCarOffer(id, request.toMap())
+        logger.info("PUT /api/offer/{} - Car offer updated", id)
+        return ResponseEntity.ok(CarOfferResponse.fromEntity(updatedCarOffer))
+    }
 
-        return try {
-            val updatedCarOffer = carOfferService.updateCarOffer(id, request.toMap())
-            logger.info("PUT /api/offer/{} - Car offer updated", id)
-            ResponseEntity.ok(CarOfferResponse.fromEntity(updatedCarOffer))
-        } catch (ex: NoSuchElementException) {
-            logger.warn("PUT /api/offer/{} - Car offer not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("PUT /api/offer/{} - Validation error: {}", id, ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("PUT /api/offer/{} - Error updating car offer", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+    @PatchMapping("/{id}/unavailable")
+    @Operation(summary = "Mark a car offer as unavailable")
+    fun markCarOfferAsUnavailable(
+        @PathVariable id: Long,
+    ): ResponseEntity<CarOfferResponse> {
+        logger.info("PATCH /api/offer/{}/unavailable - Mark as unavailable request received", id)
+        val updatedCarOffer = carOfferService.markAsUnavailable(id)
+        logger.info("PATCH /api/offer/{}/unavailable - Car offer marked as unavailable", id)
+        return ResponseEntity.ok(CarOfferResponse.fromEntity(updatedCarOffer))
     }
 }

@@ -10,9 +10,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CarsPage from './pages/CarsPage';
 import CarDetailPage from './pages/CarDetailPage';
+import PurchasesPage from './pages/PurchasesPage';
+import DealershipSalesPage from './pages/DealershipSalesPage';
 
 // import FavoritesPage from './pages/FavoritesPage';
-// import PurchasesPage from './pages/PurchasesPage';
 // import DashboardPage from './pages/DashboardPage';
 // import AdminPage from './pages/AdminPage';
 
@@ -96,6 +97,26 @@ function App() {
             <PrivateRoute>
               <Layout>
                 <CarDetailPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/purchases/:id"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <PurchasesPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sales/dealership"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <DealershipSalesPage />
               </Layout>
             </PrivateRoute>
           }
