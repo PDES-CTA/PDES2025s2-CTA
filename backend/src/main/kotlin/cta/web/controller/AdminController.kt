@@ -66,18 +66,18 @@ class AdminController(
         val dealerships = adminService.getAllDealerships()
         val response =
             dealerships.map { dealership ->
-                mapOf(
+                mapOf<String, Any>(
                     "id" to (dealership.id ?: 0),
                     "email" to dealership.email,
                     "businessName" to dealership.businessName,
                     "phone" to dealership.phone,
-                    "address" to dealership.address,
+                    "address" to (dealership.address ?: ""),
                     "active" to dealership.active,
-                    "createdAt" to (dealership.createdAt ?: ""),
+                    "createdAt" to dealership.createdAt.toString(),
                 )
             }
         logger.info("Returning {} dealerships", response.size)
-        return ResponseEntity.ok(response) as ResponseEntity<List<Map<String, Any>>>
+        return ResponseEntity.ok(response)
     }
 
     // ===== FAVORITE CARS =====

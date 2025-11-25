@@ -220,7 +220,6 @@ class DataInitializer(
         val corolla = cars.find { it.brand == "Toyota" && it.model == "Corolla" }
         val golfGTI = cars.find { it.brand == "Volkswagen" && it.model == "Golf GTI" }
         val ranger = cars.find { it.brand == "Ford" && it.model == "Ranger" }
-        val cruze = cars.find { it.brand == "Chevrolet" && it.model == "Cruze" }
         val audiA3 = cars.find { it.brand == "Audi" && it.model == "A3" }
 
         val offers = mutableListOf<CarOffer>()
