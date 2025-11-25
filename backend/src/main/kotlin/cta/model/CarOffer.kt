@@ -38,7 +38,7 @@ class CarOffer : BaseEntity() {
         this.price = newPrice
     }
 
-    fun markAsSold() {
+    fun markAsUnavailable() {
         this.available = false
     }
 

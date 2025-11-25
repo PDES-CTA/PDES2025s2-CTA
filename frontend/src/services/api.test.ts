@@ -1,24 +1,39 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Create a mock localStorage implementation
-const createMockLocalStorage = () => {
-  let store: Record<string, string> = {};
-
-  return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
-    length: 0,
-    key: vi.fn(),
+const { mockAxiosInstance } = vi.hoisted(() => {
+  const mockAxiosInstance = {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
   };
-};
+
+  return { mockAxiosInstance };
+});
+
+// Mock axios
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn(() => mockAxiosInstance),
+  },
+}));
+
+// Import API service AFTER mocking axios
+import {
+  authService,
+  carService,
+  carOfferService,
+  buyerService,
+  purchaseService,
+  dealershipService,
+  adminService,
+} from './api';
+import { PAYMENT_METHODS, PURCHASE_STATUS } from '../constants';
 
 describe('API Service', () => {
   let mockLocalStorage: ReturnType<typeof createMockLocalStorage>;
@@ -213,24 +228,155 @@ describe('API Service', () => {
     describe('createPurchase', () => {
       it('should create a purchase', async () => {
         expect(mockLocalStorage.getItem).toBeDefined();
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'PENDING' };
+        mockAxiosInstance.post.mockResolvedValue({ data: mockPurchase });
+      
+        const purchaseData = {
+          buyerId: 1,
+          carOfferId: 1,
+          finalPrice: 1200,
+          paymentMethod: PAYMENT_METHODS.CREDIT_CARD,
+          observations: 'Test',
+        };
+      
+        const result = await purchaseService.createPurchase(purchaseData);
+      
+        expect(mockAxiosInstance.post).toHaveBeenCalledWith('/purchases', {
+          buyerId: 1,
+          carOfferId: 1,
+          finalPrice: 1200,
+          purchaseStatus: 'PENDING',
+          paymentMethod: 'CREDIT_CARD',
+          observations: 'Test',
+        });
+        expect(result).toEqual(mockPurchase);
+      });
+    
+      it('should create a purchase with custom status', async () => {
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CASH', purchaseStatus: 'CONFIRMED' };
+        mockAxiosInstance.post.mockResolvedValue({ data: mockPurchase });
+      
+        const purchaseData = {
+          buyerId: 1,
+          carOfferId: 1,
+          finalPrice: 1500,
+          purchaseStatus: PURCHASE_STATUS.CONFIRMED,
+          paymentMethod: PAYMENT_METHODS.CASH,
+          observations: 'Paid in cash',
+        };
+      
+        const result = await purchaseService.createPurchase(purchaseData);
+      
+        expect(mockAxiosInstance.post).toHaveBeenCalledWith('/purchases', {
+          buyerId: 1,
+          carOfferId: 1,
+          finalPrice: 1500,
+          purchaseStatus: 'CONFIRMED',
+          paymentMethod: 'CASH',
+          observations: 'Paid in cash',
+        });
+        expect(result).toEqual(mockPurchase);
+      });
+    
+      it('should create a purchase without observations', async () => {
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CHECK', purchaseStatus: 'PENDING' };
+        mockAxiosInstance.post.mockResolvedValue({ data: mockPurchase });
+      
+        const purchaseData = {
+          buyerId: 1,
+          carOfferId: 2,
+          finalPrice: 2000,
+          paymentMethod: PAYMENT_METHODS.CHECK,
+        };
+      
+        const result = await purchaseService.createPurchase(purchaseData);
+      
+        expect(mockAxiosInstance.post).toHaveBeenCalledWith('/purchases', {
+          buyerId: 1,
+          carOfferId: 2,
+          finalPrice: 2000,
+          purchaseStatus: 'PENDING',
+          paymentMethod: 'CHECK',
+          observations: undefined,
+        });
+        expect(result).toEqual(mockPurchase);
       });
     });
-
+  
     describe('getPurchaseById', () => {
       it('should get purchase by id', async () => {
-        expect(mockLocalStorage.getItem).toBeDefined();
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'CONFIRMED' };
+        mockAxiosInstance.get.mockResolvedValue({ data: mockPurchase });
+      
+        const result = await purchaseService.getPurchaseById(1);
+      
+        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/purchases/1');
+        expect(result).toEqual(mockPurchase);
       });
     });
-
+  
+    describe('getPurchasesByBuyerId', () => {
+      it('should get purchases by buyer id', async () => {
+        const mockPurchases = [
+          { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'CONFIRMED' },
+          { id: 2, carOfferId: 2, paymentMethod: 'CASH', purchaseStatus: 'PENDING' },
+        ];
+        mockAxiosInstance.get.mockResolvedValue({ data: mockPurchases });
+      
+        const result = await purchaseService.getPurchasesByBuyerId(1);
+      
+        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/purchases/buyer/1');
+        expect(result).toEqual(mockPurchases);
+      });
+    });
+  
+    describe('getPurchasesByDealershipId', () => {
+      it('should get purchases by dealership id', async () => {
+        const mockPurchases = [
+          { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'CONFIRMED' },
+        ];
+        mockAxiosInstance.get.mockResolvedValue({ data: mockPurchases });
+      
+        const result = await purchaseService.getPurchasesByDealershipId(1);
+      
+        expect(mockAxiosInstance.get).toHaveBeenCalledWith('/purchases/dealership/1');
+        expect(result).toEqual(mockPurchases);
+      });
+    });
+  
     describe('confirmPurchase', () => {
       it('should confirm a purchase', async () => {
-        expect(mockLocalStorage.getItem).toBeDefined();
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'CONFIRMED' };
+        mockAxiosInstance.patch.mockResolvedValue({ data: mockPurchase });
+      
+        const result = await purchaseService.confirmPurchase(1);
+      
+        expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/purchases/1/confirmed');
+        expect(result).toEqual(mockPurchase);
       });
     });
-
+  
+    describe('markPurchaseAsDelivered', () => {
+      it('should mark purchase as delivered', async () => {
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'DELIVERED' };
+        mockAxiosInstance.patch.mockResolvedValue({ data: mockPurchase });
+      
+        const result = await purchaseService.markPurchaseAsDelivered(1);
+      
+        expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/purchases/1/delivered');
+        expect(result).toEqual(mockPurchase);
+      });
+    });
+  
     describe('cancelPurchase', () => {
       it('should cancel a purchase', async () => {
-        expect(mockLocalStorage.getItem).toBeDefined();
+        const mockPurchase = { id: 1, carOfferId: 1, paymentMethod: 'CREDIT_CARD', purchaseStatus: 'CANCELLED' };
+        mockAxiosInstance.patch.mockResolvedValue({ data: mockPurchase });
+      
+        const result = await purchaseService.cancelPurchase(1);
+      
+        expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/purchases/1/canceled');
+        expect(result).toEqual(mockPurchase);
       });
     });
   });

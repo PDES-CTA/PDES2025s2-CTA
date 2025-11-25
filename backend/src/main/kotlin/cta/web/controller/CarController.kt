@@ -37,15 +37,9 @@ class CarController(
     @Operation(summary = "Get all cars")
     fun getAllCars(): ResponseEntity<List<CarResponse>> {
         logger.debug("GET /api/cars - Request received")
-
-        return try {
-            val cars = carService.findAll()
-            logger.info("GET /api/cars - Retrieved {} cars", cars.size)
-            ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
-        } catch (ex: Exception) {
-            logger.error("GET /api/cars - Unexpected error", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val cars = carService.findAll()
+        logger.info("GET /api/cars - Retrieved {} cars", cars.size)
+        return ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
     }
 
     @GetMapping("/{id}")
@@ -54,18 +48,9 @@ class CarController(
         @PathVariable id: Long,
     ): ResponseEntity<CarResponse> {
         logger.debug("GET /api/cars/{} - Request received", id)
-
-        return try {
-            val car = carService.findById(id)
-            logger.info("GET /api/cars/{} - Car found: {} {}", id, car.brand, car.model)
-            ResponseEntity.ok(CarResponse.fromEntity(car))
-        } catch (ex: NoSuchElementException) {
-            logger.warn("GET /api/cars/{} - Car not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: Exception) {
-            logger.error("GET /api/cars/{} - Unexpected error", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val car = carService.findById(id)
+        logger.info("GET /api/cars/{} - Car found: {} {}", id, car.brand, car.model)
+        return ResponseEntity.ok(CarResponse.fromEntity(car))
     }
 
     @GetMapping("/search")
@@ -80,49 +65,41 @@ class CarController(
     ): ResponseEntity<List<CarResponse>> {
         logger.info("GET /api/cars/search - Search request with filters - keyword: {}, brand: {}", keyword, brand)
 
-        return try {
-            val fuelTypeEnum =
-                fuelType?.let {
-                    try {
-                        FuelType.valueOf(it.uppercase())
-                    } catch (e: IllegalArgumentException) {
-                        logger.warn("GET /api/cars/search - Invalid fuel type: {}", it)
-                        throw IllegalArgumentException("Invalid fuel type: $it. Valid values are: ${FuelType.entries.joinToString()}")
-                    }
+        val fuelTypeEnum =
+            fuelType?.let {
+                try {
+                    FuelType.valueOf(it.uppercase())
+                } catch (e: IllegalArgumentException) {
+                    logger.warn("GET /api/cars/search - Invalid fuel type: {}", it)
+                    throw IllegalArgumentException("Invalid fuel type: $it. Valid values are: ${FuelType.entries.joinToString()}")
                 }
+            }
 
-            val transmissionEnum =
-                transmission?.let {
-                    try {
-                        TransmissionType.valueOf(it.uppercase())
-                    } catch (e: IllegalArgumentException) {
-                        logger.warn("GET /api/cars/search - Invalid transmission type: {}", it)
-                        throw IllegalArgumentException(
-                            "Invalid transmission type: $it. Valid values are: ${TransmissionType.entries.joinToString()}",
-                        )
-                    }
+        val transmissionEnum =
+            transmission?.let {
+                try {
+                    TransmissionType.valueOf(it.uppercase())
+                } catch (e: IllegalArgumentException) {
+                    logger.warn("GET /api/cars/search - Invalid transmission type: {}", it)
+                    throw IllegalArgumentException(
+                        "Invalid transmission type: $it. Valid values are: ${TransmissionType.entries.joinToString()}",
+                    )
                 }
+            }
 
-            val filters =
-                CarSearchFilters(
-                    keyword = keyword,
-                    minYear = minYear,
-                    maxYear = maxYear,
-                    brand = brand,
-                    fuelType = fuelTypeEnum,
-                    transmission = transmissionEnum,
-                )
+        val filters =
+            CarSearchFilters(
+                keyword = keyword,
+                minYear = minYear,
+                maxYear = maxYear,
+                brand = brand,
+                fuelType = fuelTypeEnum,
+                transmission = transmissionEnum,
+            )
 
-            val cars = carService.searchCars(filters)
-            logger.info("GET /api/cars/search - Search completed. Found {} cars", cars.size)
-            ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("GET /api/cars/search - Invalid parameters: {}", ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("GET /api/cars/search - Unexpected error", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val cars = carService.searchCars(filters)
+        logger.info("GET /api/cars/search - Search completed. Found {} cars", cars.size)
+        return ResponseEntity.ok(cars.map { CarResponse.fromEntity(it) })
     }
 
     @PostMapping
@@ -131,19 +108,10 @@ class CarController(
         @Valid @RequestBody request: CarCreateRequest,
     ): ResponseEntity<CarResponse> {
         logger.info("POST /api/cars - Creation request for car: {} {}", request.brand, request.model)
-
-        return try {
-            val car = request.toEntity()
-            val savedCar = carService.createCar(car)
-            logger.info("POST /api/cars - Car created with ID: {}", savedCar.id)
-            ResponseEntity.status(HttpStatus.CREATED).body(CarResponse.fromEntity(savedCar))
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("POST /api/cars - Validation error: {}", ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("POST /api/cars - Error creating Car", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val car = request.toEntity()
+        val savedCar = carService.createCar(car)
+        logger.info("POST /api/cars - Car created with ID: {}", savedCar.id)
+        return ResponseEntity.status(HttpStatus.CREATED).body(CarResponse.fromEntity(savedCar))
     }
 
     @PutMapping("/{id}")
@@ -153,21 +121,9 @@ class CarController(
         @Valid @RequestBody request: CarUpdateRequest,
     ): ResponseEntity<CarResponse> {
         logger.info("PUT /api/cars/{} - Update request received", id)
-
-        return try {
-            val updatedCar = carService.updateCar(id, request.toMap())
-            logger.info("PUT /api/cars/{} - Car updated", id)
-            ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
-        } catch (ex: NoSuchElementException) {
-            logger.warn("PUT /api/cars/{} - Car not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("PUT /api/cars/{} - Validation error: {}", id, ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("PUT /api/cars/{} - Error updating Car", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val updatedCar = carService.updateCar(id, request.toMap())
+        logger.info("PUT /api/cars/{} - Car updated", id)
+        return ResponseEntity.ok(CarResponse.fromEntity(updatedCar))
     }
 
     @DeleteMapping("/{id}")
@@ -176,17 +132,8 @@ class CarController(
         @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         logger.info("DELETE /api/cars/{} - Deletion request received", id)
-
-        return try {
-            carService.deleteCar(id)
-            logger.info("DELETE /api/cars/{} - Car deleted", id)
-            ResponseEntity.noContent().build()
-        } catch (ex: NoSuchElementException) {
-            logger.warn("DELETE /api/cars/{} - Car not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: Exception) {
-            logger.error("DELETE /api/cars/{} - Error deleting Car", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        carService.deleteCar(id)
+        logger.info("DELETE /api/cars/{} - Car deleted", id)
+        return ResponseEntity.noContent().build()
     }
 }

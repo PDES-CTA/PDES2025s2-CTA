@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository
 interface CarOfferRepository : JpaRepository<CarOffer, Long> {
     fun findAllByDealershipId(dealershipId: Long): List<CarOffer>
 
+    fun findByDealershipIdAndAvailableTrue(dealershipId: Long): List<CarOffer>
+
     fun findByCarIdAndDealershipId(
         carId: Long,
         dealershipId: Long,
