@@ -41,6 +41,13 @@ class CarOfferService(
         return offers
     }
 
+    fun findByDealershipIdAndAvailableTrue(dealershipId: Long): List<CarOffer> {
+        logger.debug("Finding car offers for dealership ID: {}", dealershipId)
+        val offers = carOfferRepository.findByDealershipIdAndAvailableTrue(dealershipId)
+        logger.info("Found {} car offers for dealership {}", offers.size, dealershipId)
+        return offers
+    }
+
     @Transactional
     fun createCarOffer(request: CarOfferCreateRequest): CarOffer {
         logger.info("Creating car offer for car ID: {} and dealership ID: {}", request.carId, request.dealershipId)
@@ -50,7 +57,12 @@ class CarOfferService(
             logger.info("Car offer created successfully with ID: {}", savedOffer.id)
             savedOffer
         } catch (ex: Exception) {
-            logger.error("Error creating car offer for car ID: {} and dealership ID: {}", request.carId, request.dealershipId, ex)
+            logger.error(
+                "Error creating car offer for car ID: {} and dealership ID: {}",
+                request.carId,
+                request.dealershipId,
+                ex,
+            )
             throw ex
         }
     }
@@ -112,6 +124,25 @@ class CarOfferService(
         return carOfferRepository.save(carOffer)
     }
 
+    @Transactional
+    fun markAsUnavailable(id: Long): CarOffer {
+        return try {
+            val carOffer =
+                carOfferRepository.findByIdOrNull(id)
+                    ?: run {
+                        logger.warn("Car offer with ID {} not found for update", id)
+                        throw Exception("Car offer with ID $id not found")
+                    }
+            carOffer.markAsUnavailable()
+            validateCarOffer(carOffer)
+            val updatedOffer = carOfferRepository.save(carOffer)
+            updatedOffer
+        } catch (ex: Exception) {
+            logger.error("Error marking car offer as unavailable with ID: {}", id, ex)
+            throw ex
+        }
+    }
+
     fun findByCarIdAndDealershipId(
         carId: Long,
         dealershipId: Long,
@@ -153,9 +184,9 @@ class CarOfferService(
         logger.debug("Validating and creating car offer from request")
         val car = carService.findById(request.carId)
         val dealership = dealershipService.findById(request.dealershipId)
-        val dealershipOffers = carOfferRepository.findAllByDealershipId(request.dealershipId)
+        val dealershipOffers = carOfferRepository.findByDealershipId(request.dealershipId)
 
-        if (dealershipOffers.any { it.car.id == car.id }) {
+        if (dealershipOffers.any { it.car.id == car.id && it.available }) {
             logger.warn("Car with ID {} is already being offered by dealership with ID {}", car.id, dealership.id)
             throw IllegalArgumentException("Car with id ${car.id} is already being offered by dealership with id ${dealership.id}")
         }

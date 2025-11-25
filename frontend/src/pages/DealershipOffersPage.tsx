@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Building2 } from 'lucide-react';
+import { LogOut, Plus, Building2, ShoppingBag } from 'lucide-react';
 import { authService, carOfferService, dealershipService } from '../services/api';
 import CarOfferList from '../components/organisms/CarOfferList';
 import EditOfferModal from '../components/organisms/EditOfferModal';
@@ -9,6 +9,7 @@ import { LoadingSpinner } from '../components/atoms';
 import SmallButton from '../components/atoms/SmallButton';
 import { CarOffer } from '../types/carOffer';
 import styles from './DealershipOffersPage.module.css';
+import { ROUTES } from '../constants';
 
 interface Dealership {
   id: number;
@@ -36,7 +37,7 @@ export default function DealershipOffersPage() {
 
       const [dealershipData, offersData] = await Promise.all([
         dealershipService.getDealershipById(user.id),
-        carOfferService.getByDealershipId(user.id)
+        carOfferService.getAvailableByDealershipId(user.id)
       ]);
 
       setDealership(dealershipData);
@@ -55,7 +56,7 @@ export default function DealershipOffersPage() {
     if (!dealership?.id) return;
     
     try {
-      const offersData = await carOfferService.getByDealershipId(dealership.id);
+      const offersData = await carOfferService.getAvailableByDealershipId(dealership.id);
       setOffers(offersData);
     } catch (err) {
       const errorMessage = err instanceof Error 
@@ -68,10 +69,6 @@ export default function DealershipOffersPage() {
   useEffect(() => {
     fetchDealershipData();
   }, []);
-
-  const handleViewDetails = (carId: string | number) => {
-    navigate(`/cars/${carId}`);
-  };
 
   const handleEdit = (offerId: string | number) => {
     const offer = offers.find(o => o.id === offerId);
@@ -110,12 +107,12 @@ export default function DealershipOffersPage() {
     }
 
     try {
-      await carOfferService.deleteCarOffer(offerId);
+      await carOfferService.markAsUnavailable(offerId);
       setOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId));
     } catch (err) {
       const errorMessage = err instanceof Error 
         ? err.message 
-        : 'Failed to delete offer';
+        : 'Failed to mark offer as unavailable';
       setError(errorMessage);
       await refetchOffers();
     }
@@ -123,6 +120,10 @@ export default function DealershipOffersPage() {
 
   const handleAddNewOffer = () => {
     navigate('/cars/pool');
+  };
+
+  const handleViewPurchases = () => {
+    navigate(ROUTES.DEALERSHIP_SALES);
   };
 
   const handleLogout = () => {
@@ -158,11 +159,15 @@ export default function DealershipOffersPage() {
             </div>
           </div>
           <div className={styles.headerActions}>
+            <SmallButton onClick={handleViewPurchases} variant="secondary">
+              <ShoppingBag size={18} />
+              Sales
+            </SmallButton>
             <SmallButton onClick={handleAddNewOffer} variant="primary">
               <Plus size={18} />
               Add New Offer
             </SmallButton>
-            <SmallButton onClick={handleLogout} variant="secondary">
+            <SmallButton onClick={handleLogout} variant="danger">
               <LogOut size={18} />
               Log Out
             </SmallButton>
@@ -189,7 +194,6 @@ export default function DealershipOffersPage() {
             </div>
             <CarOfferList 
               offers={offers} 
-              onViewDetails={handleViewDetails}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

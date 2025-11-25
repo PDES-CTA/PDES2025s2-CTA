@@ -32,20 +32,11 @@ class BuyerController(
     @Operation(summary = "Create a new buyer")
     fun createBuyer(
         @Valid @RequestBody request: BuyerCreateRequest,
-    ): ResponseEntity<BuyerResponse?> {
+    ): ResponseEntity<BuyerResponse> {
         logger.info("POST /api/buyer - Creation request for buyer: {} {}", request.firstName, request.lastName)
-
-        return try {
-            val savedBuyer = buyerService.createBuyer(request.toEntity())
-            logger.info("POST /api/buyer - Buyer created with ID: {}", savedBuyer.id)
-            ResponseEntity.status(HttpStatus.CREATED).body(BuyerResponse.fromEntity(savedBuyer))
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("POST /api/buyer - Validation error: {}", ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("POST /api/buyer - Error creating buyer", ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val savedBuyer = buyerService.createBuyer(request.toEntity())
+        logger.info("POST /api/buyer - Buyer created with ID: {}", savedBuyer.id)
+        return ResponseEntity.status(HttpStatus.CREATED).body(BuyerResponse.fromEntity(savedBuyer))
     }
 
     @PutMapping("/{id}")
@@ -55,21 +46,9 @@ class BuyerController(
         @Valid @RequestBody request: BuyerUpdateRequest,
     ): ResponseEntity<BuyerResponse> {
         logger.info("PUT /api/buyer/{} - Update request received", id)
-
-        return try {
-            val updatedPurchase = buyerService.updateBuyer(id, request.toMap())
-            logger.info("PUT /api/buyer/{} - Buyer updated", id)
-            ResponseEntity.ok(BuyerResponse.fromEntity(updatedPurchase))
-        } catch (ex: NoSuchElementException) {
-            logger.warn("PUT /api/buyer/{} - Buyer not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: IllegalArgumentException) {
-            logger.warn("PUT /api/buyer/{} - Validation error: {}", id, ex.message)
-            ResponseEntity.badRequest().build()
-        } catch (ex: Exception) {
-            logger.error("PUT /api/buyer/{} - Error updating buyer", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        val updatedBuyer = buyerService.updateBuyer(id, request.toMap())
+        logger.info("PUT /api/buyer/{} - Buyer updated", id)
+        return ResponseEntity.ok(BuyerResponse.fromEntity(updatedBuyer))
     }
 
     @DeleteMapping("/{id}")
@@ -78,17 +57,8 @@ class BuyerController(
         @PathVariable id: Long,
     ): ResponseEntity<Unit> {
         logger.info("DELETE /api/buyer/{} - Deletion request received", id)
-
-        return try {
-            buyerService.deleteBuyer(id)
-            logger.info("DELETE /api/buyer/{} - Buyer deleted", id)
-            ResponseEntity.noContent().build()
-        } catch (ex: NoSuchElementException) {
-            logger.warn("DELETE /api/buyer/{} - Buyer not found", id)
-            ResponseEntity.notFound().build()
-        } catch (ex: Exception) {
-            logger.error("DELETE /api/buyer/{} - Error deleting buyer", id, ex)
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
-        }
+        buyerService.deleteBuyer(id)
+        logger.info("DELETE /api/buyer/{} - Buyer deleted", id)
+        return ResponseEntity.noContent().build()
     }
 }

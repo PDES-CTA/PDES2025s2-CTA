@@ -51,6 +51,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm, 0.5rem);
+  margin-bottom: var(--spacing-lg, 1.5rem);
 }
 
 .title {
@@ -70,6 +71,37 @@
   padding-left: calc(32px + var(--spacing-md, 1rem));
 }
 
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg, 1.5rem);
+}
+
+.statCard {
+  background: linear-gradient(135deg, #3168a3 0%, #155daa 100%);
+  padding: var(--spacing-lg, 1.5rem);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  color: white;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-xs, 0.25rem);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
 /* Empty State */
 .emptyState {
   display: flex;
@@ -79,7 +111,7 @@
   padding: var(--spacing-xxl, 4rem) var(--spacing-xl, 2rem);
   background: white;
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .emptyIcon {
@@ -101,15 +133,15 @@
   text-align: center;
 }
 
-/* Purchases List */
-.purchasesList {
+/* Sales List */
+.salesList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: var(--spacing-lg, 1.5rem);
 }
 
-/* Purchase Card */
-.purchaseCard {
+/* Sale Card */
+.saleCard {
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -119,13 +151,13 @@
   flex-direction: column;
 }
 
-.purchaseCard:hover {
+.saleCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 .cardHeader {
-  background: linear-gradient(135deg, #667eea 0%, #2c2e81 100%);
+  background: linear-gradient(135deg, #3168a3 0%, #155daa 100%);
   padding: var(--spacing-md, 1rem);
   color: white;
 }
@@ -162,7 +194,7 @@
 }
 
 .statusConfirmed {
-  background-color: rgba(209, 250, 229, 0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   color: #065f46;
 }
 
@@ -192,7 +224,7 @@
   height: 150px;
   border-radius: 10px;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3168a3 0%, #155daa 100%);
   margin-bottom: var(--spacing-md, 1rem);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -203,7 +235,7 @@
   object-fit: cover;
 }
 
-.purchaseDetails {
+.saleDetails {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm, 0.625rem);
@@ -220,7 +252,7 @@
 }
 
 .detailIcon {
-  color: #667eea;
+  color: #10b981;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -236,25 +268,43 @@
   flex: 1;
 }
 
+.link {
+  color: #10b981;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
 .cardFooter {
-  padding: var(--spacing-md, 1rem);
+  padding: var(--spacing-xl, 2rem) var(--spacing-lg, 1.5rem);
   border-top: 1px solid var(--color-gray-100, #f3f4f6);
-  display: flex;
-  justify-content: center;
   background-color: var(--color-gray-50, #f9fafb);
 }
 
-.cancelledText {
-  color: var(--color-gray-500, #6b7280);
-  font-style: italic;
-  font-size: 0.875rem;
-  font-weight: 500;
+.footerActions {
+  display: flex;
+  gap: var(--spacing-xl, 2rem);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  min-width: 140px;
+  margin: 0 !important;
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .purchasesList {
+  .salesList {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -271,7 +321,7 @@
     font-size: 0.875rem;
   }
 
-  .purchasesList {
+  .salesList {
     grid-template-columns: 1fr;
     gap: var(--spacing-md, 1rem);
   }
@@ -291,5 +341,9 @@
 
   .detailLabel {
     min-width: auto;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
   }
 }

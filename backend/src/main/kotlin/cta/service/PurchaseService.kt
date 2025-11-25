@@ -126,7 +126,6 @@ class PurchaseService(
 
         try {
             val purchase = findById(id)
-            purchase.carOffer.markAsAvailable()
             carOfferService.save(purchase.carOffer)
             purchaseRepository.delete(purchase)
             logger.info("Purchase ID {} deleted successfully", id)
@@ -142,6 +141,7 @@ class PurchaseService(
 
         return try {
             val purchase = findById(id)
+            purchase.confirmPurchase()
             carOfferService.save(purchase.carOffer)
             val confirmedPurchase = purchaseRepository.save(purchase)
             logger.info("Purchase ID {} marked as confirmed", id)
@@ -159,10 +159,7 @@ class PurchaseService(
         return try {
             val purchase = findById(id)
             purchase.pendingPurchase()
-            if (!purchase.carOffer.available) {
-                purchase.carOffer.markAsSold()
-                carOfferService.save(purchase.carOffer)
-            }
+            carOfferService.save(purchase.carOffer)
             val pendingPurchase = purchaseRepository.save(purchase)
             logger.info("Purchase ID {} marked as pending", id)
             pendingPurchase
@@ -227,7 +224,6 @@ class PurchaseService(
         val carOffer = carOfferService.findById(request.carOfferId)
         val buyer = buyerService.findById(request.buyerId)
 
-        require(carOffer.available) { "Car Offer ${carOffer.id} is not available for purchase" }
         require(buyer.isActive()) { "Buyer ${buyer.id} is not active" }
         require(carOffer.dealership.isActive()) { "Dealership ${carOffer.dealership.id} is not active" }
 

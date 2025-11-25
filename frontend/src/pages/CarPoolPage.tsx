@@ -18,6 +18,7 @@ export default function CarPoolPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [offerError, setOfferError] = useState<string | null>(null);
 
   const fetchAvailableCars = async () => {
     try {
@@ -37,7 +38,11 @@ export default function CarPoolPage() {
       ]);
 
       // Get car IDs that already have offers from this dealership
-      const offeredCarIds = new Set(dealershipOffers.map(offer => offer.car.id));
+      const offeredCarIds = new Set(
+        dealershipOffers
+          .filter(offer => offer.available)  // Filter available offers
+          .map(offer => offer.car.id)
+      );
 
       // Filter out cars that already have offers
       const availableCars = carsData.filter(car => !offeredCarIds.has(car.id));
@@ -75,14 +80,11 @@ export default function CarPoolPage() {
     }
   }, [searchTerm, cars]);
 
-  const handleViewDetails = (carId: string | number) => {
-    navigate(`/cars/${carId}`);
-  };
-
   const handleAddNewOffer = (carId: string | number) => {
     const car = filteredCars.find(c => c.id === carId);
     if (car) {
       setSelectedCar(car);
+      setOfferError(null); // Clear previous errors when opening modal
     }
   };
 
@@ -94,6 +96,8 @@ export default function CarPoolPage() {
     if (!selectedCar) return;
 
     try {
+      setOfferError(null); // Clear previous errors
+      
       // Get the current dealership user
       const user = await authService.getLoggedUser();
       if (!user?.id) {
@@ -110,11 +114,21 @@ export default function CarPoolPage() {
       setSelectedCar(null);
       // Navigate to dealership offers page
       navigate('/offers');
-    } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : 'Failed to create offer';
-      setError(errorMessage);
+    } catch (err: any) {
+      // Extract error message from API response
+      let errorMessage = 'Failed to create offer';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      } else if (err.response?.status) {
+        errorMessage = `Error ${err.response.status}: ${err.response.statusText || 'Failed to create offer'}`;
+      }
+      setOfferError(errorMessage);
+      // Don't close the modal so user can see the error and fix it
     }
   };
 
@@ -198,7 +212,6 @@ export default function CarPoolPage() {
             <CarCarousel 
               cars={filteredCars} 
               onAddOffer={handleAddNewOffer}
-              onViewDetails={handleViewDetails}
             />
           </div>
         )}
@@ -206,8 +219,12 @@ export default function CarPoolPage() {
         {selectedCar && (
           <CreateOfferModal
             car={selectedCar}
-            onClose={() => setSelectedCar(null)}
+            onClose={() => {
+              setSelectedCar(null);
+              setOfferError(null); // Clear error when closing
+            }}
             onSubmit={handleCreateOffer}
+            error={offerError} // Pass error to modal
           />
         )}
       </div>

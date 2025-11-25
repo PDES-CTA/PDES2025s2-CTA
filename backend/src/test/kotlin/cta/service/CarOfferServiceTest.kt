@@ -7,6 +7,7 @@ import cta.repository.CarOfferRepository
 import cta.web.dto.CarOfferCreateRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.Optional
@@ -155,6 +157,23 @@ class CarOfferServiceTest {
         verify(carOfferRepository).findByDealershipId(1L)
     }
 
+    // ========== findByDealershipIdAndAvailableTrue Tests ==========
+
+    @Test
+    @DisplayName("Should find available car offers by dealership id")
+    fun shouldFindAvailableCarOffersByDealershipId() {
+        // Given
+        val carOffers = listOf(validCarOffer)
+        whenever(carOfferRepository.findByDealershipIdAndAvailableTrue(1L)).thenReturn(carOffers)
+
+        // When
+        val result = carOfferService.findByDealershipIdAndAvailableTrue(1L)
+
+        // Then
+        assertEquals(1, result.size)
+        verify(carOfferRepository).findByDealershipIdAndAvailableTrue(1L)
+    }
+
     // ========== findAll Tests ==========
 
     @Test
@@ -199,7 +218,7 @@ class CarOfferServiceTest {
         val result = carOfferService.findByCarIdAndDealershipId(1L, 1L)
 
         // Then
-        assertEquals(null, result)
+        assertNull(result)
         verify(carOfferRepository).findByCarIdAndDealershipId(1L, 1L)
     }
 
@@ -219,7 +238,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
         whenever(carOfferRepository.save(any<CarOffer>())).thenReturn(validCarOffer)
 
         // When
@@ -248,7 +267,7 @@ class CarOfferServiceTest {
         val existingOffer = validCarOffer
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(listOf(existingOffer))
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(listOf(existingOffer))
 
         // When & Then
         val exception =
@@ -273,7 +292,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
 
         // When & Then
         val exception =
@@ -298,7 +317,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
 
         // When & Then
         val exception =
@@ -323,7 +342,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
 
         // When & Then
         val exception =
@@ -349,7 +368,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(inactiveDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
 
         // When & Then
         val exception =
@@ -374,7 +393,7 @@ class CarOfferServiceTest {
 
         whenever(carService.findById(1L)).thenReturn(validCar)
         whenever(dealershipService.findById(1L)).thenReturn(validDealership)
-        whenever(carOfferRepository.findAllByDealershipId(1L)).thenReturn(emptyList())
+        whenever(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
 
         // When & Then
         val exception =
@@ -428,7 +447,7 @@ class CarOfferServiceTest {
     fun shouldThrowExceptionWhenUpdatingNonExistentCarOffer() {
         // Given
         val updateData = mapOf("price" to "30000.00")
-        whenever(carOfferRepository.findById(999L)).thenReturn(Optional.empty())
+        whenever(carOfferRepository.findByIdOrNull(999L)).thenReturn(null)
 
         // When & Then
         assertThrows(Exception::class.java) {
@@ -494,5 +513,36 @@ class CarOfferServiceTest {
         assertNotNull(result)
         assertEquals(1L, result.id)
         verify(carOfferRepository).save(validCarOffer)
+    }
+
+    // ========== markAsUnavailable Tests ==========
+
+    @Test
+    @DisplayName("Should mark car offer as unavailable successfully")
+    fun shouldMarkAsUnavailable() {
+        // Given
+        val availableOffer = validCarOffer.apply { available = true }
+        whenever(carOfferRepository.findById(1L)).thenReturn(Optional.of(availableOffer))
+        whenever(carOfferRepository.save(any<CarOffer>())).thenReturn(validCarOffer)
+
+        // When
+        val result = carOfferService.markAsUnavailable(1L)
+
+        // Then
+        assertNotNull(result)
+        verify(carOfferRepository).save(any<CarOffer>())
+    }
+
+    @Test
+    @DisplayName("Should throw exception when marking non-existent offer as unavailable")
+    fun shouldThrowExceptionWhenMarkingNonExistentOfferAsUnavailable() {
+        // Given
+        whenever(carOfferRepository.findByIdOrNull(999L)).thenReturn(null)
+
+        // When & Then
+        assertThrows(Exception::class.java) {
+            carOfferService.markAsUnavailable(999L)
+        }
+        verify(carOfferRepository, never()).save(any<CarOffer>())
     }
 }

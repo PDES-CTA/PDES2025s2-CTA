@@ -14,9 +14,10 @@ interface CreateOfferModalProps {
     available: boolean;
     dealershipNotes?: string;
   }) => void;
+  error?: string | null;
 }
 
-export default function CreateOfferModal({ car, onClose, onSubmit }: CreateOfferModalProps) {
+export default function CreateOfferModal({ car, onClose, onSubmit, error }: CreateOfferModalProps) {
   const [formData, setFormData] = useState({
     price: '0.0',
     available: true,
@@ -52,6 +53,12 @@ export default function CreateOfferModal({ car, onClose, onSubmit }: CreateOffer
             <X size={24} />
           </button>
         </div>
+
+        {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.carInfo}>

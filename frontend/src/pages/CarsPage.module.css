@@ -17,6 +17,14 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.headerActions {
+  display: flex;
+  flex-direction: row; /* Explicitly set to row */
+  gap: var(--spacing-md, 1rem);
+  align-items: center;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
 .headerContent {
   flex: 1;
 }
@@ -231,6 +239,30 @@
 
 .favoriteButton:hover {
   background-color: #fbcfe8;
+}
+
+.purchasesButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.5rem);
+  padding: var(--spacing-sm, 0.625rem) var(--spacing-md, 1rem);
+  background-color: var(--color-primary, #2563eb);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.purchasesButton:hover {
+  background-color: var(--color-primary-dark, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.purchasesButton:active {
+  transform: translateY(0);
 }
 
 .detailButton {

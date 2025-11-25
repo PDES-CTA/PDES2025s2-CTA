@@ -8,7 +8,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.DecimalMin
 import java.math.BigDecimal
@@ -17,12 +17,12 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "purchase")
 class Purchase : BaseEntity() {
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id", nullable = false)
     lateinit var buyer: Buyer
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_offer_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "car_offer_id", nullable = false)
     lateinit var carOffer: CarOffer
 
     @DecimalMin("0.0")
@@ -45,7 +45,6 @@ class Purchase : BaseEntity() {
 
     fun confirmPurchase() {
         this.purchaseStatus = PurchaseStatus.CONFIRMED
-        this.carOffer.markAsSold()
     }
 
     fun cancelPurchase() {
