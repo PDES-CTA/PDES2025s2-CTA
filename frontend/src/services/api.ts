@@ -62,6 +62,7 @@ interface RegisterData {
   province?: string;
   description?: string;
   role: 'BUYER' | 'DEALERSHIP' | 'ADMINISTRATOR';
+  role: 'BUYER' | 'DEALERSHIP' | 'ADMINISTRATOR';
 }
 
 export interface User {
