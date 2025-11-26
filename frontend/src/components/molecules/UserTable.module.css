@@ -62,6 +62,29 @@
   color: #f57c00;
 }
 
+.deleteButton {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.deleteButton:hover {
+  background-color: #bb2d3b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.deleteButton:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .table {
     font-size: 13px;
@@ -73,6 +96,11 @@
   }
 
   .table th {
+    font-size: 11px;
+  }
+
+  .deleteButton {
+    padding: 4px 8px;
     font-size: 11px;
   }
 }
@@ -90,5 +118,10 @@
   .table th,
   .table td {
     padding: 10px;
+  }
+
+  .deleteButton {
+    padding: 4px 6px;
+    font-size: 10px;
   }
 }

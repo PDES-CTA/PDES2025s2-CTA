@@ -7,6 +7,7 @@ import {
   EmptyState,
   SearchBar,
   SectionHeader,
+  DeleteConfirmationModal,
 } from '../molecules';
 import { adminService } from '../../services/api';
 
@@ -26,6 +27,17 @@ const AdminDealershipsSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    dealershipId: number | null;
+    dealershipName: string;
+  }>({
+    isOpen: false,
+    dealershipId: null,
+    dealershipName: '',
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDealerships();
@@ -56,11 +68,47 @@ const AdminDealershipsSection = () => {
     }
   };
 
+  const handleDeleteClick = (dealership: Dealership) => {
+    setDeleteError(null);
+    setDeleteModal({
+      isOpen: true,
+      dealershipId: dealership.id,
+      dealershipName: dealership.businessName,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.dealershipId) return;
+
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await adminService.deleteDealership(deleteModal.dealershipId);
+      
+      setDealerships(dealerships.filter(d => d.id !== deleteModal.dealershipId));
+      setDeleteModal({ isOpen: false, dealershipId: null, dealershipName: '' });
+      setError(null);
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || 
+                          err?.message || 
+                          'Failed to delete dealership';
+      setDeleteError(errorMessage);
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal({ isOpen: false, dealershipId: null, dealershipName: '' });
+    setDeleteError(null);
+  };
+
   if (loading) {
     return <LoadingState message="Loading dealerships..." />;
   }
 
-  if (error) {
+  if (error && dealerships.length === 0) {
     return <ErrorMessage error={error} onRetry={fetchDealerships} retryLabel="Retry" />;
   }
 
@@ -70,7 +118,6 @@ const AdminDealershipsSection = () => {
         title="Dealerships"
         subtitle="Manage registered dealership partners"
       />
-
       <div className={styles.content}>
         <SearchBar
           placeholder="Search by dealership name, email, or phone..."
@@ -78,12 +125,15 @@ const AdminDealershipsSection = () => {
           onChange={setSearchTerm}
           resultCount={filteredDealerships.length}
         />
-
+        {error && <div className={styles.errorBanner}>{error}</div>}
         {dealerships.length === 0 ? (
           <EmptyState message="No dealerships found" />
         ) : (
           <>
-            <DealershipTable dealerships={filteredDealerships} />
+            <DealershipTable 
+              dealerships={filteredDealerships}
+              onDelete={handleDeleteClick}
+            />
             <div className={styles.pagination}>
               <p>
                 Showing {filteredDealerships.length} of {dealerships.length}{' '}
@@ -93,6 +143,19 @@ const AdminDealershipsSection = () => {
           </>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Dealership"
+        message={deleteError ?
+          `Error: ${deleteError}` :
+          `Are you sure you want to delete ${deleteModal.dealershipName}? This action cannot be undone.`
+        }
+        confirmLabel="Delete Dealership"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

@@ -19,3 +19,4 @@ export { default as AdminSidebar } from './AdminSidebar';
 export { default as StatsBar } from './StatsBar';
 export { default as RatingFilters } from './RatingFilters';
 export { default as PaginationInfo } from './PaginationInfo';
+export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';

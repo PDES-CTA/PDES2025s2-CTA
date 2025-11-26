@@ -12,33 +12,48 @@ interface User {
 
 interface UserTableProps {
   users: User[];
+  onDelete?: (user: User) => void;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, onDelete }) => {
   return (
-    <div className={styles.tableWrapper}>
+    <div className={styles.tableContainer}>
       <table className={styles.table}>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
             <th>Role</th>
+            {onDelete && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
+              <td>{user.id}</td>
               <td>
-                <strong>{user.firstName} {user.lastName}</strong>
+                <span className={styles.name}>
+                  {user.firstName} {user.lastName}
+                </span>
               </td>
               <td>{user.email}</td>
               <td>{user.phone}</td>
               <td>
-                <span className={`${styles.badge} ${styles[user.role.toLowerCase()]}`}>
-                  {user.role}
-                </span>
+                <span className={styles.role}>{user.role}</span>
               </td>
+              {onDelete && (
+                <td>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={() => onDelete(user)}
+                    title={`Delete ${user.firstName} ${user.lastName}`}
+                  >
+                    Delete
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
