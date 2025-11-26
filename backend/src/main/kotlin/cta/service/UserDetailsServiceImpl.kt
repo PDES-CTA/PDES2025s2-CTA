@@ -25,14 +25,7 @@ class UserDetailsServiceImpl(
                     throw UsernameNotFoundException("User not found with the following email: $email")
                 }
 
-        // Get role based on the user type
-        val role =
-            when {
-                usuario.javaClass.simpleName == "Administrator" -> "ROLE_ADMIN"
-                usuario.javaClass.simpleName == "Dealership" -> "ROLE_DEALERSHIP"
-                usuario.javaClass.simpleName == "Buyer" -> "ROLE_BUYER"
-                else -> "ROLE_USER"
-            }
+        val role = "ROLE_${usuario.role}"
 
         logger.debug("User found with email: {} and role: {}", email, role)
 

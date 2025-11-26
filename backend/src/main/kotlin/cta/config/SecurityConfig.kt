@@ -68,7 +68,7 @@ class SecurityConfig(
                         "/api/cars",
                     ).permitAll()
                     // Routes that require authentication
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
                     .requestMatchers("/api/dealerships/sales").hasRole("DEALERSHIP")
                     .requestMatchers("/api/buyers/**").hasRole("BUYER")
                     // Any other request requires authentication

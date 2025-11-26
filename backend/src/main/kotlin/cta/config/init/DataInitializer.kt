@@ -2,6 +2,7 @@ package cta.config.init
 
 import cta.enum.FuelType
 import cta.enum.TransmissionType
+import cta.model.Admin
 import cta.model.Buyer
 import cta.model.Car
 import cta.model.CarOffer
@@ -32,6 +33,15 @@ class DataInitializer(
 
     private fun initUsers() {
         if (userRepository.count() > 0L) return
+
+        val admin =
+            Admin.create(
+                email = "admin@gmail.com",
+                password = passwordEncoder.encode("admin"),
+                firstName = "Admin",
+                lastName = "User",
+                phone = "1100000000",
+            )
 
         val buyer1 =
             Buyer.create(
@@ -88,7 +98,7 @@ class DataInitializer(
                 active = true
             }
 
-        userRepository.saveAll(listOf(buyer1, buyer2, dealership1, dealership2))
+        userRepository.saveAll(listOf(admin, buyer1, buyer2, dealership1, dealership2))
     }
 
     private fun initCars() {
@@ -210,7 +220,6 @@ class DataInitializer(
         val corolla = cars.find { it.brand == "Toyota" && it.model == "Corolla" }
         val golfGTI = cars.find { it.brand == "Volkswagen" && it.model == "Golf GTI" }
         val ranger = cars.find { it.brand == "Ford" && it.model == "Ranger" }
-        val cruze = cars.find { it.brand == "Chevrolet" && it.model == "Cruze" }
         val audiA3 = cars.find { it.brand == "Audi" && it.model == "A3" }
 
         val offers = mutableListOf<CarOffer>()

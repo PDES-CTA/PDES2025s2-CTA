@@ -26,11 +26,11 @@ export default function CarsPage() {
   });
 
   const {
-      displayCars,
-      loading,
-      error,
-      fetchAllCarsAndOffers,
-      searchCarsAndOffers
+    displayCars,
+    loading,
+    error,
+    fetchAllCarsAndOffers,
+    searchCarsAndOffers
   } = useCarSearch();
 
   useEffect(() => {
@@ -103,7 +103,6 @@ export default function CarsPage() {
             </button>
           </div>
         </div>
-
         <SearchFilters
           filters={filters}
           onFiltersChange={setFilters}
@@ -112,7 +111,6 @@ export default function CarsPage() {
           showFilters={showFilters}
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
-
         <CarList displayCars={displayCars} onViewDetails={handleViewDetails} />
       </div>
     </div>

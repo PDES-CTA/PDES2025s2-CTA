@@ -33,8 +33,9 @@ export const useCarSearch = (): UseCarSearchReturn => {
     setError(null);
     try {
       return await requestFn();
-    } catch (err: any) {
-      const message = err.response?.data?.message || err.message || 'An unexpected error occurred';
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
       setError(message);
       console.error('API Request Error:', err);
       if (Array.isArray(err)) return [] as T;
@@ -183,8 +184,9 @@ export const useCarSearch = (): UseCarSearchReturn => {
 
         setDisplayCars(filtered);
         return filtered;
-      } catch (err: unknown | any) {
-        const message = err.message || 'Failed to search cars/offers';
+      } catch (err: unknown) {
+        const error = err as { message?: string };
+        const message = error.message || 'Failed to search cars/offers';
         setError(message);
         console.error('Search Error:', err);
         return [];
@@ -252,8 +254,9 @@ export const useCarSearch = (): UseCarSearchReturn => {
         car: car,
         offers: enrichedOffers,
       };
-    } catch (err: unknown | any) {
-      const message = err.message || `Failed to get car data for ID ${carId}`;
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      const message = error.message || `Failed to get car data for ID ${carId}`;
       setError(message);
       console.error('Get Car Data By ID Error:', err);
       return undefined;
