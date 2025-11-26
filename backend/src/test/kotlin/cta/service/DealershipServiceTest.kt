@@ -1,6 +1,7 @@
 package cta.service
 
 import cta.model.Dealership
+import cta.repository.CarOfferRepository
 import cta.repository.DealershipRepository
 import cta.web.dto.DealershipCreateRequest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,6 +31,9 @@ import java.util.Optional
 class DealershipServiceTest {
     @Mock
     private lateinit var dealershipRepository: DealershipRepository
+
+    @Mock
+    private lateinit var carOfferRepository: CarOfferRepository
 
     @Mock
     private lateinit var passwordEncoder: PasswordEncoder
@@ -726,10 +730,11 @@ class DealershipServiceTest {
     // ========== deleteDealership Tests ==========
 
     @Test
-    @DisplayName("Should delete dealership successfully")
-    fun shouldDeleteDealership() {
+    @DisplayName("Should delete dealership successfully without car offers")
+    fun shouldDeleteDealershipWithoutCarOffers() {
         // Given
         `when`(dealershipRepository.findById(1L)).thenReturn(Optional.of(validDealership))
+        `when`(carOfferRepository.findByDealershipId(1L)).thenReturn(emptyList())
         doNothing().`when`(dealershipRepository).delete(any(Dealership::class.java))
 
         // When
@@ -737,6 +742,7 @@ class DealershipServiceTest {
 
         // Then
         verify(dealershipRepository).findById(1L)
+        verify(carOfferRepository).findByDealershipId(1L)
         verify(dealershipRepository).delete(validDealership)
     }
 
@@ -753,6 +759,7 @@ class DealershipServiceTest {
             }
         assertEquals("Dealership with ID 999 not found", exception.message)
         verify(dealershipRepository, never()).delete(any(Dealership::class.java))
+        verify(carOfferRepository, never()).findByDealershipId(999L)
     }
 
     @Test
@@ -765,5 +772,6 @@ class DealershipServiceTest {
             }
         assertEquals("Dealership ID must be positive", exception.message)
         verify(dealershipRepository, never()).findById(0L)
+        verify(carOfferRepository, never()).findByDealershipId(0L)
     }
 }

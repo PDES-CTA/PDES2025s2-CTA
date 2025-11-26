@@ -76,17 +76,6 @@ interface LoginResponse {
   user: User;
 }
 
-//interface SearchFilters {
-//  keyword?: string;
-//  minPrice?: number;
-//  maxPrice?: number;
-//  minYear?: number;
-//  maxYear?: number;
-//  brand?: string;
-//  fuelType?: string;
-//  transmission?: string;
-//}
-
 interface Favorite {
   id: number;
   carId: number;
@@ -483,6 +472,14 @@ export const adminService = {
   async getTotalSystemRevenue() {
     const response = await apiClient.get('/admin/revenue');
     return response.data;
+  },
+
+  async deleteUser(userId: number): Promise<void> {
+    await apiClient.delete(`/buyer/${userId}`);
+  },
+
+  async deleteDealership(dealershipId: number): Promise<void> {
+    await apiClient.delete(`/dealerships/${dealershipId}`);
   }
 };
 
