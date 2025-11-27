@@ -168,7 +168,7 @@ const AdminTop5Statistics = () => {
                   <div className={styles.itemDetails}>
                     <p className={styles.itemName}>{item.carName || 'Unknown Car'}</p>
                     <p className={styles.itemRating}>
-                      ⭐ {Number(item.averageRating).toFixed(1)}/5
+                      ⭐ {Number(item.averageRating).toFixed(1)}/10
                     </p>
                   </div>
                 </div>
