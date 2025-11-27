@@ -1,0 +1,131 @@
+.header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+}
+
+.logo {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.adminButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #fff3e0;
+  color: #ff9800;
+  border: 1px solid #ffe0b2;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.adminButton:hover {
+  background-color: #ffe0b2;
+  border-color: #ff9800;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+.adminButton span {
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #ffebee;
+  color: #f44336;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #ffcdd2;
+  border-color: #f44336;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+}
+
+.logoutButton span {
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    height: 60px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .adminButton,
+  .logoutButton {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .headerContent {
+    height: 56px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .adminButton,
+  .logoutButton {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 6px;
+  }
+
+  .adminButton svg,
+  .logoutButton svg {
+    margin: 0;
+  }
+}

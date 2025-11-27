@@ -1,0 +1,41 @@
+.ratingFilters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ratingBtn {
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ratingBtn:hover {
+  background-color: #f0f0f0;
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+.ratingBtn.active {
+  background-color: #ff9800;
+  border-color: #ff9800;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .ratingFilters {
+    gap: 8px;
+  }
+
+  .ratingBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

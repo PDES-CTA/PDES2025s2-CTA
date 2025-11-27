@@ -108,7 +108,7 @@ export default function CarDetailPage() {
       const recent = allReviews
         .filter(fav => 
           fav.buyer.id !== currentUserId && 
-          (fav.rating > 0 || (fav.comment && fav.comment.trim() !== ''))
+          (fav.rating! > 0 || (fav.comment && fav.comment.trim() !== ''))
         )
         .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
         .slice(0, 3);

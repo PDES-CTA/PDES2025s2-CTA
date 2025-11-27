@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, LogOut } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { authService, carService, carOfferService } from '../services/api';
 import { ErrorMessage } from '../components/molecules';
 import { LoadingSpinner } from '../components/atoms';
@@ -132,10 +132,6 @@ export default function CarPoolPage() {
     }
   };
 
-  const handleLogout = () => {
-    authService.logout();
-  };
-
   if (loading) {
     return (
       <div className={styles.page}>
@@ -161,12 +157,6 @@ export default function CarPoolPage() {
             <p className={styles.subtitle}>
               Browse {filteredCars.length} available {filteredCars.length === 1 ? 'car' : 'cars'}
             </p>
-          </div>
-          <div className={styles.headerActions}>
-            <SmallButton onClick={handleLogout} variant="ghost">
-              <LogOut size={18} />
-              Log Out
-            </SmallButton>
           </div>
         </div>
 

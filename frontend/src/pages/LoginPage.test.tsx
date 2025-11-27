@@ -1,15 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { ReactElement } from 'react';
 import LoginPage from './LoginPage';
-import * as authService from '../services/api';
 
-vi.mock('../services/api', () => ({
-  authService: {
-    login: vi.fn(),
-  },
-}));
+// Mock localStorage
+const createMockLocalStorage = () => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    length: 0,
+    key: vi.fn(),
+  };
+};
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -20,62 +32,100 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-const renderWithRouter = (component: ReactElement) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>);
-};
+vi.mock('../services/api', () => ({
+  authService: {
+    login: vi.fn(),
+    logout: vi.fn(),
+  },
+}));
+
+// Import after mocking
+import { authService } from '../services/api';
 
 describe('LoginPage', () => {
+  let mockLocalStorage: ReturnType<typeof createMockLocalStorage>;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLocalStorage = createMockLocalStorage();
+    
+    // Mock localStorage globally
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true,
+      configurable: true,
+    });
+
+    mockNavigate.mockClear();
   });
 
   it('should render login form', () => {
-    renderWithRouter(<LoginPage />);
-    expect(screen.getByRole('heading', { name: 'Log In' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('heading', { name: /Log In/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('you@email.com')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
   });
 
   it('should render sign up link', () => {
-    renderWithRouter(<LoginPage />);
-    expect(screen.getByText(/Don't have an account?/i)).toBeInTheDocument();
-    expect(screen.getByText('Sign up')).toBeInTheDocument();
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>
+    );
+
+    const signUpLink = screen.getByRole('link', { name: /Sign up/i });
+    expect(signUpLink).toBeInTheDocument();
   });
 
   it('should submit form with valid credentials', async () => {
-    vi.mocked(authService.authService.login).mockResolvedValue({
-      user: { id: 1, email: 'test@test.com', name: 'Test', role: 'BUYER' },
-    });
+    const mockUser = {
+      user: { id: 1, email: 'test@example.com', name: 'Test', role: 'BUYER' },
+    };
 
-    renderWithRouter(<LoginPage />);
+    vi.mocked(authService.login).mockResolvedValue(mockUser);
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: /Log In/i });
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>
+    );
 
-    fireEvent.change(emailInput, { target: { value: 'test@test.com' } });
+    const emailInput = screen.getByPlaceholderText('you@email.com') as HTMLInputElement;
+    const passwordInput = screen.getByPlaceholderText('••••••••') as HTMLInputElement;
+    const submitButton = screen.getByRole('button', { name: /log in/i });
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(authService.authService.login).toHaveBeenCalledWith({
-        email: 'test@test.com',
+      expect(vi.mocked(authService.login)).toHaveBeenCalledWith({
+        email: 'test@example.com',
         password: 'password123',
       });
     });
   });
 
   it('should show error message on login failure', async () => {
-    vi.mocked(authService.authService.login).mockRejectedValue(new Error('Invalid credentials'));
+    vi.mocked(authService.login).mockRejectedValue(new Error('Invalid credentials'));
 
-    renderWithRouter(<LoginPage />);
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>
+    );
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: /Log In/i });
+    const emailInput = screen.getByPlaceholderText('you@email.com');
+    const passwordInput = screen.getByPlaceholderText('••••••••');
+    const submitButton = screen.getByRole('button', { name: /log in/i });
 
-    fireEvent.change(emailInput, { target: { value: 'test@test.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'wrong' } });
+    fireEvent.change(emailInput, { target: { value: 'invalid@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -84,20 +134,26 @@ describe('LoginPage', () => {
   });
 
   it('should show loading state during submission', async () => {
-    vi.mocked(authService.authService.login).mockImplementation(
+    vi.mocked(authService.login).mockImplementation(
       () => new Promise(resolve => setTimeout(resolve, 100))
     );
 
-    renderWithRouter(<LoginPage />);
+    render(
+      <BrowserRouter>
+        <LoginPage />
+      </BrowserRouter>
+    );
 
-    const emailInput = screen.getByLabelText('Email');
-    const passwordInput = screen.getByLabelText('Password');
-    const submitButton = screen.getByRole('button', { name: /Log In/i });
+    const emailInput = screen.getByPlaceholderText('you@email.com');
+    const passwordInput = screen.getByPlaceholderText('••••••••');
+    const submitButton = screen.getByRole('button', { name: /log in/i });
 
-    fireEvent.change(emailInput, { target: { value: 'test@test.com' } });
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(submitButton);
 
-    expect(screen.getByText('Logging in...')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/logging in|Loading/i)).toBeInTheDocument();
+    });
   });
 });

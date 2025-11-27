@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ShoppingBag, Heart } from 'lucide-react';
+import { ShoppingBag, Heart } from 'lucide-react';
 import { authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
 import { SearchFiltersState } from '../components/organisms/SearchFilters';
 import { ErrorMessage } from '../components/molecules';
 import { LoadingSpinner } from '../components/atoms';
-import { ROUTES, generateRoute } from '../constants';
+import { generateRoute } from '../constants';
 import styles from './CarsPage.module.css';
 import { useCarSearch } from '../hooks';
 
@@ -26,11 +26,11 @@ export default function CarsPage() {
   });
 
   const {
-      displayCars,
-      loading,
-      error,
-      fetchAllCarsAndOffers,
-      searchCarsAndOffers
+    displayCars,
+    loading,
+    error,
+    fetchAllCarsAndOffers,
+    searchCarsAndOffers
   } = useCarSearch();
 
   useEffect(() => {
@@ -82,11 +82,6 @@ export default function CarsPage() {
     }
   };
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate(ROUTES.LOGIN);
-  };
-
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage error={error} onRetry={fetchAllCarsAndOffers} />;
 
@@ -107,10 +102,6 @@ export default function CarsPage() {
               <ShoppingBag size={20} />
               My Purchases
             </button>
-            <button onClick={handleLogout} className={styles.logoutButton}>
-              <LogOut size={20} />
-              Log Out
-            </button>
           </div>
         </div>
 
@@ -122,7 +113,6 @@ export default function CarsPage() {
           showFilters={showFilters}
           onToggleFilters={() => setShowFilters(!showFilters)}
         />
-
         <CarList displayCars={displayCars} onViewDetails={handleViewDetails} />
       </div>
     </div>
