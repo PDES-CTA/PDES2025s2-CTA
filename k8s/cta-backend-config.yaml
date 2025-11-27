@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: cta
+data:
+  SPRING_PROFILES_ACTIVE: "kubernetes"
