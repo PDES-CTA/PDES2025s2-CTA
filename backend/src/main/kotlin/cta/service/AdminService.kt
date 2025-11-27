@@ -317,32 +317,35 @@ class AdminService(
             "Unknown Dealership"
         }
     }
+
     fun getTopRatedCarsWithNames(limit: Int = 5): List<Map<String, Any>> {
         logger.debug("Fetching top {} highest rated cars with names", limit)
 
-        val allFavorites = favoriteCarRepository.findAll()
-            .filter { it.rating != null && it.car != null && it.car.id != null }
+        val allFavorites =
+            favoriteCarRepository.findAll()
+                .filter { it.rating != null && it.car != null && it.car.id != null }
 
         logger.info("Total favorites with ratings: {}", allFavorites.size)
 
-        val topRatedCars = allFavorites
-            .groupBy { it.car.id }
-            .mapNotNull { (carId, favorites) ->
-                val ratings = favorites.mapNotNull { it.rating }
-                val carName = favorites.firstOrNull()?.car?.getFullName() ?: "Unknown Car"
+        val topRatedCars =
+            allFavorites
+                .groupBy { it.car.id }
+                .mapNotNull { (carId, favorites) ->
+                    val ratings = favorites.mapNotNull { it.rating }
+                    val carName = favorites.firstOrNull()?.car?.getFullName() ?: "Unknown Car"
 
-                if (carId != null && ratings.isNotEmpty()) {
-                    mapOf<String, Any>(
-                        "carId" to carId,
-                        "carName" to carName,
-                        "averageRating" to ratings.average(),
-                    )
-                } else {
-                    null
+                    if (carId != null && ratings.isNotEmpty()) {
+                        mapOf<String, Any>(
+                            "carId" to carId,
+                            "carName" to carName,
+                            "averageRating" to ratings.average(),
+                        )
+                    } else {
+                        null
+                    }
                 }
-            }
-            .sortedByDescending { (it["averageRating"] as? Number)?.toDouble() ?: 0.0 }
-            .take(limit)
+                .sortedByDescending { (it["averageRating"] as? Number)?.toDouble() ?: 0.0 }
+                .take(limit)
 
         logger.info("Returning {} top rated cars", topRatedCars.size)
         topRatedCars.forEach { car ->

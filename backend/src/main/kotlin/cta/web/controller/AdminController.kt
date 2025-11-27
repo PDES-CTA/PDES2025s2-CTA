@@ -5,7 +5,6 @@ import cta.service.AdminService
 import cta.web.dto.AdminDashboardResponse
 import cta.web.dto.AdminPurchaseResponse
 import cta.web.dto.CarReviewResponse
-import cta.web.dto.PurchaseResponse
 import cta.web.dto.UserResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -317,12 +316,13 @@ class AdminController(
         val topCars = adminService.getTopSellingCars(5)
         val response =
             topCars.map { (carId, count) ->
-                val carName = try {
-                    adminService.getCarNameById(carId)
-                } catch (e: Exception) {
-                    logger.warn("Could not fetch car name for carId: {}", carId)
-                    "Unknown Car"
-                }
+                val carName =
+                    try {
+                        adminService.getCarNameById(carId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch car name for carId: {}", carId)
+                        "Unknown Car"
+                    }
                 mapOf(
                     "carId" to carId,
                     "carName" to carName,
@@ -339,12 +339,13 @@ class AdminController(
         val topBuyers = adminService.getTopBuyersByPurchases(5)
         val response =
             topBuyers.map { (buyerId, count) ->
-                val buyerName = try {
-                    adminService.getBuyerNameById(buyerId)
-                } catch (e: Exception) {
-                    logger.warn("Could not fetch buyer name for buyerId: {}", buyerId)
-                    "Unknown Buyer"
-                }
+                val buyerName =
+                    try {
+                        adminService.getBuyerNameById(buyerId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch buyer name for buyerId: {}", buyerId)
+                        "Unknown Buyer"
+                    }
                 mapOf(
                     "buyerId" to buyerId,
                     "buyerName" to buyerName,
@@ -361,12 +362,13 @@ class AdminController(
         val topDealerships = adminService.getTopDealershipsBySales(5)
         val response =
             topDealerships.map { (dealershipId, count) ->
-                val dealershipName = try {
-                    adminService.getDealershipNameById(dealershipId)
-                } catch (e: Exception) {
-                    logger.warn("Could not fetch dealership name for dealershipId: {}", dealershipId)
-                    "Unknown Dealership"
-                }
+                val dealershipName =
+                    try {
+                        adminService.getDealershipNameById(dealershipId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch dealership name for dealershipId: {}", dealershipId)
+                        "Unknown Dealership"
+                    }
                 mapOf(
                     "dealershipId" to dealershipId,
                     "dealershipName" to dealershipName,
