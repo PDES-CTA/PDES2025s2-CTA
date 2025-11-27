@@ -1,11 +1,11 @@
 package cta.web.controller
 
 import cta.enum.UserRole
-import cta.repository.FavoriteCarRepository
 import cta.service.AdminService
 import cta.web.dto.AdminDashboardResponse
 import cta.web.dto.AdminPurchaseResponse
 import cta.web.dto.CarReviewResponse
+import cta.web.dto.PurchaseResponse
 import cta.web.dto.UserResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController
 @PreAuthorize("hasRole('ADMINISTRATOR')")
 class AdminController(
     private val adminService: AdminService,
-    private val favoriteCarRepository: FavoriteCarRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -318,13 +317,12 @@ class AdminController(
         val topCars = adminService.getTopSellingCars(5)
         val response =
             topCars.map { (carId, count) ->
-                val carName =
-                    try {
-                        adminService.getCarNameById(carId)
-                    } catch (e: Exception) {
-                        logger.warn("Could not fetch car name for carId: {}", carId)
-                        "Unknown Car"
-                    }
+                val carName = try {
+                    adminService.getCarNameById(carId)
+                } catch (e: Exception) {
+                    logger.warn("Could not fetch car name for carId: {}", carId)
+                    "Unknown Car"
+                }
                 mapOf(
                     "carId" to carId,
                     "carName" to carName,
@@ -341,13 +339,12 @@ class AdminController(
         val topBuyers = adminService.getTopBuyersByPurchases(5)
         val response =
             topBuyers.map { (buyerId, count) ->
-                val buyerName =
-                    try {
-                        adminService.getBuyerNameById(buyerId)
-                    } catch (e: Exception) {
-                        logger.warn("Could not fetch buyer name for buyerId: {}", buyerId)
-                        "Unknown Buyer"
-                    }
+                val buyerName = try {
+                    adminService.getBuyerNameById(buyerId)
+                } catch (e: Exception) {
+                    logger.warn("Could not fetch buyer name for buyerId: {}", buyerId)
+                    "Unknown Buyer"
+                }
                 mapOf(
                     "buyerId" to buyerId,
                     "buyerName" to buyerName,
@@ -364,13 +361,12 @@ class AdminController(
         val topDealerships = adminService.getTopDealershipsBySales(5)
         val response =
             topDealerships.map { (dealershipId, count) ->
-                val dealershipName =
-                    try {
-                        adminService.getDealershipNameById(dealershipId)
-                    } catch (e: Exception) {
-                        logger.warn("Could not fetch dealership name for dealershipId: {}", dealershipId)
-                        "Unknown Dealership"
-                    }
+                val dealershipName = try {
+                    adminService.getDealershipNameById(dealershipId)
+                } catch (e: Exception) {
+                    logger.warn("Could not fetch dealership name for dealershipId: {}", dealershipId)
+                    "Unknown Dealership"
+                }
                 mapOf(
                     "dealershipId" to dealershipId,
                     "dealershipName" to dealershipName,
@@ -384,38 +380,8 @@ class AdminController(
     @GetMapping("/top-5/best-rated-cars")
     fun getTopRatedCarsTop5(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Admin fetching top 5 best-rated cars")
-
-        val allFavorites =
-            favoriteCarRepository.findAll()
-                .filter { it.rating != null && it.car != null && it.car.id != null }
-
-        logger.info("Total favorites with ratings: {}", allFavorites.size)
-
-        val topRatedCars =
-            allFavorites
-                .groupBy { it.car.id }
-                .mapNotNull { (carId, favorites) ->
-                    val ratings = favorites.mapNotNull { it.rating }
-                    val carName = favorites.firstOrNull()?.car?.getFullName() ?: "Unknown Car"
-
-                    if (carId != null && ratings.isNotEmpty()) {
-                        mapOf(
-                            "carId" to carId,
-                            "carName" to carName,
-                            "averageRating" to ratings.average(),
-                        )
-                    } else {
-                        null
-                    }
-                }
-                .sortedByDescending { (it["averageRating"] as? Number)?.toDouble() ?: 0.0 }
-                .take(5)
-
+        val topRatedCars = adminService.getTopRatedCarsWithNames(5)
         logger.info("Returning {} top rated cars", topRatedCars.size)
-        topRatedCars.forEach { car ->
-            logger.debug("Car: {} - Rating: {}", car["carName"], car["averageRating"])
-        }
-
         return ResponseEntity.ok(topRatedCars)
     }
 }
