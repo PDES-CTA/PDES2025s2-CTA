@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "ax
 import { Car } from "../types/car";
 import { CarOffer } from "../types/carOffer";
 import { Purchase } from "../types/purchase";
+import { Favorite, FavoriteCarCreateRequest, FavoriteCarUpdateReviewRequest } from "../types/favoriteCar";
 
 // Centralized configuration
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
@@ -87,15 +88,6 @@ interface LoginResponse {
 //  transmission?: string;
 //}
 
-interface Favorite {
-  id: number;
-  carId: number;
-  car: Car;
-  rating?: number;
-  comment?: string;
-  createdAt: string;
-}
-
 interface ReviewData {
   rating: number;
   comment: string;
@@ -174,6 +166,45 @@ export const authService = {
   logout(): void {
     localStorage.removeItem("authorization_token");
     globalThis.location.href = "/login";
+  }
+};
+
+// ==================== FAVORITE SERVICE ====================
+
+export const favoriteService = {
+  // Save a favorite car marked by a buyer
+  async saveFavorite(request: FavoriteCarCreateRequest): Promise<Favorite> {
+    const response = await apiClient.post<Favorite>('/favorite', request);
+    return response.data;
+  },
+
+  // Delete an existing favorite car
+  async deleteFavoriteCar(id: string | number): Promise<void> {
+    await apiClient.delete(`/favorite/${id}`);
+  },
+
+  // Update a favorite car review
+  async updateReview(id: string | number, request: FavoriteCarUpdateReviewRequest): Promise<Favorite> {
+    const response = await apiClient.put<Favorite>(`/favorite/${id}`, request);
+    return response.data;
+  },
+
+  // Get favorite car by its ID
+  async getFavoriteById(id: string | number): Promise<Favorite> {
+    const response = await apiClient.get<Favorite>(`/favorite/${id}`);
+    return response.data;
+  },
+
+  // Get all favorite cars for a specific buyer
+  async getFavoritesByBuyerId(buyerId: string | number): Promise<Favorite[]> {
+    const response = await apiClient.get<Favorite[]>(`/favorite/buyer/${buyerId}`);
+    return response.data;
+  },
+
+  // Get all favorites associated with a specific car
+  async getFavoritesByCarId(carId: string | number): Promise<Favorite[]> {
+    const response = await apiClient.get<Favorite[]>(`/favorite/car/${carId}`);
+    return response.data;
   }
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, Calendar, CreditCard, FileText, User } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Calendar, CreditCard, FileText } from 'lucide-react';
 import { purchaseService, authService } from '../services/api';
 import { LoadingSpinner, Button } from '../components/atoms';
 import { ErrorMessage } from '../components/molecules';
@@ -230,17 +230,9 @@ export default function DealershipSalesPage() {
                     )}
 
                     <div className={styles.saleDetails}>
-                      <div className={styles.detailItem}>
-                        <User size={16} className={styles.detailIcon} />
-                        <span className={styles.detailLabel}>Buyer:</span>
-                        <span className={styles.detailValue}>
-                          {sale.buyer.email}
-                        </span>
-                      </div>
-
                       {sale.buyer.email && (
                         <div className={styles.detailItem}>
-                          <span className={styles.detailLabel}>Email:</span>
+                          <span className={styles.detailLabel}>Buyer:</span>
                           <span className={styles.detailValue}>
                             <a href={`mailto:${sale.buyer.email}`} className={styles.link}>
                               {sale.buyer.email}

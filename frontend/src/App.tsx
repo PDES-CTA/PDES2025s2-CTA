@@ -20,6 +20,7 @@ import DealershipSalesPage from './pages/DealershipSalesPage';
 import styles from './App.module.css';
 import DealershipOffersPage from './pages/DealershipOffersPage';
 import CarPoolPage from './pages/CarPoolPage';
+import BuyerFavoritesPage from './pages/BuyerFavoritesPage';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -117,6 +118,16 @@ function App() {
             <PrivateRoute>
               <Layout>
                 <DealershipSalesPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/favorites/:userId"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <BuyerFavoritesPage />
               </Layout>
             </PrivateRoute>
           }

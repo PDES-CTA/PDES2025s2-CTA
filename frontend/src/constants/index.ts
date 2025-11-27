@@ -100,5 +100,6 @@ export const ROUTES = {
 export const generateRoute = {
   carDetail: (id: string | number): string => `/cars/${id}`,
   userProfile: (id: string | number): string => `/profile/${id}`,
-  userPurchases: (id: string | number): string => `/purchases/${id}`
+  userPurchases: (id: string | number): string => `/purchases/${id}`,
+  userFavorites: (userId: string | number) => `/favorites/${userId}`
 };

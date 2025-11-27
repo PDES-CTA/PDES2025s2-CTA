@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ShoppingBag } from 'lucide-react';
+import { LogOut, ShoppingBag, Heart } from 'lucide-react';
 import { authService } from '../services/api';
 import { CarList, SearchFilters } from '../components/organisms';
 import { SearchFiltersState } from '../components/organisms/SearchFilters';
@@ -76,6 +76,12 @@ export default function CarsPage() {
     }
   };
 
+  const handleMyFavorites = () => {
+    if (userId) {
+      navigate(generateRoute.userFavorites(userId));
+    }
+  };
+
   const handleLogout = () => {
     authService.logout();
     navigate(ROUTES.LOGIN);
@@ -93,6 +99,10 @@ export default function CarsPage() {
             <p className={styles.subtitle}>Find the perfect car for you</p>
           </div>
           <div className={styles.headerActions}>
+            <button onClick={handleMyFavorites} className={styles.favoritesButton}>
+              <Heart size={20} />
+              My Favorites
+            </button>
             <button onClick={handleMyPurchases} className={styles.purchasesButton}>
               <ShoppingBag size={20} />
               My Purchases
