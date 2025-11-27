@@ -4,7 +4,7 @@ import { BarChart3, Users, Building2, ShoppingCart, TrendingUp, LogOut } from 'l
 import Button from '../atoms/Button';
 import styles from './AdminSidebar.module.css';
 
-type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases';
+type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases' | 'top5';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -20,6 +20,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     icon: React.ReactNode;
   }> = [
     { id: 'overview', label: 'Dashboard', icon: <BarChart3 size={20} /> },
+    { id: 'top5', label: 'Top 5', icon: <TrendingUp size={20} /> },
     { id: 'users', label: 'Users & Buyers', icon: <Users size={20} /> },
     { id: 'dealerships', label: 'Dealerships', icon: <Building2 size={20} /> },
     { id: 'favorites', label: 'Favorite Cars', icon: <TrendingUp size={20} /> },

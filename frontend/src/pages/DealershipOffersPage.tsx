@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Building2, ShoppingBag } from 'lucide-react';
+import { Plus, Building2, ShoppingBag } from 'lucide-react';
 import { authService, carOfferService, dealershipService } from '../services/api';
 import CarOfferList from '../components/organisms/CarOfferList';
 import EditOfferModal from '../components/organisms/EditOfferModal';
@@ -126,10 +126,6 @@ export default function DealershipOffersPage() {
     navigate(ROUTES.DEALERSHIP_SALES);
   };
 
-  const handleLogout = () => {
-    authService.logout();
-  };
-
   if (loading) {
     return (
       <div className={styles.page}>
@@ -166,10 +162,6 @@ export default function DealershipOffersPage() {
             <SmallButton onClick={handleAddNewOffer} variant="primary">
               <Plus size={18} />
               Add New Offer
-            </SmallButton>
-            <SmallButton onClick={handleLogout} variant="danger">
-              <LogOut size={18} />
-              Log Out
             </SmallButton>
           </div>
         </div>

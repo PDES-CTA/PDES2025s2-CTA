@@ -275,4 +275,68 @@ class AdminController(
             ),
         )
     }
+
+    @GetMapping("/top-5/best-selling-cars")
+    fun getTopSellingCars(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Admin fetching top 5 best-selling cars")
+        val topCars = adminService.getTopSellingCars(5)
+        val response =
+            topCars.map { (carId, count) ->
+                mapOf(
+                    "carId" to carId,
+                    "carName" to adminService.getCarNameById(carId),
+                    "purchaseCount" to count,
+                )
+            }
+        logger.info("Returning {} top selling cars", response.size)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/top-5/buyers-most-purchases")
+    fun getTopBuyersByPurchases(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Admin fetching top 5 buyers by purchase count")
+        val topBuyers = adminService.getTopBuyersByPurchases(5)
+        val response =
+            topBuyers.map { (buyerId, count) ->
+                mapOf(
+                    "buyerId" to buyerId,
+                    "buyerName" to adminService.getBuyerNameById(buyerId),
+                    "purchaseCount" to count,
+                )
+            }
+        logger.info("Returning {} top buyers", response.size)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/top-5/dealerships-most-sales")
+    fun getTopDealershipsBySales(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Admin fetching top 5 dealerships by sales count")
+        val topDealerships = adminService.getTopDealershipsBySales(5)
+        val response =
+            topDealerships.map { (dealershipId, count) ->
+                mapOf(
+                    "dealershipId" to dealershipId,
+                    "dealershipName" to adminService.getDealershipNameById(dealershipId),
+                    "salesCount" to count,
+                )
+            }
+        logger.info("Returning {} top dealerships", response.size)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/top-5/best-rated-cars")
+    fun getTopRatedCarsTop5(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Admin fetching top 5 best-rated cars")
+        val topCars = adminService.getHighestRatedCars(5)
+        val response =
+            topCars.map { (carId, avgRating) ->
+                mapOf(
+                    "carId" to carId,
+                    "carName" to adminService.getCarNameById(carId),
+                    "averageRating" to avgRating,
+                )
+            }
+        logger.info("Returning {} top rated cars", response.size)
+        return ResponseEntity.ok(response)
+    }
 }

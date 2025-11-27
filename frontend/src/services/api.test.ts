@@ -68,16 +68,16 @@ vi.mock('../constants', () => ({
 }));
 
 const PAYMENT_METHODS = {
-  CREDIT_CARD: 'CREDIT_CARD',
-  CASH: 'CASH',
-  CHECK: 'CHECK',
+  CREDIT_CARD: 'CREDIT_CARD' as const,
+  CASH: 'CASH' as const,
+  CHECK: 'CHECK' as const,
 };
 
 const PURCHASE_STATUS = {
-  PENDING: 'PENDING',
-  CONFIRMED: 'CONFIRMED',
-  CANCELLED: 'CANCELLED',
-  DELIVERED: 'DELIVERED',
+  PENDING: 'PENDING' as const,
+  CONFIRMED: 'CONFIRMED' as const,
+  CANCELLED: 'CANCELLED' as const,
+  DELIVERED: 'DELIVERED' as const,
 };
 
 describe('API Service', () => {
