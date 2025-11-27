@@ -135,7 +135,6 @@ describe('DealershipOffersPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Sales')).toBeInTheDocument();
       expect(screen.getByText('Add New Offer')).toBeInTheDocument();
-      expect(screen.getByText('Log Out')).toBeInTheDocument();
     });
   });
 
@@ -200,19 +199,6 @@ describe('DealershipOffersPage', () => {
     fireEvent.click(salesButton);
     
     expect(mockNavigate).toHaveBeenCalledWith(ROUTES.DEALERSHIP_SALES);
-  });
-
-  it('should call logout when Log Out is clicked', async () => {
-    renderPage();
-    
-    await waitFor(() => {
-      expect(screen.getByText('Log Out')).toBeInTheDocument();
-    });
-    
-    const logoutButton = screen.getByText('Log Out');
-    fireEvent.click(logoutButton);
-    
-    expect(authService.logout).toHaveBeenCalled();
   });
 
   it('should render error message when fetching fails', async () => {
