@@ -22,9 +22,10 @@ const ReviewTable: React.FC<ReviewTableProps> = ({ reviews }) => {
   };
 
   const renderStars = (rating: number | null) => {
-    if (!rating) return '—';
-    const fullStars = Math.round(rating);
-    return '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
+    if (!rating || rating <= 0) return '—';
+    const fullStars = Math.min(Math.max(Math.round(rating), 0), 5);
+    const emptyStars = Math.max(5 - fullStars, 0);
+    return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
   };
 
   const truncateComment = (comment: string | null, maxLength: number = 80) => {

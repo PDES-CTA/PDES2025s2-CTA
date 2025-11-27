@@ -35,11 +35,14 @@ const AdminFavoriteCarsSection = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = favorites.filter(
-      (fav) =>
-        fav.carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fav.buyerName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = favorites.filter((fav) => {
+      const carName = fav.carName || '';
+      const buyerName = fav.buyerName || '';
+      return (
+        carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        buyerName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
 
     if (filterReviewed === 'reviewed') {
       filtered = filtered.filter((fav) => fav.isReviewed);
