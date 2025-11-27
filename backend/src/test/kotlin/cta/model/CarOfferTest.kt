@@ -101,9 +101,9 @@ class CarOfferTest {
     }
 
     @Test
-    @DisplayName("Should mark car offer as sold")
+    @DisplayName("Should mark car offer as not available")
     fun shouldMarkCarOfferAsSold() {
-        carOffer.markAsSold()
+        carOffer.markAsUnavailable()
         assertFalse(carOffer.available)
     }
 
@@ -211,13 +211,13 @@ class CarOfferTest {
     fun shouldToggleAvailabilityMultipleTimes() {
         assertTrue(carOffer.available)
 
-        carOffer.markAsSold()
+        carOffer.markAsUnavailable()
         assertFalse(carOffer.available)
 
         carOffer.markAsAvailable()
         assertTrue(carOffer.available)
 
-        carOffer.markAsSold()
+        carOffer.markAsUnavailable()
         assertFalse(carOffer.available)
     }
 

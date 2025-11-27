@@ -10,15 +10,19 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CarsPage from './pages/CarsPage';
 import CarDetailPage from './pages/CarDetailPage';
+import PurchasesPage from './pages/PurchasesPage';
+import DealershipSalesPage from './pages/DealershipSalesPage';
 
 // import FavoritesPage from './pages/FavoritesPage';
-// import PurchasesPage from './pages/PurchasesPage';
 // import DashboardPage from './pages/DashboardPage';
 // import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/AdminPage';
 
 import styles from './App.module.css';
 import DealershipOffersPage from './pages/DealershipOffersPage';
 import CarPoolPage from './pages/CarPoolPage';
+import Header from './components/organisms/Header';
+import BuyerFavoritesPage from './pages/BuyerFavoritesPage';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -29,20 +33,27 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
   return token ? children : <Navigate to={ROUTES.LOGIN} />;
 };
 
-interface LayoutProps {
+interface AdminRouteProps {
   children: React.ReactNode;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const AdminRoute = ({ children }: AdminRouteProps) => {
+  const token = localStorage.getItem('authorization_token');
+  const userRole = localStorage.getItem('user_role');
+  const isAdmin = userRole === 'ADMINISTRATOR';
+  
+  return token && isAdmin ? children : <Navigate to={ROUTES.LOGIN} />;
+};
+
+interface LayoutProps {
+  children: React.ReactNode;
+  showHeader?: boolean;
+}
+
+const Layout = ({ children, showHeader = true }: LayoutProps) => {
   return (
     <div className={styles.layout}>
-      <header className={styles.header}>
-        <div className={styles.headerContainer}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.logo}>Compra Tu Auto</h1>
-          </div>
-        </div>
-      </header>
+      {showHeader && <Header />}
       <main>{children}</main>
     </div>
   );
@@ -62,9 +73,11 @@ function App() {
       try {
         const userData = await authService.getLoggedUser();
         setUser(userData);
+        localStorage.setItem('user_role', userData.role);
       } catch (error) {
         console.error('Error al verificar autenticación:', error);
         localStorage.removeItem('authorization_token');
+        localStorage.removeItem('user_role');
       }
     }
     setLoading(false);
@@ -82,13 +95,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path={ROUTES.HOME} element={<HomePage />} />
-        <Route path={ROUTES.CAR_POOL} element={<CarPoolPage/>} />
-        <Route path={ROUTES.DEALERSHIP_OFFERS} element={<DealershipOffersPage />} />
-        <Route path={ROUTES.DEALERSHIP_HOME} element={<DealershipHomePage />} />
+        <Route path={ROUTES.HOME} element={<Layout><HomePage/></Layout>} />
+        <Route path={ROUTES.CAR_POOL} element={<Layout><CarPoolPage /></Layout>} />
+        <Route path={ROUTES.DEALERSHIP_OFFERS} element={<Layout><DealershipOffersPage /></Layout>} />
+        <Route path={ROUTES.DEALERSHIP_HOME} element={<Layout><DealershipHomePage /></Layout> } />
         <Route path={ROUTES.LOGIN} element={<LoginPage onLogin={checkAuth} />} />
         <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-        <Route path={ROUTES.CARS} element={<CarsPage />} />
+        <Route path={ROUTES.CARS} element={<Layout><CarsPage /></Layout>} />
         {/* Protected Routes */}
         <Route
           path="/cars/:id"
@@ -98,6 +111,46 @@ function App() {
                 <CarDetailPage />
               </Layout>
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/purchases/:id"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <PurchasesPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sales/dealership"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <DealershipSalesPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/favorites/:userId"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <BuyerFavoritesPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path={ROUTES.ADMIN}
+          element={
+            <AdminRoute>
+                <AdminPage />
+            </AdminRoute>
           }
         />
 
@@ -131,17 +184,6 @@ function App() {
             <PrivateRoute>
               <Layout>
                 <DashboardPage />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
-        
-        <Route
-          path={ROUTES.ADMIN}
-          element={
-            <PrivateRoute>
-              <Layout>
-                <AdminPage />
               </Layout>
             </PrivateRoute>
           }

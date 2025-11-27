@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { Car } from "../types/car";
 import { CarOffer } from "../types/carOffer";
+import { Purchase } from "../types/purchase";
+import { Favorite, FavoriteCarCreateRequest, FavoriteCarUpdateReviewRequest } from "../types/favoriteCar";
 
 // Centralized configuration
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
@@ -60,7 +62,7 @@ interface RegisterData {
   city?: string;
   province?: string;
   description?: string;
-  role: 'BUYER' | 'DEALERSHIP';
+  role: 'BUYER' | 'DEALERSHIP' | 'ADMINISTRATOR';
 }
 
 export interface User {
@@ -75,46 +77,20 @@ interface LoginResponse {
   user: User;
 }
 
-//interface SearchFilters {
-//  keyword?: string;
-//  minPrice?: number;
-//  maxPrice?: number;
-//  minYear?: number;
-//  maxYear?: number;
-//  brand?: string;
-//  fuelType?: string;
-//  transmission?: string;
-//}
-
-interface Favorite {
-  id: number;
-  carId: number;
-  car: Car;
-  rating?: number;
-  comment?: string;
-  createdAt: string;
-}
 
 interface ReviewData {
   rating: number;
   comment: string;
 }
 
-interface Purchase {
-  id: number;
-  carId: number;
-  car: Car;
-  paymentMethod: string;
-  observations?: string;
-  status: string;
-  createdAt: string;
-  purchaseDate?: string;
-  finalPrice?: number;
-}
 
 interface PurchaseData {
-  carId: number;
-  paymentMethod: string;
+  buyerId: number;
+  carOfferId: number;
+  finalPrice: number;
+  purchaseDate?: string;
+  purchaseStatus?: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  paymentMethod: 'CASH' | 'CREDIT_CARD' | 'CHECK';
   observations?: string;
 }
 
@@ -184,6 +160,45 @@ export const authService = {
   }
 };
 
+// ==================== FAVORITE SERVICE ====================
+
+export const favoriteService = {
+  // Save a favorite car marked by a buyer
+  async saveFavorite(request: FavoriteCarCreateRequest): Promise<Favorite> {
+    const response = await apiClient.post<Favorite>('/favorite', request);
+    return response.data;
+  },
+
+  // Delete an existing favorite car
+  async deleteFavoriteCar(id: string | number): Promise<void> {
+    await apiClient.delete(`/favorite/${id}`);
+  },
+
+  // Update a favorite car review
+  async updateReview(id: string | number, request: FavoriteCarUpdateReviewRequest): Promise<Favorite> {
+    const response = await apiClient.put<Favorite>(`/favorite/${id}`, request);
+    return response.data;
+  },
+
+  // Get favorite car by its ID
+  async getFavoriteById(id: string | number): Promise<Favorite> {
+    const response = await apiClient.get<Favorite>(`/favorite/${id}`);
+    return response.data;
+  },
+
+  // Get all favorite cars for a specific buyer
+  async getFavoritesByBuyerId(buyerId: string | number): Promise<Favorite[]> {
+    const response = await apiClient.get<Favorite[]>(`/favorite/buyer/${buyerId}`);
+    return response.data;
+  },
+
+  // Get all favorites associated with a specific car
+  async getFavoritesByCarId(carId: string | number): Promise<Favorite[]> {
+    const response = await apiClient.get<Favorite[]>(`/favorite/car/${carId}`);
+    return response.data;
+  }
+};
+
 // ==================== CAR OFFER SERVICE ====================
 
 export const carOfferService = {
@@ -198,6 +213,13 @@ export const carOfferService = {
   getByDealershipId: async (dealershipId: string | number): Promise<CarOffer[]> => {
     const response = await apiClient.get<CarOffer[]>(`/offer/dealership/${dealershipId}`);
     return response.data;
+  },
+  getAvailableByDealershipId: async (dealershipId: string | number): Promise<CarOffer[]> => {
+    const response = await apiClient.get<CarOffer[]>(`/offer/dealership/${dealershipId}/available`);
+    return response.data;
+  },
+  markAsUnavailable: async (id: string | number): Promise<void> => {
+    await apiClient.patch(`/offer/${id}/unavailable`);
   },
   deleteCarOffer: async (id: string | number): Promise<void> => {
     await apiClient.delete(`/offer/${id}`);
@@ -305,11 +327,6 @@ export const buyerService = {
       comment: reviewData.comment
     });
     return response.data;
-  },
-
-  async getPurchases(): Promise<Purchase[]> {
-    const response = await apiClient.get<Purchase[]>("/buyers/purchases");
-    return response.data;
   }
 };
 
@@ -317,27 +334,44 @@ export const buyerService = {
 export const purchaseService = {
   async createPurchase(purchaseData: PurchaseData): Promise<Purchase> {
     const response = await apiClient.post<Purchase>("/purchases", {
-      carId: purchaseData.carId,
+      buyerId: purchaseData.buyerId,
+      carOfferId: purchaseData.carOfferId,
+      finalPrice: purchaseData.finalPrice,
+      purchaseStatus: purchaseData.purchaseStatus || 'PENDING',
       paymentMethod: purchaseData.paymentMethod,
       observations: purchaseData.observations
     });
     return response.data;
   },
-
   async getPurchaseById(purchaseId: string | number): Promise<Purchase> {
     const response = await apiClient.get<Purchase>(`/purchases/${purchaseId}`);
     return response.data;
   },
 
+  async getPurchasesByBuyerId(buyerId: string | number): Promise<Purchase[]> {
+    const response = await apiClient.get<Purchase[]>(`/purchases/buyer/${buyerId}`);
+    return response.data;
+  },
+
+  async getPurchasesByDealershipId(dealershipId: string | number): Promise<Purchase[]> {
+    const response = await apiClient.get<Purchase[]>(`/purchases/dealership/${dealershipId}`);
+    return response.data;
+  },
+
   async confirmPurchase(purchaseId: string | number): Promise<Purchase> {
-    const response = await apiClient.patch<Purchase>(`/purchases/${purchaseId}/confirm`);
+    const response = await apiClient.patch<Purchase>(`/purchases/${purchaseId}/confirmed`);
     return response.data;
   },
 
   async cancelPurchase(purchaseId: string | number): Promise<Purchase> {
-    const response = await apiClient.patch<Purchase>(`/purchases/${purchaseId}/cancel`);
+    const response = await apiClient.patch<Purchase>(`/purchases/${purchaseId}/canceled`);
     return response.data;
-  }
+  },
+
+  async markPurchaseAsDelivered(purchaseId: string | number): Promise<Purchase> {
+    const response = await apiClient.patch<Purchase>(`/purchases/${purchaseId}/delivered`);
+    return response.data;
+  },
 };
 
 // ==================== DEALERSHIP SERVICE ====================
@@ -400,6 +434,104 @@ export const adminService = {
     const response = await apiClient.get<TopDealership[]>("/admin/reports/top-dealerships", {
       params: { limit }
     });
+    return response.data;
+  },
+
+  async getDashboardOverview() {
+    const response = await apiClient.get('/admin/dashboard');
+    return response.data;
+  },
+
+  async getAllBuyers() {
+    const response = await apiClient.get('/admin/buyers');
+    return response.data;
+  },
+
+  async getAllDealerships() {
+    const response = await apiClient.get('/admin/dealerships');
+    return response.data;
+  },
+
+  async getUserFavorites(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/favorites`);
+    return response.data;
+  },
+
+  async getCarFavoriteCount(carId: number) {
+    const response = await apiClient.get(`/admin/cars/${carId}/favorite-count`);
+    return response.data;
+  },
+
+  async getAllFavoritesWithReviews() {
+    const response = await apiClient.get('/admin/favorites-with-reviews');
+    return response.data;
+  },
+
+  async getCarReviews(carId: number) {
+    const response = await apiClient.get(`/admin/cars/${carId}/reviews`);
+    return response.data;
+  },
+
+  async getUserReviews(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/reviews`);
+    return response.data;
+  },
+
+  async getTopRatedCars() {
+    const response = await apiClient.get('/admin/top-rated-cars');
+    return response.data;
+  },
+
+  async getAllPurchases() {
+    const response = await apiClient.get('/admin/purchases');
+    return response.data;
+  },
+
+  async getUserPurchases(userId: number) {
+    const response = await apiClient.get(`/admin/users/${userId}/purchases`);
+    return response.data;
+  },
+
+  async getDealershipPurchases(dealershipId: number) {
+    const response = await apiClient.get(`/admin/dealerships/${dealershipId}/purchases`);
+    return response.data;
+  },
+
+  async getDealershipRevenue(dealershipId: number) {
+    const response = await apiClient.get(`/admin/dealerships/${dealershipId}/revenue`);
+    return response.data;
+  },
+
+  async getTotalSystemRevenue() {
+    const response = await apiClient.get('/admin/revenue');
+    return response.data;
+  },
+
+  async deleteUser(userId: number): Promise<void> {
+    await apiClient.delete(`/buyer/${userId}`);
+  },
+
+  async deleteDealership(dealershipId: number): Promise<void> {
+    await apiClient.delete(`/dealerships/${dealershipId}`);
+  },
+
+  async getTopSellingCars() {
+    const response = await apiClient.get('/admin/top-5/best-selling-cars');
+    return response.data;
+  },
+
+  async getTopBuyersByPurchases() {
+    const response = await apiClient.get('/admin/top-5/buyers-most-purchases');
+    return response.data;
+  },
+
+  async getTopDealershipsBySales() {
+    const response = await apiClient.get('/admin/top-5/dealerships-most-sales');
+    return response.data;
+  },
+
+  async getTopRatedCarsTop5() {
+    const response = await apiClient.get('/admin/top-5/best-rated-cars');
     return response.data;
   }
 };

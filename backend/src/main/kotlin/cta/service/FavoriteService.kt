@@ -95,8 +95,8 @@ class FavoriteService(
         return try {
             val favoriteCar = findById(id)
 
-            favoriteCar.rating = rating
-            favoriteCar.comment = comment?.ifBlank { null }
+            rating?.let { favoriteCar.rating = it }
+            comment?.let { favoriteCar.comment = it.ifBlank { null } }
 
             validateFavoriteCar(favoriteCar)
             val updatedFavorite = favoriteCarRepository.save(favoriteCar)
@@ -122,7 +122,7 @@ class FavoriteService(
             val favoriteCar = findById(id)
 
             updateData["rating"]?.let {
-                val r = it.toString().toInt()
+                val r = (it as? Number)?.toInt() ?: it.toString().toInt()
                 favoriteCar.rating = r
             }
             updateData["comment"]?.let {

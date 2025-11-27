@@ -29,6 +29,103 @@
   to { transform: rotate(360deg); }
 }
 
+/* Recent Reviews Section - Other Users (Blue Theme) */
+.recentReviewsSection {
+  margin-top: var(--spacing-xxl, 3rem);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 2px solid #93c5fd;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.reviewsGrid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+.reviewCard {
+  padding: var(--spacing-md);
+  background-color: #dbeafe;
+  border-radius: var(--radius-md);
+  border: 1px solid #bfdbfe;
+  transition: all 0.2s;
+}
+
+.reviewCard:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.reviewCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-md);
+}
+
+.reviewerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reviewerName {
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+.reviewDate {
+  font-size: 0.75rem;
+  color: #2563eb;
+}
+
+.reviewRating {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 4px 8px;
+  background-color: white;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.reviewRatingValue {
+  color: #3b82f6;
+}
+
+.reviewComment {
+  color: #1e3a8a;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reviewCardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .reviewRating {
+    align-self: flex-start;
+  }
+}
+
 /* Error State */
 .errorContainer {
   display: flex;
@@ -126,6 +223,365 @@
   width: 100%;
   height: 100%;
   color: var(--color-gray-400);
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.titleRow .title {
+  margin: 0;
+  flex: 1;
+}
+
+/* Favorite button */
+.favoriteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: white;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 50%;
+  color: var(--color-gray-400);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.favoriteButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.favoriteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.favoriteActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.favoriteActive:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.favoriteLoading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .favoriteButton {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Review Section */
+.reviewSection {
+  margin-top: var(--spacing-xxl, 3rem);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-xl);
+}
+
+.reviewHeader {
+  margin-bottom: var(--spacing-lg);
+}
+
+.reviewTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.reviewIcon {
+  color: var(--color-primary);
+}
+
+/* Review Display */
+.reviewDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.ratingDisplay {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.ratingValue {
+  color: var(--color-warning);
+}
+
+.commentDisplay {
+  color: var(--color-gray-700);
+  line-height: 1.6;
+  margin: 0;
+  padding: var(--spacing-md);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+}
+
+.noReviewText {
+  color: var(--color-gray-600);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.addReviewButton,
+.editReviewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addReviewButton:hover,
+.editReviewButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.editReviewButton {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.editReviewButton:hover {
+  background-color: var(--color-gray-300);
+}
+
+/* Review Form */
+.reviewForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.formLabel {
+  font-weight: 500;
+  color: var(--color-gray-900);
+  font-size: 0.875rem;
+}
+
+.optional {
+  color: var(--color-gray-500);
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+.ratingInput {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.ratingNumberInput {
+  width: 80px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.ratingMax {
+  color: var(--color-gray-600);
+  font-weight: 500;
+}
+
+.ratingSlider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--color-gray-200);
+  border-radius: 3px;
+  outline: none;
+}
+
+.ratingSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.ratingSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.commentTextarea {
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.commentTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.charCount {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  text-align: right;
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+/* Star Rating */
+.starRating {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.starButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.starButton:hover {
+  transform: scale(1.15);
+}
+
+.starIcon {
+  transition: all 0.2s;
+}
+
+.ratingText {
+  margin-top: var(--spacing-xs);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0e4392;
+  text-align: left;
+}
+
+.cancelButton,
+.saveButton {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.cancelButton:hover:not(:disabled) {
+  background-color: var(--color-gray-300);
+}
+
+.saveButton {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.cancelButton:disabled,
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reviewSection {
+    padding: var(--spacing-lg);
+  }
+
+  .ratingInput {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ratingNumberInput {
+    width: 100%;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .saveButton {
+    width: 100%;
+  }
 }
 
 /* Info Section */
@@ -254,4 +710,83 @@
   .label {
     min-width: auto;
   }
+}
+
+offerSection {
+  margin-top: var(--spacing-xxl, 3rem);
+}
+
+.offerSection h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-xl, 1.5rem) 0;
+}
+
+.offerList {
+  display: grid;
+  gap: var(--spacing-xl, 1.5rem);
+  grid-template-columns: 1fr;
+}
+
+.noOfferText {
+  color: var(--color-gray-600);
+  font-size: 1rem;
+  padding: var(--spacing-xxl, 2rem);
+  text-align: center;
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-md);
+}
+
+/* Responsive grid for offers */
+@media (min-width: 1024px) {
+  .offerList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .offerList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}/* Add these styles to your existing CarDetailPage.module.css */
+
+.offerSection {
+  margin-top: 3rem; /* Adds space between main card and offers section */
+}
+
+.offerSection h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1.5rem 0; /* Adds space below the heading */
+}
+
+.offerList {
+  display: grid;
+  gap: 1.5rem; /* Adds space between offer cards */
+  grid-template-columns: 1fr;
+}
+
+/* Optional: Show 2 columns on larger screens */
+@media (min-width: 1024px) {
+  .offerList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Optional: Show 3 columns on extra large screens */
+@media (min-width: 1536px) {
+  .offerList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.noOfferText {
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 8px;
 }

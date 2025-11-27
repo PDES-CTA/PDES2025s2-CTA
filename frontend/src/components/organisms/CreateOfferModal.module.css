@@ -149,6 +149,15 @@
   color: var(--color-text, #111827);
 }
 
+.errorMessage {
+  padding: 1rem;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
 .textarea {
   padding: 10px 12px;
   font-size: 14px;

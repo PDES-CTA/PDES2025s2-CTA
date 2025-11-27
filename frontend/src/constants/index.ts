@@ -83,6 +83,7 @@ export const ROUTES = {
   HOME: '/',
   DEALERSHIP_HOME: '/dealerships',
   DEALERSHIP_OFFERS: '/offers',
+  DEALERSHIP_SALES: '/sales/dealership',
   CAR_POOL: '/cars/pool',
   LOGIN: '/login',
   REGISTER: '/register',
@@ -98,5 +99,7 @@ export const ROUTES = {
 // Helper for dynamic routes
 export const generateRoute = {
   carDetail: (id: string | number): string => `/cars/${id}`,
-  userProfile: (id: string | number): string => `/profile/${id}`
+  userProfile: (id: string | number): string => `/profile/${id}`,
+  userPurchases: (id: string | number): string => `/purchases/${id}`,
+  userFavorites: (userId: string | number) => `/favorites/${userId}`
 };

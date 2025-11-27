@@ -1,6 +1,7 @@
 package cta.service
 
 import cta.model.Dealership
+import cta.repository.CarOfferRepository
 import cta.repository.DealershipRepository
 import cta.web.dto.DealershipCreateRequest
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DealershipService(
     private val dealershipRepository: DealershipRepository,
+    private val carOfferRepository: CarOfferRepository,
     private val passwordEncoder: PasswordEncoder,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -300,6 +302,15 @@ class DealershipService(
         try {
             require(id > 0) { "Dealership ID must be positive" }
             val dealership = findById(id)
+
+            // Delete all car offers first to handle foreign key constraint
+            logger.debug("Deleting all car offers for dealership {}", id)
+            val carOffers = carOfferRepository.findByDealershipId(id)
+            if (carOffers.isNotEmpty()) {
+                logger.info("Found {} car offers for dealership {}. Deleting them first...", carOffers.size, id)
+                carOfferRepository.deleteAll(carOffers)
+            }
+
             dealershipRepository.delete(dealership)
             logger.info("Dealership ID {} deleted successfully", id)
         } catch (e: IllegalArgumentException) {

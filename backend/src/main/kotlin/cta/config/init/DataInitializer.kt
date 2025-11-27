@@ -1,19 +1,27 @@
 package cta.config.init
 
 import cta.enum.FuelType
+import cta.enum.PaymentMethod
+import cta.enum.PurchaseStatus
 import cta.enum.TransmissionType
+import cta.model.Admin
 import cta.model.Buyer
 import cta.model.Car
 import cta.model.CarOffer
 import cta.model.Dealership
+import cta.model.FavoriteCar
+import cta.model.Purchase
 import cta.repository.CarOfferRepository
 import cta.repository.CarRepository
+import cta.repository.FavoriteCarRepository
+import cta.repository.PurchaseRepository
 import cta.repository.UserRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Component
 @Profile("!test")
@@ -22,16 +30,29 @@ class DataInitializer(
     private val carRepository: CarRepository,
     private val carOfferRepository: CarOfferRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val favoriteCarRepository: FavoriteCarRepository,
+    private val purchaseRepository: PurchaseRepository,
 ) {
     @PostConstruct
     fun initDatabase() {
         initUsers()
         initCars()
         initCarOffers()
+        initFavorites()
+        initPurchases()
     }
 
     private fun initUsers() {
         if (userRepository.count() > 0L) return
+
+        val admin =
+            Admin.create(
+                email = "admin@gmail.com",
+                password = passwordEncoder.encode("admin"),
+                firstName = "Admin",
+                lastName = "User",
+                phone = "1100000000",
+            )
 
         val buyer1 =
             Buyer.create(
@@ -88,7 +109,7 @@ class DataInitializer(
                 active = true
             }
 
-        userRepository.saveAll(listOf(buyer1, buyer2, dealership1, dealership2))
+        userRepository.saveAll(listOf(admin, buyer1, buyer2, dealership1, dealership2))
     }
 
     private fun initCars() {
@@ -196,6 +217,8 @@ class DataInitializer(
     }
 
     private fun initCarOffers() {
+        if (carOfferRepository.count() > 0L) return
+
         val premiumCar =
             userRepository.findAll()
                 .filterIsInstance<Dealership>()
@@ -210,7 +233,6 @@ class DataInitializer(
         val corolla = cars.find { it.brand == "Toyota" && it.model == "Corolla" }
         val golfGTI = cars.find { it.brand == "Volkswagen" && it.model == "Golf GTI" }
         val ranger = cars.find { it.brand == "Ford" && it.model == "Ranger" }
-        val cruze = cars.find { it.brand == "Chevrolet" && it.model == "Cruze" }
         val audiA3 = cars.find { it.brand == "Audi" && it.model == "A3" }
 
         val offers = mutableListOf<CarOffer>()
@@ -297,5 +319,177 @@ class DataInitializer(
         }
 
         carOfferRepository.saveAll(offers)
+    }
+
+    private fun initFavorites() {
+        if (favoriteCarRepository.count() > 0L) return
+
+        val alan =
+            userRepository.findAll()
+                .filterIsInstance<Buyer>()
+                .find { it.email == "alan@gmail.com" } ?: return
+
+        val franco =
+            userRepository.findAll()
+                .filterIsInstance<Buyer>()
+                .find { it.email == "franco@gmail.com" } ?: return
+
+        val cars = carRepository.findAll()
+        val corolla = cars.find { it.brand == "Toyota" && it.model == "Corolla" }
+        val golfGTI = cars.find { it.brand == "Volkswagen" && it.model == "Golf GTI" }
+        val ranger = cars.find { it.brand == "Ford" && it.model == "Ranger" }
+        val audiA3 = cars.find { it.brand == "Audi" && it.model == "A3" }
+        val sentra = cars.find { it.brand == "Nissan" && it.model == "Sentra" }
+
+        val favorites = mutableListOf<FavoriteCar>()
+
+        // Alan's favorites with reviews
+        corolla?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = alan
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(10)
+                    rating = 9
+                    comment = "Excellent hybrid car! Very fuel efficient and comfortable for daily commute."
+                    priceNotifications = true
+                },
+            )
+        }
+
+        golfGTI?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = alan
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(5)
+                    rating = 10
+                    comment = "Amazing performance! This is the perfect sports car. Highly recommended!"
+                    priceNotifications = false
+                },
+            )
+        }
+
+        ranger?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = alan
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(2)
+                    rating = 8
+                    comment = "Great for off-road adventures. A bit pricey but worth it."
+                    priceNotifications = true
+                },
+            )
+        }
+
+        // Franco's favorites with reviews
+        audiA3?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = franco
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(15)
+                    rating = 9
+                    comment = "Luxury at its best! The interior is stunning and drives like a dream."
+                    priceNotifications = true
+                },
+            )
+        }
+
+        corolla?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = franco
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(7)
+                    rating = 8
+                    comment = "Reliable and economical. Perfect family car."
+                    priceNotifications = false
+                },
+            )
+        }
+
+        sentra?.let {
+            favorites.add(
+                FavoriteCar().apply {
+                    buyer = franco
+                    car = it
+                    dateAdded = LocalDateTime.now().minusDays(1)
+                    rating = 7
+                    comment = "Good value for money. Comfortable ride but lacks some modern features."
+                    priceNotifications = true
+                },
+            )
+        }
+
+        favoriteCarRepository.saveAll(favorites)
+    }
+
+    private fun initPurchases() {
+        if (purchaseRepository.count() > 0L) return
+
+        val alan =
+            userRepository.findAll()
+                .filterIsInstance<Buyer>()
+                .find { it.email == "alan@gmail.com" } ?: return
+
+        val franco =
+            userRepository.findAll()
+                .filterIsInstance<Buyer>()
+                .find { it.email == "franco@gmail.com" } ?: return
+
+        val offers = carOfferRepository.findAll()
+        val corollaOffer = offers.find { it.car.brand == "Toyota" && it.dealership.businessName == "Premium Car Buenos Aires" }
+        val rangerOffer = offers.find { it.car.brand == "Ford" }
+        val audiOffer = offers.find { it.car.brand == "Audi" }
+
+        val purchases = mutableListOf<Purchase>()
+
+        // Alan's purchases
+        corollaOffer?.let {
+            purchases.add(
+                Purchase().apply {
+                    buyer = alan
+                    carOffer = it
+                    finalPrice = it.price
+                    purchaseDate = LocalDateTime.now().minusDays(30)
+                    purchaseStatus = PurchaseStatus.DELIVERED
+                    paymentMethod = PaymentMethod.CREDIT_CARD
+                    observations = "Delivered on time. Customer very satisfied with the purchase."
+                },
+            )
+        }
+
+        rangerOffer?.let {
+            purchases.add(
+                Purchase().apply {
+                    buyer = alan
+                    carOffer = it
+                    finalPrice = it.price.multiply(BigDecimal("0.95")) // 5% discount
+                    purchaseDate = LocalDateTime.now().minusDays(5)
+                    purchaseStatus = PurchaseStatus.CONFIRMED
+                    paymentMethod = PaymentMethod.CHECK
+                    observations = "Applied 5% discount for cash payment. Awaiting delivery."
+                },
+            )
+        }
+
+        // Franco's purchases
+        audiOffer?.let {
+            purchases.add(
+                Purchase().apply {
+                    buyer = franco
+                    carOffer = it
+                    finalPrice = it.price
+                    purchaseDate = LocalDateTime.now().minusDays(2)
+                    purchaseStatus = PurchaseStatus.PENDING
+                    paymentMethod = PaymentMethod.CASH
+                    observations = "Waiting for financing approval from the bank."
+                },
+            )
+        }
+
+        purchaseRepository.saveAll(purchases)
     }
 }
