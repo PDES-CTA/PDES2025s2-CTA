@@ -202,7 +202,6 @@ export default function DealershipSalesPage() {
           <div className={styles.salesList}>
             {sales.map((sale) => {
               const car = getCarFromPurchase(sale);
-
               return (
                 <div key={sale.id} className={styles.saleCard}>
                   <div className={styles.cardHeader}>
