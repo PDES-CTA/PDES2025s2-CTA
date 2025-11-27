@@ -68,7 +68,7 @@ const AdminPurchasesSection = () => {
     try {
       setLoading(true);
       const response = await adminService.getAllPurchases();
-      const purchasesData = response.map((p: AdminPurchaseResponse) => ({
+      const purchasesData: AdminPurchase[] = response.map((p: AdminPurchaseResponse) => ({
         id: p.id,
         buyerEmail: p.buyerEmail,
         buyerName: p.buyerName,
@@ -139,7 +139,7 @@ const AdminPurchasesSection = () => {
           <EmptyState message="No purchases found" />
         ) : (
           <>
-            <PurchaseTable purchases={filteredPurchases as any} />
+            <PurchaseTable purchases={filteredPurchases} />
             <PaginationInfo
               showing={filteredPurchases.length}
               total={purchases.length}
