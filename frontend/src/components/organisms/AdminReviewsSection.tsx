@@ -47,10 +47,14 @@ const AdminReviewsSection = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = reviews.filter((review: Review) =>
-      review.carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.buyerName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = reviews.filter((review: Review) => {
+      const carName = review.carName || '';
+      const buyerName = review.buyerName || '';
+      return (
+        carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        buyerName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
 
     if (ratingFilter !== 'all') {
       const filterRating = Number.parseInt(ratingFilter);
@@ -66,8 +70,9 @@ const AdminReviewsSection = () => {
     try {
       setLoading(true);
       const allFavorites = await adminService.getAllFavoritesWithReviews();
-      
-      const reviewsData = allFavorites.map((fav: FavoriteWithReview) => ({
+      const reviewsData = allFavorites
+        .filter((fav: FavoriteWithReview) => fav.rating !== null || fav.comment !== null)
+      .map((fav: FavoriteWithReview) => ({
         id: fav.id,
         buyerId: fav.buyerId,
         buyerName: fav.buyerName,

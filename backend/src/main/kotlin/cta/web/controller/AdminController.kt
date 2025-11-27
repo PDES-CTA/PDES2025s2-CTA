@@ -1,10 +1,11 @@
 package cta.web.controller
 
 import cta.enum.UserRole
+import cta.repository.FavoriteCarRepository
 import cta.service.AdminService
 import cta.web.dto.AdminDashboardResponse
+import cta.web.dto.AdminPurchaseResponse
 import cta.web.dto.CarReviewResponse
-import cta.web.dto.PurchaseResponse
 import cta.web.dto.UserResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @PreAuthorize("hasRole('ADMINISTRATOR')")
 class AdminController(
     private val adminService: AdminService,
+    private val favoriteCarRepository: FavoriteCarRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -134,6 +136,7 @@ class AdminController(
                     "rating" to favorite.rating,
                     "comment" to favorite.comment,
                     "dateAdded" to favorite.dateAdded,
+                    "isReviewed" to favorite.isReviewed(),
                 )
             }
         logger.info("Returning {} favorites with reviews", response.size)
@@ -212,12 +215,23 @@ class AdminController(
     // ===== PURCHASES =====
 
     @GetMapping("/purchases")
-    fun getAllPurchases(): ResponseEntity<List<PurchaseResponse>> {
+    fun getAllPurchases(): ResponseEntity<List<AdminPurchaseResponse>> {
         logger.info("Admin fetching all purchases")
         val purchases = adminService.getAllPurchases()
         val response =
             purchases.map { purchase ->
-                PurchaseResponse.fromEntity(purchase)
+                AdminPurchaseResponse(
+                    id = purchase.id!!,
+                    buyerEmail = purchase.buyer.email,
+                    buyerName = "${purchase.buyer.firstName} ${purchase.buyer.lastName}",
+                    carName = purchase.carOffer.car.getFullName(),
+                    dealershipName = purchase.carOffer.dealership.businessName,
+                    finalPrice = purchase.finalPrice,
+                    purchaseDate = purchase.purchaseDate,
+                    purchaseStatus = purchase.purchaseStatus.toString(),
+                    paymentMethod = purchase.paymentMethod.toString(),
+                    observations = purchase.observations,
+                )
             }
         logger.info("Returning {} purchases", response.size)
         return ResponseEntity.ok(response)
@@ -226,12 +240,23 @@ class AdminController(
     @GetMapping("/users/{userId}/purchases")
     fun getUserPurchases(
         @PathVariable userId: Long,
-    ): ResponseEntity<List<PurchaseResponse>> {
+    ): ResponseEntity<List<AdminPurchaseResponse>> {
         logger.info("Admin fetching purchases for user ID: {}", userId)
         val purchases = adminService.getUserPurchases(userId)
         val response =
             purchases.map { purchase ->
-                PurchaseResponse.fromEntity(purchase)
+                AdminPurchaseResponse(
+                    id = purchase.id!!,
+                    buyerEmail = purchase.buyer.email,
+                    buyerName = "${purchase.buyer.firstName} ${purchase.buyer.lastName}",
+                    carName = purchase.carOffer.car.getFullName(),
+                    dealershipName = purchase.carOffer.dealership.businessName,
+                    finalPrice = purchase.finalPrice,
+                    purchaseDate = purchase.purchaseDate,
+                    purchaseStatus = purchase.purchaseStatus.toString(),
+                    paymentMethod = purchase.paymentMethod.toString(),
+                    observations = purchase.observations,
+                )
             }
         logger.info("Returning {} purchases for user {}", response.size, userId)
         return ResponseEntity.ok(response)
@@ -240,12 +265,23 @@ class AdminController(
     @GetMapping("/dealerships/{dealershipId}/purchases")
     fun getDealershipPurchases(
         @PathVariable dealershipId: Long,
-    ): ResponseEntity<List<PurchaseResponse>> {
+    ): ResponseEntity<List<AdminPurchaseResponse>> {
         logger.info("Admin fetching purchases for dealership ID: {}", dealershipId)
         val purchases = adminService.getDealershipPurchases(dealershipId)
         val response =
             purchases.map { purchase ->
-                PurchaseResponse.fromEntity(purchase)
+                AdminPurchaseResponse(
+                    id = purchase.id!!,
+                    buyerEmail = purchase.buyer.email,
+                    buyerName = "${purchase.buyer.firstName} ${purchase.buyer.lastName}",
+                    carName = purchase.carOffer.car.getFullName(),
+                    dealershipName = purchase.carOffer.dealership.businessName,
+                    finalPrice = purchase.finalPrice,
+                    purchaseDate = purchase.purchaseDate,
+                    purchaseStatus = purchase.purchaseStatus.toString(),
+                    paymentMethod = purchase.paymentMethod.toString(),
+                    observations = purchase.observations,
+                )
             }
         logger.info("Returning {} purchases for dealership {}", response.size, dealershipId)
         return ResponseEntity.ok(response)
@@ -282,9 +318,16 @@ class AdminController(
         val topCars = adminService.getTopSellingCars(5)
         val response =
             topCars.map { (carId, count) ->
+                val carName =
+                    try {
+                        adminService.getCarNameById(carId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch car name for carId: {}", carId)
+                        "Unknown Car"
+                    }
                 mapOf(
                     "carId" to carId,
-                    "carName" to adminService.getCarNameById(carId),
+                    "carName" to carName,
                     "purchaseCount" to count,
                 )
             }
@@ -298,9 +341,16 @@ class AdminController(
         val topBuyers = adminService.getTopBuyersByPurchases(5)
         val response =
             topBuyers.map { (buyerId, count) ->
+                val buyerName =
+                    try {
+                        adminService.getBuyerNameById(buyerId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch buyer name for buyerId: {}", buyerId)
+                        "Unknown Buyer"
+                    }
                 mapOf(
                     "buyerId" to buyerId,
-                    "buyerName" to adminService.getBuyerNameById(buyerId),
+                    "buyerName" to buyerName,
                     "purchaseCount" to count,
                 )
             }
@@ -314,9 +364,16 @@ class AdminController(
         val topDealerships = adminService.getTopDealershipsBySales(5)
         val response =
             topDealerships.map { (dealershipId, count) ->
+                val dealershipName =
+                    try {
+                        adminService.getDealershipNameById(dealershipId)
+                    } catch (e: Exception) {
+                        logger.warn("Could not fetch dealership name for dealershipId: {}", dealershipId)
+                        "Unknown Dealership"
+                    }
                 mapOf(
                     "dealershipId" to dealershipId,
-                    "dealershipName" to adminService.getDealershipNameById(dealershipId),
+                    "dealershipName" to dealershipName,
                     "salesCount" to count,
                 )
             }
@@ -327,16 +384,38 @@ class AdminController(
     @GetMapping("/top-5/best-rated-cars")
     fun getTopRatedCarsTop5(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Admin fetching top 5 best-rated cars")
-        val topCars = adminService.getHighestRatedCars(5)
-        val response =
-            topCars.map { (carId, avgRating) ->
-                mapOf(
-                    "carId" to carId,
-                    "carName" to adminService.getCarNameById(carId),
-                    "averageRating" to avgRating,
-                )
-            }
-        logger.info("Returning {} top rated cars", response.size)
-        return ResponseEntity.ok(response)
+
+        val allFavorites =
+            favoriteCarRepository.findAll()
+                .filter { it.rating != null && it.car != null && it.car.id != null }
+
+        logger.info("Total favorites with ratings: {}", allFavorites.size)
+
+        val topRatedCars =
+            allFavorites
+                .groupBy { it.car.id }
+                .mapNotNull { (carId, favorites) ->
+                    val ratings = favorites.mapNotNull { it.rating }
+                    val carName = favorites.firstOrNull()?.car?.getFullName() ?: "Unknown Car"
+
+                    if (carId != null && ratings.isNotEmpty()) {
+                        mapOf(
+                            "carId" to carId,
+                            "carName" to carName,
+                            "averageRating" to ratings.average(),
+                        )
+                    } else {
+                        null
+                    }
+                }
+                .sortedByDescending { (it["averageRating"] as? Number)?.toDouble() ?: 0.0 }
+                .take(5)
+
+        logger.info("Returning {} top rated cars", topRatedCars.size)
+        topRatedCars.forEach { car ->
+            logger.debug("Car: {} - Rating: {}", car["carName"], car["averageRating"])
+        }
+
+        return ResponseEntity.ok(topRatedCars)
     }
 }
