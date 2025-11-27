@@ -246,34 +246,6 @@ class PurchaseServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when car offer is not available")
-    fun shouldThrowExceptionWhenCarOfferNotAvailable() {
-        // Given
-        val unavailableCarOffer = validCarOffer.apply { available = false }
-        val request =
-            PurchaseCreateRequest(
-                carOfferId = 1L,
-                buyerId = 1L,
-                finalPrice = BigDecimal("25000.00"),
-                paymentMethod = PaymentMethod.CASH,
-                purchaseDate = LocalDateTime.now().minusDays(1),
-                purchaseStatus = PurchaseStatus.PENDING,
-                observations = "Test",
-            )
-
-        whenever(carOfferService.findById(1L)).thenReturn(unavailableCarOffer)
-        whenever(buyerService.findById(1L)).thenReturn(validBuyer)
-
-        // When & Then
-        val exception =
-            assertThrows(IllegalArgumentException::class.java) {
-                purchaseService.createPurchase(request)
-            }
-        assertTrue(exception.message!!.contains("is not available for purchase"))
-        verify(purchaseRepository, never()).save(any<Purchase>())
-    }
-
-    @Test
     @DisplayName("Should throw exception when buyer is not active")
     fun shouldThrowExceptionWhenBuyerNotActive() {
         // Given

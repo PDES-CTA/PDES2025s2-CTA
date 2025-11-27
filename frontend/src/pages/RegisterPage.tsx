@@ -8,6 +8,15 @@ import FormField from '../components/atoms/FormField';
 import { useAuthForm } from '../hooks/useAuthForm';
 import React from 'react';
 
+interface ErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { error, loading, getStringValue, handleFormSubmit } = useAuthForm();
@@ -40,7 +49,7 @@ export default function RegisterPage() {
   };
 
   const onSubmit = async (formData: FormData) => {
-     try {
+    try {
       const password = getStringValue(formData, 'password');
       const confirmPassword = getStringValue(formData, 'confirmPassword');
 
@@ -61,14 +70,14 @@ export default function RegisterPage() {
       if (userType === 'BUYER') {
         const buyerData = {
           ...registerData,
-          dni: dniValue.replace(/\D/g, ''), // Remove dots and convert to integer
+          dni: dniValue.replace(/\D/g, ''),
         };
         await buyerService.createBuyer(buyerData);
       } else {
         const dealershipData = {
           ...registerData,
           businessName: getStringValue(formData, 'businessName'),
-          cuit: cuitValue.replace(/\D/g, ''), // Remove dashes
+          cuit: cuitValue.replace(/\D/g, ''),
           city: getStringValue(formData, 'city') || undefined,
           province: getStringValue(formData, 'province') || undefined,
           description: getStringValue(formData, 'description') || undefined,
@@ -77,11 +86,10 @@ export default function RegisterPage() {
       }
 
       navigate(ROUTES.LOGIN);
-    } catch (error: any) {
-      // Parse backend error messages
-      const errorMessage = error.response?.data?.message || error.message || '';
+    } catch (error: unknown) {
+      const err = error as ErrorResponse;
+      const errorMessage = err.response?.data?.message || err.message || '';
       
-      // The backend returns messages like "duplicate key: this email is already registered"
       if (errorMessage.toLowerCase().includes('email') && errorMessage.toLowerCase().includes('duplicate key')) {
         throw new Error('This email is already registered. Please use a different email or try logging in.');
       } else if (errorMessage.toLowerCase().includes('dni') && errorMessage.toLowerCase().includes('duplicate key')) {

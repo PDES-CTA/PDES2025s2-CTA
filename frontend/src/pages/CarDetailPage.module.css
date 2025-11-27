@@ -255,3 +255,82 @@
     min-width: auto;
   }
 }
+
+offerSection {
+  margin-top: var(--spacing-xxl, 3rem);
+}
+
+.offerSection h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-xl, 1.5rem) 0;
+}
+
+.offerList {
+  display: grid;
+  gap: var(--spacing-xl, 1.5rem);
+  grid-template-columns: 1fr;
+}
+
+.noOfferText {
+  color: var(--color-gray-600);
+  font-size: 1rem;
+  padding: var(--spacing-xxl, 2rem);
+  text-align: center;
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-md);
+}
+
+/* Responsive grid for offers */
+@media (min-width: 1024px) {
+  .offerList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  .offerList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}/* Add these styles to your existing CarDetailPage.module.css */
+
+.offerSection {
+  margin-top: 3rem; /* Adds space between main card and offers section */
+}
+
+.offerSection h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1.5rem 0; /* Adds space below the heading */
+}
+
+.offerList {
+  display: grid;
+  gap: 1.5rem; /* Adds space between offer cards */
+  grid-template-columns: 1fr;
+}
+
+/* Optional: Show 2 columns on larger screens */
+@media (min-width: 1024px) {
+  .offerList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Optional: Show 3 columns on extra large screens */
+@media (min-width: 1536px) {
+  .offerList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.noOfferText {
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}

@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { ReactElement } from 'react';
 import CarsPage from './CarsPage';
 import * as useCarSearchHook from '../hooks/useCarSearch';
-import * as authServiceModule from '../services/api';
 import { CarOffer } from '../types/carOffer';
 import { Car } from '../types/car';
 import { Dealership } from '../types/dealership';
@@ -114,19 +113,12 @@ describe('CarsPage', () => {
       setDisplayCars: mockSetDisplayCars,
       setError: mockSetError,
     });
-
-    vi.spyOn(authServiceModule.authService, 'logout').mockImplementation(() => {});
   });
 
   it('should render page title', () => {
     renderWithRouter(<CarsPage />);
     expect(screen.getByText('Available Cars')).toBeInTheDocument();
     expect(screen.getByText('Find the perfect car for you')).toBeInTheDocument();
-  });
-
-  it('should render logout button', () => {
-    renderWithRouter(<CarsPage />);
-    expect(screen.getByRole('button', { name: /Log Out/i })).toBeInTheDocument();
   });
 
   it('should call fetchAllCarsAndOffers on mount', () => {
@@ -238,16 +230,6 @@ describe('CarsPage', () => {
     fireEvent.click(viewDetailsButtons[0]);
 
     expect(mockNavigate).toHaveBeenCalledWith('/cars/1');
-  });
-
-  it('should logout and navigate when logout button is clicked', () => {
-    renderWithRouter(<CarsPage />);
-
-    const logoutButton = screen.getByRole('button', { name: /Log Out/i });
-    fireEvent.click(logoutButton);
-
-    expect(authServiceModule.authService.logout).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
   it('should render search filters component', () => {

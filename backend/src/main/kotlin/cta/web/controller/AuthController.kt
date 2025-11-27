@@ -1,6 +1,7 @@
 package cta.web.controller
 
 import cta.config.JwtTokenProvider
+import cta.enum.UserRole
 import cta.model.Buyer
 import cta.repository.UserRepository
 import cta.service.BuyerService
@@ -103,7 +104,7 @@ class AuthController(
                 firstName = savedBuyer.firstName,
                 lastName = savedBuyer.lastName,
                 phone = savedBuyer.phone,
-                role = "BUYER",
+                role = UserRole.BUYER,
             )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
@@ -118,14 +119,6 @@ class AuthController(
             userRepository.findByEmail(email)
                 ?: throw RuntimeException("User not found")
 
-        val role =
-            when {
-                usuario.javaClass.simpleName == "Administrator" -> "ADMIN"
-                usuario.javaClass.simpleName == "Dealership" -> "DEALERSHIP"
-                usuario.javaClass.simpleName == "Buyer" -> "BUYER"
-                else -> "USER"
-            }
-
         val response =
             UserResponse(
                 id = usuario.id!!,
@@ -133,7 +126,7 @@ class AuthController(
                 firstName = usuario.firstName,
                 lastName = usuario.lastName,
                 phone = usuario.phone,
-                role = role,
+                role = usuario.role,
             )
 
         return ResponseEntity.ok(response)

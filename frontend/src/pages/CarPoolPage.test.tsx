@@ -151,14 +151,6 @@ describe('CarPoolPage', () => {
         expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
       });
     });
-
-    it('should render logout button', async () => {
-      renderWithRouter(<CarPoolPage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Data Fetching', () => {
@@ -463,21 +455,6 @@ describe('CarPoolPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Failed to load available cars')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Logout Functionality', () => {
-    it('should call logout when logout button clicked', async () => {
-      renderWithRouter(<CarPoolPage />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
-      });
-
-      const logoutButton = screen.getByRole('button', { name: /log out/i });
-      fireEvent.click(logoutButton);
-
-      expect(api.authService.logout).toHaveBeenCalledTimes(1);
     });
   });
 

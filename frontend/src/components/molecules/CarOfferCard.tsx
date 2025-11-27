@@ -7,14 +7,12 @@ import styles from './CarOfferCard.module.css';
 
 interface CarOfferCardProps {
   readonly offer: CarOffer;
-  readonly onViewDetails: () => void;
   readonly onEdit?: () => void;
   readonly onDelete?: () => void;
 }
 
 export default function CarOfferCard({ 
   offer, 
-  onViewDetails, 
   onEdit, 
   onDelete 
 }: CarOfferCardProps) {
@@ -85,20 +83,18 @@ export default function CarOfferCard({
             Published: {formatDate(car.publicationDate)}
           </span>
           <div className={styles.actions}>
-            <SmallButton
-              onClick={onViewDetails}
-              variant="primary"
-            >
-              View Details
-            </SmallButton>
-            {onEdit && (
-              <SmallButton
-                onClick={onEdit}
-                variant="secondary"
-              >
-                <Edit size={16} />
-                Edit
-              </SmallButton>
+            {offer.available && (
+              <>
+                {onEdit && (
+                  <SmallButton
+                    onClick={onEdit}
+                    variant="secondary"
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </SmallButton>
+                )}
+              </>
             )}
             {onDelete && (
               <SmallButton

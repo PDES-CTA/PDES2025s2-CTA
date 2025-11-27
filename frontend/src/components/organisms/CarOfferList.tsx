@@ -5,14 +5,12 @@ import styles from './CarOfferList.module.css';
 
 interface CarOfferListProps {
   offers: CarOffer[];
-  onViewDetails: (offerId: string | number) => void;
   onEdit?: (offerId: string | number) => void;
   onDelete?: (offerId: string | number) => void;
 }
 
 export default function CarOfferList({ 
-  offers, 
-  onViewDetails, 
+  offers,
   onEdit, 
   onDelete 
 }: CarOfferListProps) {
@@ -31,7 +29,6 @@ export default function CarOfferList({
         <CarOfferCard
           key={offer.id}
           offer={offer}
-          onViewDetails={() => onViewDetails(offer.car.id)}
           onEdit={onEdit ? () => onEdit(offer.id) : undefined}
           onDelete={onDelete ? () => onDelete(offer.id) : undefined}
         />

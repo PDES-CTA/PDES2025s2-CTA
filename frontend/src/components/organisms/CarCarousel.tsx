@@ -8,10 +8,9 @@ import React from 'react';
 interface CarCarouselProps {
   readonly cars: Car[];
   readonly onAddOffer: (carId: string | number) => void;
-  readonly onViewDetails: (carId: string | number) => void;
 }
 
-export default function CarCarousel({ cars, onAddOffer, onViewDetails }: CarCarouselProps) {
+export default function CarCarousel({ cars, onAddOffer }: CarCarouselProps) {
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   if (cars.length === 0) {
@@ -79,17 +78,11 @@ export default function CarCarousel({ cars, onAddOffer, onViewDetails }: CarCaro
 
           <div className={styles.featuredActions}>
             <SmallButton 
-              onClick={() => onViewDetails(featuredCar.id)} 
-              variant="secondary"
-            >
-              View Details
-            </SmallButton>
-            <SmallButton 
               onClick={() => onAddOffer(featuredCar.id)} 
               variant="primary"
             >
               <Plus size={18} />
-              Add to Offer
+              Add Offer
             </SmallButton>
           </div>
         </div>
