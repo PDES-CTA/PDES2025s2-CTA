@@ -116,13 +116,14 @@ class AdminService(
 
     fun getHighestRatedCars(limit: Int = 10): List<Pair<Long, Double>> {
         logger.debug("Fetching top {} highest rated cars", limit)
-        val allFavorites: List<FavoriteCar?> = favoriteCarRepository.findAll()
+        val allFavorites: List<FavoriteCar> = favoriteCarRepository.findAll()
 
         val carRatings =
             allFavorites
-                .groupBy { it?.car?.id }
+                .filter { it.rating != null }
+                .groupBy { it.car.id }
                 .mapNotNull { (carId, favorites) ->
-                    val ratings = favorites.mapNotNull { it?.rating }
+                    val ratings = favorites.mapNotNull { it.rating }
                     if (carId != null && ratings.isNotEmpty()) {
                         carId to ratings.average()
                     } else {
@@ -133,6 +134,9 @@ class AdminService(
                 .take(limit)
 
         logger.info("Found {} cars with ratings", carRatings.size)
+        carRatings.forEach { (carId, rating) ->
+            logger.debug("Car ID: {} - Average Rating: {}", carId, rating)
+        }
         return carRatings
     }
 
@@ -253,17 +257,33 @@ class AdminService(
 
     fun getCarNameById(carId: Long): String {
         return try {
-            val purchases = getAllPurchases()
-            val car = purchases.find { it.carOffer.car.id == carId }?.carOffer?.car
+            logger.debug("Fetching car name for ID {}", carId)
 
-            if (car != null) {
-                car.getFullName()
-            } else {
-                logger.warn("Car not found for ID {}", carId)
-                "Unknown Car"
+            val carFromPurchase =
+                getAllPurchases()
+                    .find { it.carOffer.car.id == carId }
+                    ?.carOffer?.car
+
+            if (carFromPurchase != null) {
+                logger.debug("Found car in purchases: {}", carFromPurchase.getFullName())
+                return carFromPurchase.getFullName()
             }
+
+            // If not found in purchases, try to find in favorites (for best-rated cars)
+            val carFromFavorite =
+                favoriteCarRepository.findAll()
+                    .find { it.car.id == carId }
+                    ?.car
+
+            if (carFromFavorite != null) {
+                logger.debug("Found car in favorites: {}", carFromFavorite.getFullName())
+                return carFromFavorite.getFullName()
+            }
+
+            logger.warn("Car not found for ID {}", carId)
+            "Unknown Car"
         } catch (e: Exception) {
-            logger.warn("Error fetching car name for ID {}", carId, e)
+            logger.error("Error fetching car name for ID {}", carId, e)
             "Unknown Car"
         }
     }
@@ -296,5 +316,42 @@ class AdminService(
             logger.warn("Error fetching dealership name for ID {}", dealershipId, e)
             "Unknown Dealership"
         }
+    }
+
+    fun getTopRatedCarsWithNames(limit: Int = 5): List<Map<String, Any>> {
+        logger.debug("Fetching top {} highest rated cars with names", limit)
+
+        val allFavorites =
+            favoriteCarRepository.findAll()
+                .filter { it.rating != null && it.car != null && it.car.id != null }
+
+        logger.info("Total favorites with ratings: {}", allFavorites.size)
+
+        val topRatedCars =
+            allFavorites
+                .groupBy { it.car.id }
+                .mapNotNull { (carId, favorites) ->
+                    val ratings = favorites.mapNotNull { it.rating }
+                    val carName = favorites.firstOrNull()?.car?.getFullName() ?: "Unknown Car"
+
+                    if (carId != null && ratings.isNotEmpty()) {
+                        mapOf<String, Any>(
+                            "carId" to carId,
+                            "carName" to carName,
+                            "averageRating" to ratings.average(),
+                        )
+                    } else {
+                        null
+                    }
+                }
+                .sortedByDescending { (it["averageRating"] as? Number)?.toDouble() ?: 0.0 }
+                .take(limit)
+
+        logger.info("Returning {} top rated cars", topRatedCars.size)
+        topRatedCars.forEach { car ->
+            logger.debug("Car: {} - Rating: {}", car["carName"], car["averageRating"])
+        }
+
+        return topRatedCars
     }
 }

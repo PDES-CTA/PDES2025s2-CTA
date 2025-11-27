@@ -12,31 +12,35 @@ import {
 } from '../molecules';
 import { adminService } from '../../services/api';
 
-interface Purchase {
+interface AdminPurchase {
   id: number;
-  buyerId: number;
+  buyerEmail: string;
   buyerName: string;
-  carId: number;
   carName: string;
   dealershipName: string;
   finalPrice: number;
   purchaseDate: string;
+  purchaseStatus: string;
+  paymentMethod: string;
+  observations: string | null;
 }
 
-interface PurchaseResponse {
+interface AdminPurchaseResponse {
   id: number;
-  buyerId: number;
+  buyerEmail: string;
   buyerName: string;
-  carId: number;
   carName: string;
   dealershipName: string;
   finalPrice: string | number;
   purchaseDate: string;
+  purchaseStatus: string;
+  paymentMethod: string;
+  observations: string | null;
 }
 
 const AdminPurchasesSection = () => {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [filteredPurchases, setFilteredPurchases] = useState<Purchase[]>([]);
+  const [purchases, setPurchases] = useState<AdminPurchase[]>([]);
+  const [filteredPurchases, setFilteredPurchases] = useState<AdminPurchase[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +51,16 @@ const AdminPurchasesSection = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = purchases.filter((purchase: Purchase) =>
-      purchase.carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      purchase.buyerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      purchase.dealershipName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = purchases.filter((purchase: AdminPurchase) => {
+      const carName = purchase.carName || '';
+      const buyerName = purchase.buyerName || '';
+      const dealershipName = purchase.dealershipName || '';
+      return (
+        carName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        buyerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dealershipName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
     setFilteredPurchases(filtered);
   }, [searchTerm, purchases]);
 
@@ -59,19 +68,21 @@ const AdminPurchasesSection = () => {
     try {
       setLoading(true);
       const response = await adminService.getAllPurchases();
-      const purchasesData = response.map((p: PurchaseResponse) => ({
+      const purchasesData: AdminPurchase[] = response.map((p: AdminPurchaseResponse) => ({
         id: p.id,
-        buyerId: p.buyerId,
+        buyerEmail: p.buyerEmail,
         buyerName: p.buyerName,
-        carId: p.carId,
         carName: p.carName,
         dealershipName: p.dealershipName,
         finalPrice: Number.parseFloat(String(p.finalPrice)),
         purchaseDate: p.purchaseDate,
+        purchaseStatus: p.purchaseStatus,
+        paymentMethod: p.paymentMethod,
+        observations: p.observations,
       }));
       setPurchases(purchasesData);
       setFilteredPurchases(purchasesData);
-      const revenue = purchasesData.reduce((sum: number, p: Purchase) => sum + p.finalPrice, 0);
+      const revenue = purchasesData.reduce((sum: number, p: AdminPurchase) => sum + p.finalPrice, 0);
       setTotalRevenue(revenue);
       setError(null);
     } catch (err) {
@@ -90,20 +101,25 @@ const AdminPurchasesSection = () => {
     return <ErrorMessage error={error} onRetry={fetchPurchases} retryLabel="Retry" />;
   }
 
-  const statsData = purchases.length > 0 ? [
-    {
-      label: 'Total Purchases',
-      value: purchases.length,
-    },
-    {
-      label: 'Total Revenue',
-      value: `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-    },
-    {
-      label: 'Average Sale',
-      value: `$${(totalRevenue / purchases.length).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-    },
-  ] : [];
+  const statsData =
+    purchases.length > 0
+      ? [
+          {
+            label: 'Total Purchases',
+            value: purchases.length,
+          },
+          {
+            label: 'Total Revenue',
+            value: `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          },
+          {
+            label: 'Average Sale',
+            value: `$${(totalRevenue / purchases.length).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+            })}`,
+          },
+        ]
+      : [];
 
   return (
     <div className={styles.section}>

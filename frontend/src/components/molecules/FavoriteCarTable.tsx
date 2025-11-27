@@ -23,8 +23,10 @@ const FavoriteCarTable: React.FC<FavoriteCarTableProps> = ({ favorites }) => {
   };
 
   const renderStars = (rating: number | null) => {
-    if (!rating) return '—';
-    return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+    if (!rating || rating <= 0) return '—';
+    const fullStars = Math.min(Math.max(Math.round(rating), 0), 5);
+    const emptyStars = Math.max(5 - fullStars, 0);
+    return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
   };
 
   return (

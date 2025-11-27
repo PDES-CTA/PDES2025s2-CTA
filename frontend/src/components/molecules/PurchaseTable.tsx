@@ -3,13 +3,17 @@ import styles from './PurchaseTable.module.css';
 
 interface Purchase {
   id: number;
-  buyerId: number;
   buyerName: string;
-  carId: number;
   carName: string;
   dealershipName: string;
   finalPrice: number;
   purchaseDate: string;
+  buyerId?: number;
+  carId?: number;
+  buyerEmail?: string;
+  purchaseStatus?: string;
+  paymentMethod?: string;
+  observations?: string | null;
 }
 
 interface PurchaseTableProps {

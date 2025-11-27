@@ -4,15 +4,35 @@ import styles from './AdminTop5Statistics.module.css';
 import { LoadingState, ErrorMessage } from '../molecules';
 import { adminService } from '../../services/api';
 
-interface TopItem {
-  [key: string]: string | number;
+interface TopSellingCar {
+  carId: number;
+  carName: string;
+  purchaseCount: number;
+}
+
+interface TopBuyer {
+  buyerId: number;
+  buyerName: string;
+  purchaseCount: number;
+}
+
+interface TopDealership {
+  dealershipId: number;
+  dealershipName: string;
+  salesCount: number;
+}
+
+interface TopRatedCar {
+  carId: number;
+  carName: string;
+  averageRating: number;
 }
 
 interface Top5Data {
-  bestSellingCars: TopItem[];
-  topBuyers: TopItem[];
-  topDealerships: TopItem[];
-  bestRatedCars: TopItem[];
+  bestSellingCars: TopSellingCar[];
+  topBuyers: TopBuyer[];
+  topDealerships: TopDealership[];
+  bestRatedCars: TopRatedCar[];
 }
 
 const AdminTop5Statistics = () => {
@@ -31,7 +51,7 @@ const AdminTop5Statistics = () => {
         adminService.getTopSellingCars(),
         adminService.getTopBuyersByPurchases(),
         adminService.getTopDealershipsBySales(),
-        adminService.getTopRatedCars(),
+        adminService.getTopRatedCarsTop5(),
       ]);
 
       setData({
@@ -72,15 +92,19 @@ const AdminTop5Statistics = () => {
             <h2>Best Selling Cars</h2>
           </div>
           <div className={styles.list}>
-            {data?.bestSellingCars.map((item, index) => (
+            {data?.bestSellingCars && data.bestSellingCars.length > 0 ? (
+            data.bestSellingCars.map((item, index) => (
               <div key={index} className={styles.listItem}>
                 <div className={styles.rank}>{index + 1}</div>
                 <div className={styles.itemDetails}>
-                  <p className={styles.itemName}>{item.carName}</p>
+                  <p className={styles.itemName}>{item.carName || 'Unknown Car'}</p>
                   <p className={styles.itemCount}>{item.purchaseCount} compras</p>
                 </div>
               </div>
-            ))}
+            ))
+          ) : (
+            <p className={styles.noData}>No data available</p>
+          )}
           </div>
         </div>
 
@@ -88,18 +112,22 @@ const AdminTop5Statistics = () => {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <Users size={24} className={styles.icon} />
-            <h2> Top Buyers</h2>
+            <h2>Top Buyers</h2>
           </div>
           <div className={styles.list}>
-            {data?.topBuyers.map((item, index) => (
-              <div key={index} className={styles.listItem}>
-                <div className={styles.rank}>{index + 1}</div>
-                <div className={styles.itemDetails}>
-                  <p className={styles.itemName}>{item.buyerName}</p>
-                  <p className={styles.itemCount}>{item.purchaseCount} compras</p>
+            {data?.topBuyers && data.topBuyers.length > 0 ? (
+              data.topBuyers.map((item, index) => (
+                <div key={index} className={styles.listItem}>
+                  <div className={styles.rank}>{index + 1}</div>
+                  <div className={styles.itemDetails}>
+                    <p className={styles.itemName}>{item.buyerName || 'Unknown Buyer'}</p>
+                    <p className={styles.itemCount}>{item.purchaseCount} compras</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className={styles.noData}>No data available</p>
+            )}
           </div>
         </div>
 
@@ -110,15 +138,19 @@ const AdminTop5Statistics = () => {
             <h2>Top Dealerships</h2>
           </div>
           <div className={styles.list}>
-            {data?.topDealerships.map((item, index) => (
-              <div key={index} className={styles.listItem}>
-                <div className={styles.rank}>{index + 1}</div>
-                <div className={styles.itemDetails}>
-                  <p className={styles.itemName}>{item.dealershipName}</p>
-                  <p className={styles.itemCount}>{item.salesCount} ventas</p>
+            {data?.topDealerships && data.topDealerships.length > 0 ? (
+              data.topDealerships.map((item, index) => (
+                <div key={index} className={styles.listItem}>
+                  <div className={styles.rank}>{index + 1}</div>
+                  <div className={styles.itemDetails}>
+                    <p className={styles.itemName}>{item.dealershipName || 'Unknown Dealership'}</p>
+                    <p className={styles.itemCount}>{item.salesCount} ventas</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className={styles.noData}>No data available</p>
+            )}
           </div>
         </div>
 
@@ -129,17 +161,21 @@ const AdminTop5Statistics = () => {
             <h2>Best Rated Cars</h2>
           </div>
           <div className={styles.list}>
-            {data?.bestRatedCars.map((item, index) => (
-              <div key={index} className={styles.listItem}>
-                <div className={styles.rank}>{index + 1}</div>
-                <div className={styles.itemDetails}>
-                  <p className={styles.itemName}>{item.carName}</p>
-                  <p className={styles.itemRating}>
-                    ⭐ {Number(item.averageRating).toFixed(1)}/10
-                  </p>
+            {data?.bestRatedCars && data.bestRatedCars.length > 0 ? (
+              data.bestRatedCars.map((item, index) => (
+                <div key={index} className={styles.listItem}>
+                  <div className={styles.rank}>{index + 1}</div>
+                  <div className={styles.itemDetails}>
+                    <p className={styles.itemName}>{item.carName || 'Unknown Car'}</p>
+                    <p className={styles.itemRating}>
+                      ⭐ {Number(item.averageRating).toFixed(1)}/10
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className={styles.noData}>No data available</p>
+            )}
           </div>
         </div>
       </div>
