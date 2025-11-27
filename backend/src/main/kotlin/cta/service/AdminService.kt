@@ -253,11 +253,18 @@ class AdminService(
 
     fun getCarNameById(carId: Long): String {
         return try {
-            val favorites = favoriteCarRepository.findByCarId(carId)
-            favorites.firstOrNull()?.car?.getFullName() ?: "Unknown"
+            val purchases = getAllPurchases()
+            val car = purchases.find { it.carOffer.car.id == carId }?.carOffer?.car
+            
+            if (car != null) {
+                car.getFullName()
+            } else {
+                logger.warn("Car not found for ID {}", carId)
+                "Unknown Car"
+            }
         } catch (e: Exception) {
-            logger.warn("Error fetching car name for ID {}", carId)
-            "Unknown"
+            logger.warn("Error fetching car name for ID {}", carId, e)
+            "Unknown Car"
         }
     }
 
@@ -267,11 +274,12 @@ class AdminService(
             if (buyer != null) {
                 "${buyer.firstName} ${buyer.lastName}"
             } else {
-                "Unknown"
+                logger.warn("Buyer not found for ID {}", buyerId)
+                "Unknown Buyer"
             }
         } catch (e: Exception) {
-            logger.warn("Error fetching buyer name for ID {}", buyerId)
-            "Unknown"
+            logger.warn("Error fetching buyer name for ID {}", buyerId, e)
+            "Unknown Buyer"
         }
     }
 
@@ -281,11 +289,12 @@ class AdminService(
             if (dealership != null) {
                 dealership.businessName
             } else {
-                "Unknown"
+                logger.warn("Dealership not found for ID {}", dealershipId)
+                "Unknown Dealership"
             }
         } catch (e: Exception) {
-            logger.warn("Error fetching dealership name for ID {}", dealershipId)
-            "Unknown"
+            logger.warn("Error fetching dealership name for ID {}", dealershipId, e)
+            "Unknown Dealership"
         }
     }
 }
