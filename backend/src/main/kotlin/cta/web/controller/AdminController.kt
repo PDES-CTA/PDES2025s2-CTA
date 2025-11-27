@@ -275,7 +275,7 @@ class AdminController(
             ),
         )
     }
-    
+
     @GetMapping("/top-5/best-selling-cars")
     fun getTopSellingCars(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Admin fetching top 5 best-selling cars")

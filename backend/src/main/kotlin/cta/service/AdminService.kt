@@ -255,7 +255,7 @@ class AdminService(
         return try {
             val purchases = getAllPurchases()
             val car = purchases.find { it.carOffer.car.id == carId }?.carOffer?.car
-            
+
             if (car != null) {
                 car.getFullName()
             } else {
