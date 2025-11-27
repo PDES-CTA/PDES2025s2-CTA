@@ -7,7 +7,6 @@ kubectl apply -f cta-namespace.yaml
 echo "Deploying PostgreSQL..."
 kubectl apply -f cta-postgres-config.yaml
 kubectl apply -f cta-postgres-secret.yaml
-kubectl apply -f cta-postgres-pvc.yaml
 kubectl apply -f cta-postgres-deployment.yaml
 kubectl wait --for=condition=ready pod -l app=postgres -n cta --timeout=300s
 

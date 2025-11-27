@@ -24,10 +24,6 @@ spec:
             name: postgres-config
         - secretRef:
             name: postgres-secret
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
-          subPath: postgres
         resources:
           requests:
             memory: "256Mi"
@@ -51,10 +47,6 @@ spec:
             - pg_isready -U postgres -d cta
           initialDelaySeconds: 5
           periodSeconds: 10
-      volumes:
-      - name: postgres-storage
-        persistentVolumeClaim:
-          claimName: postgres-pvc
 
 ---
 apiVersion: v1
