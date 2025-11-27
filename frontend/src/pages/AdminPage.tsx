@@ -8,9 +8,10 @@ import {
   AdminFavoriteCarsSection,
   AdminReviewsSection,
   AdminPurchasesSection,
+  AdminTop5Statistics,
 } from '../components/organisms';
 
-type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases';
+type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases' | 'top5';
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('overview');
@@ -29,6 +30,8 @@ const AdminPage = () => {
         return <AdminReviewsSection />;
       case 'purchases':
         return <AdminPurchasesSection />;
+      case 'top5':
+        return <AdminTop5Statistics />;
       default:
         return <AdminDashboardOverview />;
     }

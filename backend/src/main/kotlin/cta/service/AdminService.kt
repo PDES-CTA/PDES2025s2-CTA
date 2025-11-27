@@ -187,4 +187,114 @@ class AdminService(
         logger.info("Total system revenue: {}", revenue)
         return revenue
     }
+
+    fun getTopSellingCars(limit: Int = 5): List<Pair<Long, Long>> {
+        logger.debug("Fetching top {} best-selling cars", limit)
+        val allPurchases = getAllPurchases()
+
+        val carSales =
+            allPurchases
+                .groupBy { it.carOffer.car.id }
+                .mapNotNull { (carId, purchases) ->
+                    if (carId != null) {
+                        carId to purchases.size.toLong()
+                    } else {
+                        null
+                    }
+                }
+                .sortedByDescending { it.second }
+                .take(limit)
+
+        logger.info("Found {} cars with sales", carSales.size)
+        return carSales
+    }
+
+    fun getTopBuyersByPurchases(limit: Int = 5): List<Pair<Long, Long>> {
+        logger.debug("Fetching top {} buyers by purchase count", limit)
+        val allPurchases = getAllPurchases()
+
+        val buyerPurchases =
+            allPurchases
+                .groupBy { it.buyer.id }
+                .mapNotNull { (buyerId, purchases) ->
+                    if (buyerId != null) {
+                        buyerId to purchases.size.toLong()
+                    } else {
+                        null
+                    }
+                }
+                .sortedByDescending { it.second }
+                .take(limit)
+
+        logger.info("Found {} buyers with purchases", buyerPurchases.size)
+        return buyerPurchases
+    }
+
+    fun getTopDealershipsBySales(limit: Int = 5): List<Pair<Long, Long>> {
+        logger.debug("Fetching top {} dealerships by sales count", limit)
+        val allPurchases = getAllPurchases()
+
+        val dealershipSales =
+            allPurchases
+                .groupBy { it.carOffer.dealership.id }
+                .mapNotNull { (dealershipId, purchases) ->
+                    if (dealershipId != null) {
+                        dealershipId to purchases.size.toLong()
+                    } else {
+                        null
+                    }
+                }
+                .sortedByDescending { it.second }
+                .take(limit)
+
+        logger.info("Found {} dealerships with sales", dealershipSales.size)
+        return dealershipSales
+    }
+
+    fun getCarNameById(carId: Long): String {
+        return try {
+            val purchases = getAllPurchases()
+            val car = purchases.find { it.carOffer.car.id == carId }?.carOffer?.car
+
+            if (car != null) {
+                car.getFullName()
+            } else {
+                logger.warn("Car not found for ID {}", carId)
+                "Unknown Car"
+            }
+        } catch (e: Exception) {
+            logger.warn("Error fetching car name for ID {}", carId, e)
+            "Unknown Car"
+        }
+    }
+
+    fun getBuyerNameById(buyerId: Long): String {
+        return try {
+            val buyer = buyerRepository.findById(buyerId).orElse(null)
+            if (buyer != null) {
+                "${buyer.firstName} ${buyer.lastName}"
+            } else {
+                logger.warn("Buyer not found for ID {}", buyerId)
+                "Unknown Buyer"
+            }
+        } catch (e: Exception) {
+            logger.warn("Error fetching buyer name for ID {}", buyerId, e)
+            "Unknown Buyer"
+        }
+    }
+
+    fun getDealershipNameById(dealershipId: Long): String {
+        return try {
+            val dealership = dealershipRepository.findById(dealershipId).orElse(null)
+            if (dealership != null) {
+                dealership.businessName
+            } else {
+                logger.warn("Dealership not found for ID {}", dealershipId)
+                "Unknown Dealership"
+            }
+        } catch (e: Exception) {
+            logger.warn("Error fetching dealership name for ID {}", dealershipId, e)
+            "Unknown Dealership"
+        }
+    }
 }

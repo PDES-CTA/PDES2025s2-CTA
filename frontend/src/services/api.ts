@@ -513,6 +513,26 @@ export const adminService = {
 
   async deleteDealership(dealershipId: number): Promise<void> {
     await apiClient.delete(`/dealerships/${dealershipId}`);
+  },
+
+  async getTopSellingCars() {
+    const response = await apiClient.get('/admin/top-5/best-selling-cars');
+    return response.data;
+  },
+
+  async getTopBuyersByPurchases() {
+    const response = await apiClient.get('/admin/top-5/buyers-most-purchases');
+    return response.data;
+  },
+
+  async getTopDealershipsBySales() {
+    const response = await apiClient.get('/admin/top-5/dealerships-most-sales');
+    return response.data;
+  },
+
+  async getTopRatedCarsTop5() {
+    const response = await apiClient.get('/admin/top-5/best-rated-cars');
+    return response.data;
   }
 };
 
