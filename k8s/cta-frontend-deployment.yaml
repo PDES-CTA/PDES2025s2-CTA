@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: frontend
-        image: francomm/cta-frontend:0.3.2
+        image: francomm/cta-frontend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000

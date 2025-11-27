@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: backend
-        image: francomm/cta-backend:0.3.2
+        image: francomm/cta-backend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
