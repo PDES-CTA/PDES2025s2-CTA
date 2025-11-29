@@ -42,25 +42,15 @@ test.describe('Car Purchase Flow', () => {
     // Catch-all for unmocked API requests
     await page.route('**/api/**', async (route) => {
       if (await handleCors(route)) return;
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([]) 
-      });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
     });
 
     // Mock auth endpoint
     await page.route('**/api/auth/me', async (route) => {
       if (await handleCors(route)) return;
       await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 1,
-          email: 'alan@gmail.com',
-          name: 'Alan Test',
-          role: 'BUYER'
-        })
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ id: 1, email: 'alan@gmail.com', name: 'Alan Test', role: 'BUYER' })
       });
     });
 
@@ -68,48 +58,33 @@ test.describe('Car Purchase Flow', () => {
     await page.route(/.*\/api\/cars\/\d+$/, async (route) => {
       if (await handleCors(route)) return;
       if (route.request().method() === 'GET') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(MOCK_CAR)
-        });
-      } else {
-        await route.continue();
-      }
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_CAR) });
+      } else { await route.continue(); }
     });
 
     // Mock cars list endpoint
     await page.route(/.*\/api\/cars(\?|$)/, async (route) => {
       if (await handleCors(route)) return;
       if (route.request().method() === 'GET') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify([MOCK_CAR])
-        });
-      } else {
-        await route.continue();
-      }
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([MOCK_CAR]) });
+      } else { await route.continue(); }
     });
   });
 
   test('should load cars listing page', async ({ page }) => {
     await page.goto('http://localhost:5173/cars');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota'); 
     expect(page.url()).toContain('/cars');
   });
 
   test('should navigate to car details page', async ({ page }) => {
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
     expect(page.url()).toContain('/cars/1');
-    const pageContent = await page.content();
-    expect(pageContent.length).toBeGreaterThan(100);
   });
 
   test('should display car information on details page', async ({ page }) => {
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
     
     const body = page.locator('body');
     await expect(body).toContainText('Toyota');
@@ -119,98 +94,111 @@ test.describe('Car Purchase Flow', () => {
 
   test('should have navigation elements', async ({ page }) => {
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
-    const hasBackButton = await page.getByRole('button', { name: /back/i }).isVisible().catch(() => false);
+    await expect(page.locator('button').first()).toBeAttached();
+    
+    const hasBackButton = await page.getByRole('button', { name: /back|volver/i }).isVisible().catch(() => false);
     const hasNavigation = await page.locator('a, button').count().then(count => count > 0);
     expect(hasBackButton || hasNavigation).toBeTruthy();
   });
 
   test('should handle going back to cars list', async ({ page }) => {
+    // Navigate to cars list
+    await page.goto('http://localhost:5173/cars');
+    await expect(page.locator('body')).toContainText('Toyota');
+
+    // Navigate to car details
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
+    await expect(page.locator('body')).toContainText('2023');
+
+    // Click back button
+    const backButton = page.getByRole('button', { name: /back|volver/i })
+        .or(page.getByRole('link', { name: /back|volver/i }));
     
-    const backButton = page.locator('button').filter({ hasText: /back|volver/i }).first();
     if (await backButton.isVisible()) {
       await backButton.click();
-      await page.waitForLoadState('networkidle');
-      expect(page.url()).not.toContain('/cars/1');
+      
+      // Verify returned to cars list
+      await expect(page).toHaveURL(/.*\/cars\/?(\?|$)/); 
+      await expect(page.locator('body')).toContainText('Toyota');
     }
   });
 
   test('should maintain session across pages', async ({ page }) => {
+    // Navigate to cars list
     await page.goto('http://localhost:5173/cars');
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/cars');
+    await expect(page).toHaveURL(/.*\/cars/);
     
+    // Navigate to car details
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/cars/1');
+    await expect(page).toHaveURL(/.*\/cars\/1/);
+    
+    // Verify not redirected to login
     expect(page.url()).not.toContain('login');
   });
 
   test('should allow page refresh', async ({ page }) => {
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
+    
     const urlBefore = page.url();
     
+    // Reload page
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
     expect(page.url()).toBe(urlBefore);
   });
 
   test('complete user flow: browse -> view details', async ({ page }) => {
     // Navigate to cars list
     await page.goto('http://localhost:5173/cars');
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/cars');
+    await expect(page.locator('body')).toContainText('Toyota');
     
     // View car details
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Camry');
     expect(page.url()).toContain('/cars/1');
-    
-    // Verify car info displayed
-    await expect(page.locator('body')).toContainText('Toyota');
   });
 
   test('should handle multiple car views', async ({ page }) => {
     // Navigate to first car
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
     
     // Go back to list
     await page.goto('http://localhost:5173/cars');
-    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/.*\/cars$/);
     
-    // View another car
+    // Navigate to car details again
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
     expect(page.url()).toContain('/cars/1');
   });
 
   test('should display car year and details', async ({ page }) => {
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
     
-    // Verify car year displays
+    // Verify car year
     await expect(page.locator('body')).toContainText('2023');
     
-    // Verify specs displayed
+    // Verify specifications
     const pageText = await page.textContent('body');
     const hasSpecs = pageText?.includes('Hybrid') || pageText?.includes('Automatic');
     expect(hasSpecs).toBeTruthy();
   });
 
   test('should maintain auth token across navigations', async ({ page }) => {
-    // Check token on cars list
+    // Check token on first page
     await page.goto('http://localhost:5173/cars');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toBeVisible();
+    
     const token1 = await page.evaluate(() => localStorage.getItem('authorization_token'));
     expect(token1).toBe('mock-token-12345');
     
     // Check token still exists after navigation
     await page.goto('http://localhost:5173/cars/1');
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('body')).toContainText('Toyota');
+    
     const token2 = await page.evaluate(() => localStorage.getItem('authorization_token'));
     expect(token2).toBe('mock-token-12345');
   });
@@ -248,17 +236,16 @@ test.describe('Car Purchase Flow', () => {
 
   test('should load home page', async ({ page }) => {
     await page.goto('http://localhost:5173/');
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toBeTruthy();
+    await expect(page).toHaveURL('http://localhost:5173/');
   });
 
   test('should have header with navigation', async ({ page }) => {
     await page.goto('http://localhost:5173/');
-    await page.waitForLoadState('networkidle');
     
-    const hasHeader = await page.locator('header').isVisible().catch(() => false);
+    // Wait for header to appear
+    await expect(page.locator('header')).toBeVisible();
+    
     const hasNav = await page.locator('nav').isVisible().catch(() => false);
-    
-    expect(hasHeader || hasNav || await page.locator('a, button').count().then(count => count > 0)).toBeTruthy();
+    expect(hasNav || await page.locator('a, button').count().then(count => count > 0)).toBeTruthy();
   });
 });
