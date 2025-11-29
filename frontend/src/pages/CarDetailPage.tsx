@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCarSearch, DisplayCar } from '../hooks/useCarSearch';
 import { LoadingSpinner, Badge } from '../components/atoms';
@@ -52,6 +52,54 @@ export default function CarDetailPage() {
   
   const { getDisplayCarById } = useCarSearch();
 
+  const loadRecentReviews = useCallback(
+    async (carId: number, userId: number) => {
+      const allReviews = await favoriteService.getFavoritesByCarId(carId).catch(() => []);
+      
+      const recent = allReviews
+        .filter(fav => 
+          fav.buyer.id !== userId && 
+          (fav.rating > 0 || (fav.comment && fav.comment.trim() !== ''))
+        )
+        .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
+        .slice(0, 3);
+      setRecentReviews(recent);
+    },
+    []
+  );
+
+  const checkIfFavorite = useCallback(
+    async (buyerId: number, carId: number) => {
+      const favorites = await favoriteService.getFavoritesByBuyerId(buyerId).catch(() => []);
+      const favorite = favorites.find(fav => fav.car.id === carId);
+      
+      if (favorite) {
+        setIsFavorite(true);
+        setFavoriteId(favorite.id);
+        setCurrentRating(favorite.rating || 0);
+        setCurrentComment(favorite.comment || '');
+      } else {
+        setIsFavorite(false);
+        setFavoriteId(null);
+        setCurrentRating(0);
+        setCurrentComment('');
+      }
+    },
+    []
+  );
+
+  const loadUserAndCheckFavorite = useCallback(
+    async (carId: number) => {
+      const user = await authService.getLoggedUser().catch(() => null);
+      if (!user) return;
+      
+      setCurrentUserId(user.id);
+      await checkIfFavorite(user.id, carId);
+      await loadRecentReviews(carId, user.id);
+    },
+    [checkIfFavorite, loadRecentReviews]
+  );
+
   useEffect(() => {
     const fetchCarDetails = async () => {
       const numericId = id ? parseInt(id, 10) : NaN;
@@ -88,46 +136,7 @@ export default function CarDetailPage() {
     };
 
     fetchCarDetails();
-  }, [id, getDisplayCarById]);
-
-  const loadUserAndCheckFavorite = async (carId: number) => {
-    const user = await authService.getLoggedUser().catch(() => null);
-    if (!user) return;
-    
-    setCurrentUserId(user.id);
-    await checkIfFavorite(user.id, carId);
-    await loadRecentReviews(carId, user.id);
-  };
-  
-  const loadRecentReviews = async (carId: number, currentUserId: number) => {
-    const allReviews = await favoriteService.getFavoritesByCarId(carId).catch(() => []);
-    
-    const recent = allReviews
-      .filter(fav => 
-        fav.buyer.id !== currentUserId && 
-        (fav.rating > 0 || (fav.comment && fav.comment.trim() !== ''))
-      )
-      .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
-      .slice(0, 3);
-    setRecentReviews(recent);
-  };
-  
-  const checkIfFavorite = async (buyerId: number, carId: number) => {
-    const favorites = await favoriteService.getFavoritesByBuyerId(buyerId).catch(() => []);
-    const favorite = favorites.find(fav => fav.car.id === carId);
-    
-    if (favorite) {
-      setIsFavorite(true);
-      setFavoriteId(favorite.id);
-      setCurrentRating(favorite.rating || 0);
-      setCurrentComment(favorite.comment || '');
-    } else {
-      setIsFavorite(false);
-      setFavoriteId(null);
-      setCurrentRating(0);
-      setCurrentComment('');
-    }
-  };
+  }, [id, getDisplayCarById, loadUserAndCheckFavorite]);
 
   const handleToggleFavorite = async () => {
     if (!carData || !currentUserId) {

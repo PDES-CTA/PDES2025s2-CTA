@@ -21,6 +21,15 @@ interface Dealership {
   createdAt: string;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const AdminDealershipsSection = () => {
   const [dealerships, setDealerships] = useState<Dealership[]>([]);
   const [filteredDealerships, setFilteredDealerships] = useState<Dealership[]>([]);
@@ -88,9 +97,10 @@ const AdminDealershipsSection = () => {
       setDealerships(dealerships.filter(d => d.id !== deleteModal.dealershipId));
       setDeleteModal({ isOpen: false, dealershipId: null, dealershipName: '' });
       setError(null);
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || 
-                          err?.message || 
+    } catch (err) {
+      const error = err as ApiError;
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
                           'Failed to delete dealership';
       setDeleteError(errorMessage);
       console.error(err);
