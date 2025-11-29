@@ -11,7 +11,7 @@ const MOCK_CAR = {
   price: 25000,
   mileage: 5000,
   description: 'Well-maintained hybrid sedan',
-  images: ['https://via.placeholder.com/800x600']
+  images: ['https://scene7.toyota.eu/is/image/toyotaeurope/camry-header_tcm-3044-2353685?wid=1920&hei=1080&fit=hfit,1']
 };
 
 // Handle CORS OPTIONS requests
