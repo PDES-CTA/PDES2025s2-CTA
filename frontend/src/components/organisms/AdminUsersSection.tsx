@@ -20,6 +20,15 @@ interface User {
   role: string;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const AdminUsersSection = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -88,9 +97,10 @@ const AdminUsersSection = () => {
       setUsers(users.filter(u => u.id !== deleteModal.userId));
       setDeleteModal({ isOpen: false, userId: null, userName: '' });
       setError(null);
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || 
-                          err?.message || 
+    } catch (err) {
+      const error = err as ApiError;
+      const errorMessage = error?.response?.data?.message || 
+                          error?.message || 
                           'Failed to delete user';
       setDeleteError(errorMessage);
       console.error(err);

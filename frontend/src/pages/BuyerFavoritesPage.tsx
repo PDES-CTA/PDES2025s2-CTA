@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Star, Trash2, Edit2, Eye } from 'lucide-react';
 import { favoriteService, authService } from '../services/api';
@@ -19,13 +19,7 @@ export default function BuyerFavoritesPage() {
   const [editComment, setEditComment] = useState<string>('');
   const [reviewLoading, setReviewLoading] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      fetchFavorites();
-    }
-  }, [userId]);
-
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!userId) {
       setError('User ID is required');
       setLoading(false);
@@ -54,7 +48,13 @@ export default function BuyerFavoritesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchFavorites();
+    }
+  }, [userId, fetchFavorites]);
 
   const handleBack = () => {
     navigate(-1);
