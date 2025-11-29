@@ -7,7 +7,7 @@ import tsparser from '@typescript-eslint/parser'
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'coverage', 'build', '.vite', '**/*.js', '**/*.cjs']
+    ignores: ['dist', 'node_modules', 'coverage', 'build', '.vite', '**/*.js', '**/*.cjs', 'tests/load-test.ts'],
   },
   
   {
