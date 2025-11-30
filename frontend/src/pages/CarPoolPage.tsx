@@ -10,6 +10,18 @@ import styles from './CarPoolPage.module.css';
 import CreateOfferModal from '../components/organisms/CreateOfferModal';
 import CarCarousel from '../components/organisms/CarCarousel';
 
+interface ApiError {
+  response?: {
+    status?: number;
+    statusText?: string;
+    data?: {
+      message?: string;
+      error?: string;
+    };
+  };
+  message?: string;
+}
+
 export default function CarPoolPage() {
   const navigate = useNavigate();
   const [cars, setCars] = useState<Car[]>([]);
@@ -114,18 +126,18 @@ export default function CarPoolPage() {
       setSelectedCar(null);
       // Navigate to dealership offers page
       navigate('/offers');
-    } catch (err: any) {
-      // Extract error message from API response
+    } catch (err) {
+      const error = err as ApiError;
       let errorMessage = 'Failed to create offer';
       
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.message) {
-        errorMessage = err.message;
-      } else if (err.response?.status) {
-        errorMessage = `Error ${err.response.status}: ${err.response.statusText || 'Failed to create offer'}`;
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.status) {
+        errorMessage = `Error ${error.response.status}: ${error.response.statusText || 'Failed to create offer'}`;
       }
       setOfferError(errorMessage);
       // Don't close the modal so user can see the error and fix it

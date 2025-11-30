@@ -7,7 +7,7 @@ import tsparser from '@typescript-eslint/parser'
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'coverage', 'build', '.vite', '**/*.js', '**/*.cjs']
+    ignores: ['dist', 'node_modules', 'coverage', 'build', '.vite', '**/*.js', '**/*.cjs', 'tests/load-test.ts'],
   },
   
   {
@@ -65,6 +65,27 @@ export default [
           varsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+  {
+    files: ['tests/**/*.{ts,tsx}', '**/*.spec.ts', '**/*.spec.tsx'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: { ...globals.browser, ...globals.node },
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
 ];
