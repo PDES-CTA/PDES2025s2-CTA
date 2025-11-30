@@ -2,7 +2,6 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Options } from 'k6/options';
 
-// K6 options - FULL STRESS TEST
 export const options: Options = {
   stages: [
     { duration: '1m', target: 30 },   // Warm up - creating base data
@@ -11,7 +10,7 @@ export const options: Options = {
     { duration: '2m', target: 0 },    // Cool down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<3000'],  // Relaxed for write operations
+    http_req_duration: ['p(95)<3000'],
     http_req_failed: ['rate<0.15'],     // Allow 15% errors under stress
   },
 };
@@ -193,7 +192,7 @@ export default function (): void {
   }
 }
 
-// SCENARIO 1: Admin creates cars
+// Admin creates cars
 function runAdminScenario(): void {
   const adminToken = loginAsAdmin();
   if (!adminToken) {
@@ -234,7 +233,7 @@ function runAdminScenario(): void {
   sleep(2);
 }
 
-// SCENARIO 2: Dealership creates offers
+// Dealership creates offers
 function runDealershipScenario(): void {
   const newDealership = generateDealership();
 
@@ -318,7 +317,7 @@ function runDealershipScenario(): void {
   sleep(2);
 }
 
-// SCENARIO 3: Buyer full journey
+// Buyer full journey
 function runBuyerScenario(): void {
   const newUser = generateUser();
 
@@ -335,7 +334,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 2. Login
+  // Login
   res = http.post(
     `${BASE_URL}/auth/login`,
     JSON.stringify({
@@ -366,7 +365,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 3. Browse cars
+  // Browse cars
   res = http.get(`${BASE_URL}/cars`, authHeaders);
   check(res, { 'cars loaded': (r) => r.status === 200 });
   const cars = (res.json() as unknown as Car[]) || [];
@@ -377,7 +376,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 4. Create favorites directly (not just add)
+  // Create favorites directly (not just add)
   const numFavorites = randomIntBetween(2, 4);
   const createdFavoriteIds: number[] = [];
 
@@ -412,7 +411,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 5. Update some favorites with new reviews
+  // Update some favorites with new reviews
   for (let i = 0; i < Math.min(2, createdFavoriteIds.length); i++) {
     const favId = createdFavoriteIds[i];
     
@@ -433,7 +432,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 6. Search cars
+  // Search cars
   const brands = ['Toyota', 'Ford', 'Chevrolet', 'Volkswagen'];
   const randomBrand = brands[randomIntBetween(0, brands.length - 1)];
   
@@ -442,7 +441,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 7. Get available offers
+  // Get available offers
   res = http.get(`${BASE_URL}/offer/available`, authHeaders);
   check(res, { 'offers loaded': (r) => r.status === 200 });
   const offers = (res.json() as unknown as any[]) || [];
@@ -453,7 +452,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 8. Create purchase
+  // Create purchase
   const randomOffer = offers[randomIntBetween(0, offers.length - 1)];
   const paymentMethods = ['CREDIT_CARD', 'CASH', 'CHECK'];
   
@@ -483,7 +482,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 9. Randomly confirm, deliver, or cancel purchase
+  // Randomly confirm, deliver, or cancel purchase
   const action = randomIntBetween(1, 3);
   
   if (action === 1) {
@@ -505,7 +504,7 @@ function runBuyerScenario(): void {
 
   sleep(1);
 
-  // 10. Get purchase history
+  // Get purchase history
   res = http.get(`${BASE_URL}/purchases/buyer/${buyerId}`, authHeaders);
   check(res, { 'purchases loaded': (r) => r.status === 200 });
 
@@ -513,8 +512,7 @@ function runBuyerScenario(): void {
 }
 
 export function teardown(data: unknown): void {
-  console.log('🔥 COMPREHENSIVE STRESS TEST COMPLETED!');
-  console.log('📊 Check your database for all created resources:');
+  console.log('Stress test completed with the following actions:');
   console.log('   - New buyers');
   console.log('   - New dealerships');
   console.log('   - New cars (created by admin)');
