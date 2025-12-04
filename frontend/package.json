@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:k6": "node build-k6.cjs",
-    "test:load": "npm run build:k6 && k6 run tests/load-test.ts",
+    "test:load": "npm run build:k6 && k6 run dist/k6/stress-test.js",
     "lint": "eslint . --ext ts,tsx --max-warnings=5",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "preview": "vite preview",
