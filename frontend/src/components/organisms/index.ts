@@ -10,3 +10,4 @@ export { default as AdminReviewsSection } from './AdminReviewsSection';
 export { default as AdminPurchasesSection } from './AdminPurchasesSection';
 export { default as Header } from './Header'; 
 export { default as AdminTop5Statistics } from './AdminTop5Statistics';
+export { default as AdminCreateCarSection } from './AdminCreateCarSection';
