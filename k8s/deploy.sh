@@ -19,6 +19,9 @@ kubectl wait --for=condition=ready pod -l app=backend -n cta --timeout=300s
 echo "Deploying frontend..."
 kubectl apply -f cta-frontend-config.yaml
 kubectl apply -f cta-frontend-deployment.yaml
-
+echo "Deploying HPA..."
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.4/components.yaml
+sleep 5
+kubectl apply -f hpa-config.yaml
 echo "Done!"
 kubectl get pods -n cta

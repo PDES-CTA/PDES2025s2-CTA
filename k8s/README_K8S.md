@@ -23,14 +23,35 @@ newgrp docker
 minikube start --driver=docker --cpus=4 --memory=4096
 ```
 
+## Setup Metrics Server (for HPA)
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.1/components.yaml
+```
+
+Fix certificate issue for minikube:
+
+```bash
+kubectl patch deployment metrics-server -n kube-system --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value":"--kubelet-insecure-tls"}]'
+```
+
+Wait for it to be ready:
+
+```bash
+kubectl get pods -n kube-system -l k8s-app=metrics-server -w
+```
+
+Should show `1/1` Running.
+
 ## Check Everything Works
 
 ```bash
 minikube status
 kubectl get nodes
+kubectl get pods -n kube-system | grep metrics-server
 ```
 
-Both should show the cluster is running.
+All should be running.
 
 ## Deploying the App
 
@@ -59,6 +80,9 @@ echo "Deploying frontend..."
 kubectl apply -f cta-frontend-config.yaml
 kubectl apply -f cta-frontend-deployment.yaml
 
+echo "Deploying HPA..."
+kubectl apply -f hpa-config.yaml
+
 echo "Done!"
 kubectl get pods -n cta
 ```
@@ -77,68 +101,79 @@ Run it:
 
 ## Running the App
 
-Open two terminal windows. In one:
+Open three terminal windows.
 
+**Terminal 1 - Frontend:**
 ```bash
 kubectl port-forward -n cta svc/frontend 3000:3000
 ```
 
-In the other:
-
+**Terminal 2 - Backend:**
 ```bash
 kubectl port-forward -n cta svc/backend 8080:8080
 ```
 
+**Terminal 3 - Monitor HPA:**
+```bash
+kubectl get hpa -n cta -w
+```
+
 Then go to `http://localhost:3000`.
+
+## Load Testing & Monitoring HPA
+
+**Terminal 1 - Watch HPA scaling:**
+```bash
+kubectl get hpa -n cta -w
+```
+
+**Terminal 2 - Run load test:**
+```bash
+# Make sure port-forward is running
+kubectl port-forward -n cta svc/backend 8080:8080
+
+# In your frontend directory:
+npm run test:load
+```
+
+You'll see HPA create new pods as load increases:
+- Backend scales 1-5 replicas
+- Frontend scales 1-3 replicas
 
 ## Common Commands
 
 ```bash
-# Check status
 kubectl get pods -n cta
-
-# See what's running
 kubectl get svc -n cta
-
-# Check logs
 kubectl logs -n cta -l app=backend -f
-
-# Get into a pod if needed to debug
 kubectl exec -it -n cta <pod-name> -- /bin/sh
-
-# Restart something
 kubectl rollout restart deployment/backend -n cta
-
-# See resource usage
-kubectl top pods -n cta
+kubectl get hpa -n cta
+kubectl describe hpa backend-hpa -n cta
+kubectl get events -n cta --sort-by='.lastTimestamp'
 ```
 
 ## Cleaning Up
 
 ```bash
-# Delete everything in the namespace
 kubectl delete namespace cta
-
-# Or completely nuke minikube (careful!)
 minikube delete
 ```
 
-## Files Needed
-
-Make sure all these files are in the `k8s/` folder:
+## Files Needed in `k8s/` folder
 
 - `cta-namespace.yaml`
 - `cta-postgres-config.yaml`
 - `cta-postgres-secret.yaml`
-- `cta-postgres-pvc.yaml`
 - `cta-postgres-deployment.yaml`
 - `cta-backend-config.yaml`
 - `cta-backend-secret.yaml`
 - `cta-backend-deployment.yaml`
 - `cta-frontend-config.yaml`
 - `cta-frontend-deployment.yaml`
+- `hpa-config.yaml`
 
-## What's in the Secret Files
+## Secret Files Content
 
 **cta-postgres-secret.yaml:**
 ```yaml
@@ -156,7 +191,7 @@ JWT_EXPIRATION: "86400000"
 ENVIRONMENT: "kubernetes"
 ```
 
-**Note:** Don't commit secret files to Git. Add to `.gitignore`:
+Add to `.gitignore`:
 ```
 *-secret.yaml
 ```
