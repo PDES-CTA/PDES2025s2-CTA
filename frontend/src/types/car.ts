@@ -1,14 +1,12 @@
-import { FuelType, TransmissionType } from '../utils/carUtils';
-
 export interface Car {
-  id: number | string;
+  id?: number | string;
   brand: string;
   model: string;
   year: number;
-  fuelType: FuelType;
-  transmission: TransmissionType;
+  fuelType: 'GASOLINE' | 'DIESEL' | 'HYBRID' | 'ELECTRIC' | 'GNC';
+  transmission: 'MANUAL' | 'AUTOMATIC' | 'SEMI_AUTOMATIC';
   color: string;
   description?: string;
-  publicationDate: string | Date;
+  publicationDate?: string | Date;
   images?: string[];
 }

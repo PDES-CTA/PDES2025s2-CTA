@@ -1,0 +1,50 @@
+.successAlert,
+.errorAlert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.successAlert {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #4caf50;
+}
+
+.successAlert span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.errorAlert {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #f44336;
+}
+
+.errorAlert span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.successAlert p,
+.errorAlert p {
+  margin: 0;
+}
