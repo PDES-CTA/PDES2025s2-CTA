@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Users, Building2, ShoppingCart, TrendingUp, LogOut } from 'lucide-react';
+import { BarChart3, Users, Building2, ShoppingCart, TrendingUp, LogOut, Plus } from 'lucide-react';
 import Button from '../atoms/Button';
 import styles from './AdminSidebar.module.css';
 
-type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases' | 'top5';
+type AdminSection = 'overview' | 'users' | 'dealerships' | 'favorites' | 'reviews' | 'purchases' | 'top5' | 'create-car';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -26,6 +26,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
     { id: 'favorites', label: 'Favorite Cars', icon: <TrendingUp size={20} /> },
     { id: 'reviews', label: 'Reviews & Opinions', icon: <BarChart3 size={20} /> },
     { id: 'purchases', label: 'Purchases', icon: <ShoppingCart size={20} /> },
+    { id: 'create-car', label: 'Create Car', icon: <Plus size={20} /> },
   ];
 
   return (

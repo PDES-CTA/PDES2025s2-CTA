@@ -20,3 +20,8 @@ export { default as StatsBar } from './StatsBar';
 export { default as RatingFilters } from './RatingFilters';
 export { default as PaginationInfo } from './PaginationInfo';
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
+
+export { default as FormTextArea } from './FormTextArea';
+export { default as ImageInput } from './ImageInput';
+export { default as FormAlerts } from './FormAlerts';
+export { default as FormBasicFields } from './FormBasicFields';
