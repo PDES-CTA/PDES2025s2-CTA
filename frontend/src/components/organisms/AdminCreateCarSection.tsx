@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { carService } from '../../services/api';
 import { Car } from '../../types/car';
 import { FormBasicFields, FormTextArea, ImageInput, FormAlerts } from '../molecules';
@@ -13,13 +13,13 @@ const INITIAL_CAR_FORM: Partial<Car> = {
   model: '',
   year: new Date().getFullYear(),
   color: '',
-  fuelType: 'GASOLINE' as any,
+  fuelType: 'GASOLINE',
   transmission: 'MANUAL',
   description: '',
   images: [],
 };
 
-const AdminCreateCarSection = () => {
+const AdminCreateCarSection: React.FC = () => {
   const [formData, setFormData] = useState<Partial<Car>>(INITIAL_CAR_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ const AdminCreateCarSection = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleFieldChange = (field: keyof Partial<Car>, value: any) => {
+  const handleFieldChange = (field: keyof Partial<Car>, value: string | number): void => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -69,7 +69,7 @@ const AdminCreateCarSection = () => {
     }
   };
 
-  const handleAddImage = (url: string) => {
+  const handleAddImage = (url: string): void => {
     const updatedImages = [...(formData.images || []), url];
     setFormData(prev => ({
       ...prev,
@@ -84,7 +84,7 @@ const AdminCreateCarSection = () => {
     }
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = (index: number): void => {
     const updatedImages = formData.images?.filter((_, i) => i !== index) || [];
     setFormData(prev => ({
       ...prev,
@@ -92,7 +92,7 @@ const AdminCreateCarSection = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -143,7 +143,7 @@ const AdminCreateCarSection = () => {
           errors={errors}
           onBrandChange={value => handleFieldChange('brand', value)}
           onModelChange={value => handleFieldChange('model', value)}
-          onYearChange={value => handleFieldChange('year', parseInt(value))}
+          onYearChange={value => handleFieldChange('year', parseInt(value, 10))}
           onColorChange={value => handleFieldChange('color', value)}
           onFuelTypeChange={value => handleFieldChange('fuelType', value)}
           onTransmissionChange={value => handleFieldChange('transmission', value)}
